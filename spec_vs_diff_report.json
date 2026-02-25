@@ -1,0 +1,151 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-25T08:46:43.108Z",
+  "summary": "The diff implements a substantial portion of the requirements, including the Motoko backend actor, frontend routing, guest invitation view, dashboard structure, creation wizard, media management, template/theme selector, and decorative assets. However, several specific requirements and acceptance criteria show gaps or cannot be confirmed from the truncated diff alone.",
+  "missing_requirements": [
+    {
+      "id": "REQ-1",
+      "requirement": "Store all data in stable vars for upgrade safety.",
+      "reason": "The backend/main.mo snippet shows 'let invitationStore = Map.empty<Text, Invitation>()' etc. without the 'stable' keyword. Stable vars are explicitly required for canister upgrade persistence.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Users can reorder events in the event management UI.",
+      "reason": "EventCard and EventForm components exist, but no reordering mechanism such as drag handles, up/down buttons, or a DnD library is visible in any of the shown files.",
+      "evidence": [
+        "frontend/src/components/events/EventCard.tsx",
+        "frontend/src/components/events/EventForm.tsx"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Events can be deleted with a confirmation prompt.",
+      "reason": "EventCard has a delete button that calls onDelete directly with no confirmation dialog or prompt visible in the shown code.",
+      "evidence": [
+        "frontend/src/components/events/EventCard.tsx"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Background texture/pattern selector in the Template and Theme panel.",
+      "reason": "ColorSchemePicker and FontSelector components are present, but no background texture or pattern selector component appears in any of the shown or listed files.",
+      "evidence": [
+        "frontend/src/components/templates/ColorSchemePicker.tsx",
+        "frontend/src/components/templates/FontSelector.tsx"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "At least 6 distinct template live mini-previews rendering actual miniature guest invitation content.",
+      "reason": "Template definitions and selector UI are referenced but no TemplateMiniPreview or equivalent component rendering actual invitation content is visible in the diff.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "Image reordering in the photo gallery upload section.",
+      "reason": "PhotoGalleryUpload supports add and delete but shows no reordering capability such as drag-and-drop reorder or order buttons.",
+      "evidence": [
+        "frontend/src/components/media/PhotoGalleryUpload.tsx"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "requirement": "Preview tab in the individual invitation editor renders the full guest invitation view in an iframe or embedded component.",
+      "reason": "InvitationEditor page is listed as added but its content was omitted from the diff due to limits; cannot confirm the Preview tab with iframe or embedded render is implemented.",
+      "evidence": [
+        "frontend/src/pages/InvitationEditor.tsx"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "requirement": "Unpublished invitations at /:slug show an appropriate Coming Soon or 404 message.",
+      "reason": "GuestInvitation page is listed but its content was omitted from the diff; cannot confirm unpublished-state handling is implemented.",
+      "evidence": [
+        "frontend/src/pages/GuestInvitation.tsx"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "requirement": "All five generated image assets must be stored as actual files in frontend/public/assets/generated.",
+      "reason": "The diff shows references to asset paths in components but no actual image files are listed as added under frontend/public/assets/generated/.",
+      "evidence": [
+        "frontend/src/components/guest/HeroSection.tsx",
+        "frontend/src/components/layout/Header.tsx",
+        "frontend/src/components/layout/DecorativeDivider.tsx"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "TanStack Router is used instead of React Router for all client-side routing.",
+      "reason": "The build request explicitly states all routing must be client-side React Router, but the diff uses @tanstack/react-router throughout the application.",
+      "evidence": [
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "description": "A dedicated /create route is added as a standalone page for the invitation creation wizard.",
+      "reason": "The spec routing requirements in REQ-9 define routes for /, /dashboard, /dashboard/:slug, and /:slug only. A /create route is not mentioned in any requirement.",
+      "evidence": [
+        "frontend/src/App.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.62,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/SkeletonLoader.tsx",
+    "frontend/src/components/events/EventCard.tsx",
+    "frontend/src/components/events/EventForm.tsx",
+    "frontend/src/components/guest/CountdownTimer.tsx",
+    "frontend/src/components/guest/CoupleIntroduction.tsx",
+    "frontend/src/components/guest/EventTimeline.tsx",
+    "frontend/src/components/guest/HeroSection.tsx",
+    "frontend/src/components/guest/PhotoGalleryLightbox.tsx",
+    "frontend/src/components/guest/RSVPForm.tsx",
+    "frontend/src/components/guest/VenueSection.tsx",
+    "frontend/src/components/guest/WhatsAppShareButton.tsx",
+    "frontend/src/components/layout/DecorativeDivider.tsx",
+    "frontend/src/components/layout/Header.tsx",
+    "frontend/src/components/media/MusicController.tsx",
+    "frontend/src/components/media/MusicUploader.tsx",
+    "frontend/src/components/media/PhotoGalleryUpload.tsx",
+    "frontend/src/components/templates/ColorSchemePicker.tsx",
+    "frontend/src/components/templates/FontSelector.tsx",
+    "frontend/src/components/templates/TemplatePreview.tsx",
+    "frontend/src/components/templates/TemplateSelector.tsx",
+    "frontend/src/components/wizard/CoupleDetailsStep.tsx",
+    "frontend/src/components/wizard/EventManagementStep.tsx",
+    "frontend/src/components/wizard/MediaManagementStep.tsx",
+    "frontend/src/components/wizard/ProgressBar.tsx",
+    "frontend/src/components/wizard/ReviewStep.tsx",
+    "frontend/src/components/wizard/TemplateThemeStep.tsx",
+    "frontend/src/context/InvitationFormContext.tsx",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useScrollAnimation.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/pages/CreateInvitationWizard.tsx",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/GuestInvitation.tsx",
+    "frontend/src/pages/InvitationEditor.tsx",
+    "frontend/src/pages/LandingPage.tsx",
+    "frontend/src/pages/NotFound.tsx",
+    "frontend/src/utils/animations.ts",
+    "frontend/src/utils/eventIcons.tsx",
+    "frontend/src/utils/templateDefinitions.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

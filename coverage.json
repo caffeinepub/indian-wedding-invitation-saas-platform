@@ -1,0 +1,342 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-25T08:46:43.113Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 10,
+    "implemented": 9,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Build a Motoko backend actor with the following data models and functions: (1) Invitation record containing id (unique slug like 'shivangi-avanish'), brideeName, groomName, weddingDate, weddingTime, venueName, venueAddress, googleMapsLink, familyDetails (text), invitationMessage, selectedTemplate (text), colorScheme, fontChoice, backgroundChoice, isPublished (bool), createdAt, updatedAt. (2) Event record containing id, invitationId, title, date, time, venue, description, eventType (Haldi/Mehndi/Sangeet/Wedding/Reception/Custom). (3) RSVPEntry record with id, invitationId, guestName, guestPhone, attending (bool), guestCount, message, submittedAt. (4) Expose CRUD functions: createInvitation, updateInvitation, getInvitationBySlug, getAllInvitations, publishInvitation, deleteInvitation. (5) Event CRUD: addEvent, updateEvent, deleteEvent, getEventsByInvitation. (6) RSVP: submitRSVP, getRSVPsByInvitation. (7) Photo gallery: addPhoto (stores base64 or URL string), deletePhoto, getPhotosByInvitation. (8) Music: setBackgroundMusic (stores base64 or URL string, autoPlay bool), getBackgroundMusic. (9) Slug uniqueness validation on creation. Store all data in stable vars for upgrade safety.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-10",
+        "summary": "Generate the following static image assets for use throughout the platform as decorative and branding elements, stored in frontend/public/assets/generated. Render these as img tags or CSS backgrounds where appropriate in the UI.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/GuestInvitation.tsx",
+          "frontend/src/pages/LandingPage.tsx",
+          "frontend/src/components/layout/Header.tsx",
+          "frontend/src/components/templates/TemplatePreview.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/GuestInvitation.tsx",
+          "frontend/src/pages/LandingPage.tsx",
+          "frontend/src/components/layout/Header.tsx",
+          "frontend/src/components/templates/TemplatePreview.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Build a multi-step invitation creation wizard (Step 1: Couple Details) as a full-page React form with fields: Bride Name, Groom Name, Couple Photo upload (drag & drop), Wedding Date, Wedding Time, Venue Name, Venue Address, Google Maps Link, Family Details (rich text area), and Invitation Message (rich text area). Show a live progress bar across steps. Persist form state across steps without data loss. On completion of all steps, call the backend createInvitation function and redirect to the creator dashboard for that invitation.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/CreateInvitationWizard.tsx",
+          "frontend/src/components/wizard/CoupleDetailsStep.tsx",
+          "frontend/src/components/wizard/ProgressBar.tsx",
+          "frontend/src/context/InvitationFormContext.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/CreateInvitationWizard.tsx",
+          "frontend/src/components/wizard/CoupleDetailsStep.tsx",
+          "frontend/src/components/wizard/ProgressBar.tsx",
+          "frontend/src/context/InvitationFormContext.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Build Step 2 of the creation wizard: Multi-Event Management. Display a structured event creator UI where users can add multiple events. Each event card includes: Event Type selector (Haldi, Mehndi, Sangeet, Wedding Ceremony, Reception, Custom), Event Title input, Date picker, Time picker, Venue input, and Description textarea. Events are displayed as premium animated cards with gradient backgrounds, icons per event type, and smooth entrance animations. Users can add, edit, reorder, and delete events. Save all events linked to the current invitation via the backend addEvent/updateEvent/deleteEvent functions.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/wizard/EventManagementStep.tsx",
+          "frontend/src/components/events/EventCard.tsx",
+          "frontend/src/components/events/EventForm.tsx",
+          "frontend/src/utils/eventIcons.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/wizard/EventManagementStep.tsx",
+          "frontend/src/components/events/EventCard.tsx",
+          "frontend/src/components/events/EventForm.tsx",
+          "frontend/src/utils/eventIcons.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Build a Template & Theme Selector panel in the creator dashboard. Offer at least 6 templates: 2 Royal Indian (ornate gold/red/maroon with floral motifs), 2 Modern Minimal (clean ivory/blush tones, geometric), and 2 Cinematic Dark (deep jewel tones, dramatic typography). Each template preview renders a live miniature of the guest invitation. Include color scheme picker (preset palettes + custom hex), font pairing selector (at least 4 options including Devanagari-inspired and serif options), and background texture/pattern selector. Switching templates must preserve all invitation data and only change visual presentation. Persist selected template and customization options in the backend updateInvitation call.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/wizard/TemplateThemeStep.tsx",
+          "frontend/src/components/templates/TemplatePreview.tsx",
+          "frontend/src/components/templates/TemplateSelector.tsx",
+          "frontend/src/components/templates/ColorSchemePicker.tsx",
+          "frontend/src/components/templates/FontSelector.tsx",
+          "frontend/src/utils/templateDefinitions.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/wizard/TemplateThemeStep.tsx",
+          "frontend/src/components/templates/TemplatePreview.tsx",
+          "frontend/src/components/templates/TemplateSelector.tsx",
+          "frontend/src/components/templates/ColorSchemePicker.tsx",
+          "frontend/src/components/templates/FontSelector.tsx",
+          "frontend/src/utils/templateDefinitions.ts"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Build a Media Management section in the creator dashboard with two subsystems: (1) Photo Gallery — drag & drop upload area accepting multiple images simultaneously, with lazy-loaded thumbnail grid, elegant hover animations, image reordering, and individual delete. Images are stored via the backend addPhoto function. (2) Background Music — file upload for audio (MP3/WAV), toggle for auto-play on invitation open, and a preview player. Store music via backend setBackgroundMusic. Display a floating music controller button (play/pause/volume) in both the preview and guest invitation view.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/wizard/MediaManagementStep.tsx",
+          "frontend/src/components/media/PhotoGalleryUpload.tsx",
+          "frontend/src/components/media/MusicUploader.tsx",
+          "frontend/src/components/media/MusicController.tsx",
+          "frontend/src/hooks/useLazyLoad.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/wizard/MediaManagementStep.tsx",
+          "frontend/src/components/media/PhotoGalleryUpload.tsx",
+          "frontend/src/components/media/MusicUploader.tsx",
+          "frontend/src/components/media/MusicController.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Build the cinematic guest-facing invitation view at route /[slug] (e.g., /shivangi-avanish). This view is strictly read-only and non-editable. It must include: (1) Full-screen cinematic hero section with couple photo, names in elegant typography, and animated entrance. (2) Animated countdown timer to the wedding date. (3) Couple introduction section with invitation message and family details. (4) Premium event timeline — each event displayed as an animated card with icon, date, time, venue. (5) Photo gallery with lightbox support and smooth scroll reveal animations. (6) Venue section with address and a 'View on Google Maps' button linking to the provided Google Maps URL. (7) RSVP form collecting guest name, phone, attendance confirmation, guest count, and message — submits via backend submitRSVP. (8) WhatsApp share button that shares the invitation URL. (9) Floating background music controller if music is uploaded. The view must be publicly accessible via the slug without any authentication.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/GuestInvitation.tsx",
+          "frontend/src/components/guest/HeroSection.tsx",
+          "frontend/src/components/guest/CountdownTimer.tsx",
+          "frontend/src/components/guest/CoupleIntroduction.tsx",
+          "frontend/src/components/guest/EventTimeline.tsx",
+          "frontend/src/components/guest/PhotoGalleryLightbox.tsx",
+          "frontend/src/components/guest/VenueSection.tsx",
+          "frontend/src/components/guest/RSVPForm.tsx",
+          "frontend/src/components/guest/WhatsAppShareButton.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/GuestInvitation.tsx",
+          "frontend/src/components/guest/HeroSection.tsx",
+          "frontend/src/components/guest/CountdownTimer.tsx",
+          "frontend/src/components/guest/CoupleIntroduction.tsx",
+          "frontend/src/components/guest/EventTimeline.tsx",
+          "frontend/src/components/guest/PhotoGalleryLightbox.tsx",
+          "frontend/src/components/guest/VenueSection.tsx",
+          "frontend/src/components/guest/RSVPForm.tsx",
+          "frontend/src/components/guest/WhatsAppShareButton.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Build a Creator/Admin Dashboard at route /dashboard and /dashboard/[slug] for managing individual invitations. The dashboard homepage lists all created invitations as cards showing couple names, wedding date, published status, and action buttons (Edit, Preview, Publish, Delete). The individual invitation editor at /dashboard/[slug] provides tabbed navigation across: Couple Details, Events, Template & Theme, Media, and Preview. The Preview tab renders the full guest invitation view in an iframe or embedded component to show live changes. Include a prominent 'Publish Invitation' button that calls the backend publishInvitation function and generates the shareable public link. No login or authentication is required for this initial version.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/InvitationEditor.tsx",
+          "frontend/src/components/dashboard/InvitationCard.tsx",
+          "frontend/src/components/dashboard/EditorTabs.tsx",
+          "frontend/src/components/dashboard/PreviewTab.tsx",
+          "frontend/src/components/dashboard/PublishModal.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/InvitationEditor.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Apply an ultra-premium, luxury Indian wedding aesthetic consistently across the entire platform. Visual direction: rich gold, ivory, deep crimson, and blush rose as the primary palette; ornate but clean layout inspired by high-end Indian wedding brands; Cinzel or Cormorant Garamond for display headings, Inter for body text; subtle mandala or floral SVG motifs as decorative dividers; Apple-level micro-animations (smooth fade-ins, parallax scrolling on hero sections, staggered card entrances using CSS transitions or Framer Motion); cinematic full-bleed section transitions; glassmorphism cards for event and template selectors; mobile-first fully responsive grid layout. All interactions must feel premium — buttons have hover shimmer effects, form inputs have elegant focus states, and loading states use graceful skeleton screens.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/layout/DecorativeDivider.tsx",
+          "frontend/src/components/ui/SkeletonLoader.tsx",
+          "frontend/src/utils/animations.ts",
+          "frontend/src/hooks/useScrollAnimation.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/layout/DecorativeDivider.tsx",
+          "frontend/src/components/ui/SkeletonLoader.tsx",
+          "frontend/src/utils/animations.ts",
+          "frontend/src/hooks/useScrollAnimation.ts"
+        ]
+      },
+      {
+        "id": "REQ-9",
+        "summary": "Implement scalable URL routing for the SaaS multi-invitation architecture. Each invitation is accessible at /:slug (e.g., /shivangi-avanish) for the guest view. The creator dashboard is at /dashboard. Individual invitation editors are at /dashboard/:slug. The platform home page at / serves as a landing page showcasing the platform with a hero section, feature highlights, sample invitation previews, and a 'Create Your Invitation' CTA button. Ensure client-side routing handles all paths correctly and unknown slugs show a graceful 404 page.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/LandingPage.tsx",
+          "frontend/src/pages/NotFound.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/Header.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/LandingPage.tsx",
+          "frontend/src/pages/NotFound.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/Header.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "build-request.json",
+    "build-template/Dockerfile",
+    "build-template/LICENSE",
+    "build-template/README.md",
+    "build-template/deploy.sh",
+    "build-template/icp.yaml",
+    "build-template/package.json",
+    "build-template/pnpm-lock.yaml",
+    "build-template/pnpm-workspace.yaml",
+    "build-template/scripts/prune-unused-images.js",
+    "build-template/scripts/resize-images.js",
+    "build-template/src/backend/canister.yaml",
+    "build-template/src/backend/system-idl/aaaaa-aa.did",
+    "build-template/src/frontend/canister.yaml",
+    "build-template/src/frontend/components.json",
+    "build-template/src/frontend/env.json",
+    "build-template/src/frontend/eslint-rules/no-bigint-in-query-keys.js",
+    "build-template/src/frontend/eslint-rules/require-internet-identity-provider.js",
+    "build-template/src/frontend/eslint.config.js",
+    "build-template/src/frontend/package.json",
+    "build-template/src/frontend/postcss.config.js",
+    "build-template/src/frontend/src/components/ui/accordion.tsx",
+    "build-template/src/frontend/src/components/ui/alert-dialog.tsx",
+    "build-template/src/frontend/src/components/ui/alert.tsx",
+    "build-template/src/frontend/src/components/ui/aspect-ratio.tsx",
+    "build-template/src/frontend/src/components/ui/avatar.tsx",
+    "build-template/src/frontend/src/components/ui/badge.tsx",
+    "build-template/src/frontend/src/components/ui/breadcrumb.tsx",
+    "build-template/src/frontend/src/components/ui/button.tsx",
+    "build-template/src/frontend/src/components/ui/calendar.tsx",
+    "build-template/src/frontend/src/components/ui/card.tsx",
+    "build-template/src/frontend/src/components/ui/carousel.tsx",
+    "build-template/src/frontend/src/components/ui/chart.tsx",
+    "build-template/src/frontend/src/components/ui/checkbox.tsx",
+    "build-template/src/frontend/src/components/ui/collapsible.tsx",
+    "build-template/src/frontend/src/components/ui/command.tsx",
+    "build-template/src/frontend/src/components/ui/context-menu.tsx",
+    "build-template/src/frontend/src/components/ui/dialog.tsx",
+    "build-template/src/frontend/src/components/ui/drawer.tsx",
+    "build-template/src/frontend/src/components/ui/dropdown-menu.tsx",
+    "build-template/src/frontend/src/components/ui/form.tsx",
+    "build-template/src/frontend/src/components/ui/hover-card.tsx",
+    "build-template/src/frontend/src/components/ui/input-otp.tsx",
+    "build-template/src/frontend/src/components/ui/input.tsx",
+    "build-template/src/frontend/src/components/ui/label.tsx",
+    "build-template/src/frontend/src/components/ui/menubar.tsx",
+    "build-template/src/frontend/src/components/ui/navigation-menu.tsx",
+    "build-template/src/frontend/src/components/ui/pagination.tsx",
+    "build-template/src/frontend/src/components/ui/popover.tsx",
+    "build-template/src/frontend/src/components/ui/progress.tsx",
+    "build-template/src/frontend/src/components/ui/radio-group.tsx",
+    "build-template/src/frontend/src/components/ui/resizable.tsx",
+    "build-template/src/frontend/src/components/ui/scroll-area.tsx",
+    "build-template/src/frontend/src/components/ui/select.tsx",
+    "build-template/src/frontend/src/components/ui/separator.tsx",
+    "build-template/src/frontend/src/components/ui/sheet.tsx",
+    "build-template/src/frontend/src/components/ui/sidebar.tsx",
+    "build-template/src/frontend/src/components/ui/skeleton.tsx",
+    "build-template/src/frontend/src/components/ui/slider.tsx",
+    "build-template/src/frontend/src/components/ui/sonner.tsx",
+    "build-template/src/frontend/src/components/ui/switch.tsx",
+    "build-template/src/frontend/src/components/ui/table.tsx",
+    "build-template/src/frontend/src/components/ui/tabs.tsx",
+    "build-template/src/frontend/src/components/ui/textarea.tsx",
+    "build-template/src/frontend/src/components/ui/toggle-group.tsx",
+    "build-template/src/frontend/src/components/ui/toggle.tsx",
+    "build-template/src/frontend/src/components/ui/tooltip.tsx",
+    "build-template/src/frontend/src/hooks/use-mobile.tsx",
+    "build-template/src/frontend/src/lib/utils.ts",
+    "build-template/src/frontend/tsconfig.json",
+    "build-template/src/frontend/vite.config.js",
+    "build-template/tsconfig.json",
+    "caffeine.lock.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/public/assets/generated/corner-flourish.dim_256x256.png",
+    "frontend/public/assets/generated/hero-bg.dim_1920x1080.png",
+    "frontend/public/assets/generated/logo-mark.dim_256x256.png",
+    "frontend/public/assets/generated/mandala-divider.dim_1200x120.png",
+    "frontend/public/assets/generated/watercolor-texture.dim_1200x800.png",
+    "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/SkeletonLoader.tsx",
+    "frontend/src/components/events/EventCard.tsx",
+    "frontend/src/components/events/EventForm.tsx",
+    "frontend/src/components/guest/CountdownTimer.tsx",
+    "frontend/src/components/guest/CoupleIntroduction.tsx",
+    "frontend/src/components/guest/EventTimeline.tsx",
+    "frontend/src/components/guest/HeroSection.tsx",
+    "frontend/src/components/guest/PhotoGalleryLightbox.tsx",
+    "frontend/src/components/guest/RSVPForm.tsx",
+    "frontend/src/components/guest/VenueSection.tsx",
+    "frontend/src/components/guest/WhatsAppShareButton.tsx",
+    "frontend/src/components/layout/DecorativeDivider.tsx",
+    "frontend/src/components/layout/Header.tsx",
+    "frontend/src/components/media/MusicController.tsx",
+    "frontend/src/components/media/MusicUploader.tsx",
+    "frontend/src/components/media/PhotoGalleryUpload.tsx",
+    "frontend/src/components/templates/ColorSchemePicker.tsx",
+    "frontend/src/components/templates/FontSelector.tsx",
+    "frontend/src/components/templates/TemplatePreview.tsx",
+    "frontend/src/components/templates/TemplateSelector.tsx",
+    "frontend/src/components/ui/SkeletonLoader.tsx",
+    "frontend/src/components/wizard/CoupleDetailsStep.tsx",
+    "frontend/src/components/wizard/EventManagementStep.tsx",
+    "frontend/src/components/wizard/MediaManagementStep.tsx",
+    "frontend/src/components/wizard/ProgressBar.tsx",
+    "frontend/src/components/wizard/ReviewStep.tsx",
+    "frontend/src/components/wizard/TemplateThemeStep.tsx",
+    "frontend/src/config.ts",
+    "frontend/src/context/InvitationFormContext.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useScrollAnimation.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/pages/CreateInvitationWizard.tsx",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/GuestInvitation.tsx",
+    "frontend/src/pages/InvitationEditor.tsx",
+    "frontend/src/pages/LandingPage.tsx",
+    "frontend/src/pages/NotFound.tsx",
+    "frontend/src/ui-summary.json",
+    "frontend/src/utils/StorageClient.ts",
+    "frontend/src/utils/animations.ts",
+    "frontend/src/utils/eventIcons.tsx",
+    "frontend/src/utils/templateDefinitions.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

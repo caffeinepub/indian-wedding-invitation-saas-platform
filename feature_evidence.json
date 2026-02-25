@@ -1,0 +1,203 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-build-a-multi-step-invitation-creation-wizard-step-1-couple-details-as-a-full-page-react-form-with-fields-bride-name-groom-name-couple-photo-upload-drag-drop-wedding-date-wedding-time-venue-name-venue-address-google-maps-link-family-details-rich-text-area-and-invitation-message-rich-text-area-show-a-live-progress-bar-across-steps-persist-form-state-across-steps-without-data-loss-on-completion-of-all-steps-call-the-backend-createinvitation-function-and-redirect-to-the-creator-dashboard-for-that-invitation",
+      "featureTitle": "Build a multi-step invitation creation wizard (Step 1: Couple Details) as a full-page React form with fields: Bride Name, Groom Name, Couple Photo upload (drag & drop), Wedding Date, Wedding Time, Venue Name, Venue Address, Google Maps Link, Family Details (rich text area), and Invitation Message (rich text area). Show a live progress bar across steps. Persist form state across steps without data loss. On completion of all steps, call the backend createInvitation function and redirect to the creator dashboard for that invitation.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/wizard/CoupleDetailsStep.tsx",
+        "frontend/src/components/wizard/ProgressBar.tsx",
+        "frontend/src/context/InvitationFormContext.tsx",
+        "frontend/src/pages/CreateInvitationWizard.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-step-2-of-the-creation-wizard-multi-event-management-display-a-structured-event-creator-ui-where-users-can-add-multiple-events-each-event-card-includes-event-type-selector-haldi-mehndi-sangeet-wedding-ceremony-reception-custom-event-title-input-date-picker-time-picker-venue-input-and-description-textarea-events-are-displayed-as-premium-animated-cards-with-gradient-backgrounds-icons-per-event-type-and-smooth-entrance-animations-users-can-add-edit-reorder-and-delete-events-save-all-events-linked-to-the-current-invitation-via-the-backend-addevent-updateevent-deleteevent-functions",
+      "featureTitle": "Build Step 2 of the creation wizard: Multi-Event Management. Display a structured event creator UI where users can add multiple events. Each event card includes: Event Type selector (Haldi, Mehndi, Sangeet, Wedding Ceremony, Reception, Custom), Event Title input, Date picker, Time picker, Venue input, and Description textarea. Events are displayed as premium animated cards with gradient backgrounds, icons per event type, and smooth entrance animations. Users can add, edit, reorder, and delete events. Save all events linked to the current invitation via the backend addEvent/updateEvent/deleteEvent functions.",
+      "files": [
+        "frontend/src/components/events/EventCard.tsx",
+        "frontend/src/components/events/EventForm.tsx",
+        "frontend/src/components/wizard/EventManagementStep.tsx",
+        "frontend/src/utils/eventIcons.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-a-template-theme-selector-panel-in-the-creator-dashboard-offer-at-least-6-templates-2-royal-indian-ornate-gold-red-maroon-with-floral-motifs-2-modern-minimal-clean-ivory-blush-tones-geometric-and-2-cinematic-dark-deep-jewel-tones-dramatic-typography-each-template-preview-renders-a-live-miniature-of-the-guest-invitation-include-color-scheme-picker-preset-palettes-custom-hex-font-pairing-selector-at-least-4-options-including-devanagari-inspired-and-serif-options-and-background-texture-pattern-selector-switching-templates-must-preserve-all-invitation-data-and-only-change-visual-presentation-persist-selected-template-and-customization-options-in-the-backend-updateinvitation-call",
+      "featureTitle": "Build a Template & Theme Selector panel in the creator dashboard. Offer at least 6 templates: 2 Royal Indian (ornate gold/red/maroon with floral motifs), 2 Modern Minimal (clean ivory/blush tones, geometric), and 2 Cinematic Dark (deep jewel tones, dramatic typography). Each template preview renders a live miniature of the guest invitation. Include color scheme picker (preset palettes + custom hex), font pairing selector (at least 4 options including Devanagari-inspired and serif options), and background texture/pattern selector. Switching templates must preserve all invitation data and only change visual presentation. Persist selected template and customization options in the backend updateInvitation call.",
+      "files": [
+        "frontend/src/components/templates/ColorSchemePicker.tsx",
+        "frontend/src/components/templates/FontSelector.tsx",
+        "frontend/src/components/templates/TemplatePreview.tsx",
+        "frontend/src/components/templates/TemplateSelector.tsx",
+        "frontend/src/components/wizard/TemplateThemeStep.tsx",
+        "frontend/src/utils/templateDefinitions.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-a-media-management-section-in-the-creator-dashboard-with-two-subsystems-1-photo-gallery-drag-drop-upload-area-accepting-multiple-images-simultaneously-with-lazy-loaded-thumbnail-grid-elegant-hover-animations-image-reordering-and-individual-delete-images-are-stored-via-the-backend-addphoto-function-2-background-music-file-upload-for-audio-mp3-wav-toggle-for-auto-play-on-invitation-open-and-a-preview-player-store-music-via-backend-setbackgroundmusic-display-a-floating-music-controller-button-play-pause-volume-in-both-the-preview-and-guest-invitation-view",
+      "featureTitle": "Build a Media Management section in the creator dashboard with two subsystems: (1) Photo Gallery — drag & drop upload area accepting multiple images simultaneously, with lazy-loaded thumbnail grid, elegant hover animations, image reordering, and individual delete. Images are stored via the backend addPhoto function. (2) Background Music — file upload for audio (MP3/WAV), toggle for auto-play on invitation open, and a preview player. Store music via backend setBackgroundMusic. Display a floating music controller button (play/pause/volume) in both the preview and guest invitation view.",
+      "files": [
+        "frontend/src/components/media/MusicController.tsx",
+        "frontend/src/components/media/MusicUploader.tsx",
+        "frontend/src/components/media/PhotoGalleryUpload.tsx",
+        "frontend/src/components/wizard/MediaManagementStep.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-the-cinematic-guest-facing-invitation-view-at-route-slug-e-g-shivangi-avanish-this-view-is-strictly-read-only-and-non-editable-it-must-include-1-full-screen-cinematic-hero-section-with-couple-photo-names-in-elegant-typography-and-animated-entrance-2-animated-countdown-timer-to-the-wedding-date-3-couple-introduction-section-with-invitation-message-and-family-details-4-premium-event-timeline-each-event-displayed-as-an-animated-card-with-icon-date-time-venue-5-photo-gallery-with-lightbox-support-and-smooth-scroll-reveal-animations-6-venue-section-with-address-and-a-view-on-google-maps-button-linking-to-the-provided-google-maps-url-7-rsvp-form-collecting-guest-name-phone-attendance-confirmation-guest-count-and-message-submits-via-backend-submitrsvp-8-whatsapp-share-button-that-shares-the-invitation-url-9-floating-background-music-controller-if-music-is-uploaded-the-view-must-be-publicly-accessible-via-the-slug-without-any-authentication",
+      "featureTitle": "Build the cinematic guest-facing invitation view at route /[slug] (e.g., /shivangi-avanish). This view is strictly read-only and non-editable. It must include: (1) Full-screen cinematic hero section with couple photo, names in elegant typography, and animated entrance. (2) Animated countdown timer to the wedding date. (3) Couple introduction section with invitation message and family details. (4) Premium event timeline — each event displayed as an animated card with icon, date, time, venue. (5) Photo gallery with lightbox support and smooth scroll reveal animations. (6) Venue section with address and a 'View on Google Maps' button linking to the provided Google Maps URL. (7) RSVP form collecting guest name, phone, attendance confirmation, guest count, and message — submits via backend submitRSVP. (8) WhatsApp share button that shares the invitation URL. (9) Floating background music controller if music is uploaded. The view must be publicly accessible via the slug without any authentication.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/guest/CountdownTimer.tsx",
+        "frontend/src/components/guest/CoupleIntroduction.tsx",
+        "frontend/src/components/guest/EventTimeline.tsx",
+        "frontend/src/components/guest/HeroSection.tsx",
+        "frontend/src/components/guest/PhotoGalleryLightbox.tsx",
+        "frontend/src/components/guest/RSVPForm.tsx",
+        "frontend/src/components/guest/VenueSection.tsx",
+        "frontend/src/components/guest/WhatsAppShareButton.tsx",
+        "frontend/src/pages/GuestInvitation.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-a-creator-admin-dashboard-at-route-dashboard-and-dashboard-slug-for-managing-individual-invitations-the-dashboard-homepage-lists-all-created-invitations-as-cards-showing-couple-names-wedding-date-published-status-and-action-buttons-edit-preview-publish-delete-the-individual-invitation-editor-at-dashboard-slug-provides-tabbed-navigation-across-couple-details-events-template-theme-media-and-preview-the-preview-tab-renders-the-full-guest-invitation-view-in-an-iframe-or-embedded-component-to-show-live-changes-include-a-prominent-publish-invitation-button-that-calls-the-backend-publishinvitation-function-and-generates-the-shareable-public-link-no-login-or-authentication-is-required-for-this-initial-version",
+      "featureTitle": "Build a Creator/Admin Dashboard at route /dashboard and /dashboard/[slug] for managing individual invitations. The dashboard homepage lists all created invitations as cards showing couple names, wedding date, published status, and action buttons (Edit, Preview, Publish, Delete). The individual invitation editor at /dashboard/[slug] provides tabbed navigation across: Couple Details, Events, Template & Theme, Media, and Preview. The Preview tab renders the full guest invitation view in an iframe or embedded component to show live changes. Include a prominent 'Publish Invitation' button that calls the backend publishInvitation function and generates the shareable public link. No login or authentication is required for this initial version.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/pages/Dashboard.tsx",
+        "frontend/src/pages/InvitationEditor.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-apply-an-ultra-premium-luxury-indian-wedding-aesthetic-consistently-across-the-entire-platform-visual-direction-rich-gold-ivory-deep-crimson-and-blush-rose-as-the-primary-palette-ornate-but-clean-layout-inspired-by-high-end-indian-wedding-brands-cinzel-or-cormorant-garamond-for-display-headings-inter-for-body-text-subtle-mandala-or-floral-svg-motifs-as-decorative-dividers-apple-level-micro-animations-smooth-fade-ins-parallax-scrolling-on-hero-sections-staggered-card-entrances-using-css-transitions-or-framer-motion-cinematic-full-bleed-section-transitions-glassmorphism-cards-for-event-and-template-selectors-mobile-first-fully-responsive-grid-layout-all-interactions-must-feel-premium-buttons-have-hover-shimmer-effects-form-inputs-have-elegant-focus-states-and-loading-states-use-graceful-skeleton-screens",
+      "featureTitle": "Apply an ultra-premium, luxury Indian wedding aesthetic consistently across the entire platform. Visual direction: rich gold, ivory, deep crimson, and blush rose as the primary palette; ornate but clean layout inspired by high-end Indian wedding brands; Cinzel or Cormorant Garamond for display headings, Inter for body text; subtle mandala or floral SVG motifs as decorative dividers; Apple-level micro-animations (smooth fade-ins, parallax scrolling on hero sections, staggered card entrances using CSS transitions or Framer Motion); cinematic full-bleed section transitions; glassmorphism cards for event and template selectors; mobile-first fully responsive grid layout. All interactions must feel premium — buttons have hover shimmer effects, form inputs have elegant focus states, and loading states use graceful skeleton screens.",
+      "files": [
+        "frontend/src/components/layout/DecorativeDivider.tsx",
+        "frontend/src/hooks/useScrollAnimation.ts",
+        "frontend/src/index.css",
+        "frontend/src/utils/animations.ts",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-scalable-url-routing-for-the-saas-multi-invitation-architecture-each-invitation-is-accessible-at-slug-e-g-shivangi-avanish-for-the-guest-view-the-creator-dashboard-is-at-dashboard-individual-invitation-editors-are-at-dashboard-slug-the-platform-home-page-at-serves-as-a-landing-page-showcasing-the-platform-with-a-hero-section-feature-highlights-sample-invitation-previews-and-a-create-your-invitation-cta-button-ensure-client-side-routing-handles-all-paths-correctly-and-unknown-slugs-show-a-graceful-404-page",
+      "featureTitle": "Implement scalable URL routing for the SaaS multi-invitation architecture. Each invitation is accessible at /:slug (e.g., /shivangi-avanish) for the guest view. The creator dashboard is at /dashboard. Individual invitation editors are at /dashboard/:slug. The platform home page at / serves as a landing page showcasing the platform with a hero section, feature highlights, sample invitation previews, and a 'Create Your Invitation' CTA button. Ensure client-side routing handles all paths correctly and unknown slugs show a graceful 404 page.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/layout/Header.tsx",
+        "frontend/src/pages/LandingPage.tsx",
+        "frontend/src/pages/NotFound.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-generate-the-following-static-image-assets-for-use-throughout-the-platform-as-decorative-and-branding-elements-stored-in-frontend-public-assets-generated-render-these-as-img-tags-or-css-backgrounds-where-appropriate-in-the-ui",
+      "featureTitle": "Generate the following static image assets for use throughout the platform as decorative and branding elements, stored in frontend/public/assets/generated. Render these as img tags or CSS backgrounds where appropriate in the UI.",
+      "files": [
+        "frontend/src/components/layout/Header.tsx",
+        "frontend/src/components/templates/TemplatePreview.tsx",
+        "frontend/src/pages/GuestInvitation.tsx",
+        "frontend/src/pages/LandingPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

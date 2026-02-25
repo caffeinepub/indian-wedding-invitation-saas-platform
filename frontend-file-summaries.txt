@@ -1,0 +1,21 @@
+{
+  "frontend/src/pages/LandingPage.tsx": "Platform landing page with cinematic hero section, feature highlights grid, sample invitation previews, and CTA — uses parallax scrolling, luxury gold/crimson styling, and links to create/dashboard routes.",
+  "frontend/src/pages/NotFound.tsx": "Styled 404 page with floating heart icon, elegant gold/ivory typography, and navigation buttons back to home and dashboard.",
+  "frontend/src/pages/Dashboard.tsx": "Creator dashboard listing all invitations with status badges, edit/view/publish/delete actions — updated import path for SkeletonLoader from components/ instead of components/ui/.",
+  "frontend/src/pages/CreateInvitationWizard.tsx": "Multi-step wizard (5 steps) wrapped in InvitationFormProvider, with progress bar, step navigation, validation, and final submission that creates the invitation plus all events/photos/music via backend mutations.",
+  "frontend/src/pages/InvitationEditor.tsx": "Tabbed invitation editor at /dashboard/:slug with save/publish functionality and a shareable URL modal — updated import path for SkeletonLoader from components/ instead of components/ui/.",
+  "frontend/src/pages/GuestInvitation.tsx": "Read-only cinematic guest invitation view composing all sections (Hero, Countdown, Events, Gallery, Venue, RSVP) — updated import path for SkeletonLoader and removed unused import.",
+  "frontend/src/components/media/MusicUploader.tsx": "Music upload component with file picker, audio preview player with play/pause, auto-play toggle switch, and remove button — stores music as base64 data URL in form context.",
+  "frontend/src/components/media/MusicController.tsx": "Floating fixed music controller with play/pause button, volume slider, and mute toggle — positioned bottom-right and supports auto-play on mount.",
+  "frontend/src/components/wizard/MediaManagementStep.tsx": "Step 4 of the wizard combining PhotoGalleryUpload and MusicUploader components in luxury card containers with icon headers.",
+  "frontend/src/components/wizard/ReviewStep.tsx": "Step 5 review panel showing a summary of all form data (couple details, events, template, media) plus a unique slug input field with validation for the public invitation URL.",
+  "frontend/src/components/guest/HeroSection.tsx": "Full-screen cinematic hero with parallax background, couple photo, animated names in template typography, wedding date, and venue — entrance animation on mount.",
+  "frontend/src/components/guest/CountdownTimer.tsx": "Live countdown timer updating every second showing days/hours/minutes/seconds until the wedding, styled with template colors and gold accents.",
+  "frontend/src/components/guest/CoupleIntroduction.tsx": "Scroll-animated section displaying the invitation message as a styled blockquote and family details in a bordered card, using template fonts and colors.",
+  "frontend/src/components/guest/EventTimeline.tsx": "Scroll-animated grid of event cards using event-type gradient backgrounds and icons, sorted chronologically with staggered entrance animations.",
+  "frontend/src/components/guest/PhotoGalleryLightbox.tsx": "Lazy-loaded photo grid with hover zoom effects and a full-screen lightbox with prev/next navigation and keyboard-friendly close button.",
+  "frontend/src/components/guest/VenueSection.tsx": "Scroll-animated venue section with venue name, address, and a Google Maps external link button styled with template primary colors.",
+  "frontend/src/components/guest/RSVPForm.tsx": "RSVP form collecting guest name, phone, attendance (yes/no radio), guest count, and message — submits via backend and shows an animated success confirmation.",
+  "frontend/src/components/guest/WhatsAppShareButton.tsx": "Fixed floating WhatsApp share button (bottom-left) that opens WhatsApp with a pre-filled invitation message containing the public URL.",
+  "frontend/src/components/SkeletonLoader.tsx": "Reusable skeleton loading component moved out of the read-only ui/ directory, supporting card/text/image/invitation-card variants with animated shimmer placeholders."
+}
