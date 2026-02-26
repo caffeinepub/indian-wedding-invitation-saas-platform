@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Invitation, Event, RSVPEntry, Photo, BackgroundMusic } from '../backend';
+import type { Invitation, Event, RSVPEntry, RSVPStats, Photo, BackgroundMusic } from '../backend';
 import { EventType } from '../backend';
 
 export { EventType };
@@ -348,6 +348,33 @@ export function useSubmitRSVP() {
     },
     onSuccess: (_, vars) => {
       queryClient.invalidateQueries({ queryKey: ['rsvps', vars.invitationId] });
+      queryClient.invalidateQueries({ queryKey: ['rsvp-stats', vars.invitationId] });
     },
+  });
+}
+
+export function useRSVPsByInvitation(invitationId: string) {
+  const { actor, isFetching } = useActor();
+  return useQuery<RSVPEntry[]>({
+    queryKey: ['rsvps', invitationId],
+    queryFn: async () => {
+      if (!actor || !invitationId) return [];
+      return actor.getRSVPsByInvitation(invitationId);
+    },
+    enabled: !!actor && !isFetching && !!invitationId,
+  });
+}
+
+export function useRSVPsStats(invitationId: string) {
+  const { actor, isFetching } = useActor();
+  return useQuery<RSVPStats>({
+    queryKey: ['rsvp-stats', invitationId],
+    queryFn: async () => {
+      if (!actor || !invitationId) {
+        return { totalResponses: BigInt(0), totalConfirmedGuests: BigInt(0), totalDeclined: BigInt(0) };
+      }
+      return actor.getRSVPsStats(invitationId);
+    },
+    enabled: !!actor && !isFetching && !!invitationId,
   });
 }

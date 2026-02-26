@@ -89,6 +89,21 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface RSVPEntry {
+    id: string;
+    guestCount: bigint;
+    invitationId: string;
+    submittedAt: bigint;
+    guestName: string;
+    message: string;
+    attending: boolean;
+    guestPhone: string;
+}
+export interface RSVPStats {
+    totalConfirmedGuests: bigint;
+    totalResponses: bigint;
+    totalDeclined: bigint;
+}
 export interface Event {
     id: string;
     title: string;
@@ -117,16 +132,6 @@ export interface Invitation {
     venueName: string;
     familyDetails: string;
     colorScheme: string;
-}
-export interface RSVPEntry {
-    id: string;
-    guestCount: bigint;
-    invitationId: string;
-    submittedAt: bigint;
-    guestName: string;
-    message: string;
-    attending: boolean;
-    guestPhone: string;
 }
 export interface BackgroundMusic {
     id: string;
@@ -162,6 +167,7 @@ export interface backendInterface {
     getInvitationBySlug(slug: string): Promise<Invitation>;
     getPhotosByInvitation(invitationId: string): Promise<Array<Photo>>;
     getRSVPsByInvitation(invitationId: string): Promise<Array<RSVPEntry>>;
+    getRSVPsStats(invitationId: string): Promise<RSVPStats>;
     publishInvitation(slug: string): Promise<Invitation>;
     setBackgroundMusic(invitationId: string, musicId: string, musicUrl: string, autoPlay: boolean): Promise<BackgroundMusic>;
     submitRSVP(invitationId: string, rsvpId: string, guestName: string, guestPhone: string, attending: boolean, guestCount: bigint, message: string): Promise<RSVPEntry>;
@@ -336,6 +342,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getRSVPsByInvitation(arg0);
+            return result;
+        }
+    }
+    async getRSVPsStats(arg0: string): Promise<RSVPStats> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getRSVPsStats(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getRSVPsStats(arg0);
             return result;
         }
     }

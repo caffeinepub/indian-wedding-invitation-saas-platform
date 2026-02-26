@@ -1,288 +1,88 @@
 {
   "kind": "build_request",
-  "title": "AI Wedding Invitation SaaS Platform — Full Build",
-  "projectName": "WedInvite Studio",
-  "priority": "high",
+  "title": "RSVP Responses Button, Nav Text Contrast Fix & Mobile Music Controller Fix",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Build a Motoko backend actor with the following data models and functions: (1) Invitation record containing id (unique slug like 'shivangi-avanish'), brideeName, groomName, weddingDate, weddingTime, venueName, venueAddress, googleMapsLink, familyDetails (text), invitationMessage, selectedTemplate (text), colorScheme, fontChoice, backgroundChoice, isPublished (bool), createdAt, updatedAt. (2) Event record containing id, invitationId, title, date, time, venue, description, eventType (Haldi/Mehndi/Sangeet/Wedding/Reception/Custom). (3) RSVPEntry record with id, invitationId, guestName, guestPhone, attending (bool), guestCount, message, submittedAt. (4) Expose CRUD functions: createInvitation, updateInvitation, getInvitationBySlug, getAllInvitations, publishInvitation, deleteInvitation. (5) Event CRUD: addEvent, updateEvent, deleteEvent, getEventsByInvitation. (6) RSVP: submitRSVP, getRSVPsByInvitation. (7) Photo gallery: addPhoto (stores base64 or URL string), deletePhoto, getPhotosByInvitation. (8) Music: setBackgroundMusic (stores base64 or URL string, autoPlay bool), getBackgroundMusic. (9) Slug uniqueness validation on creation. Store all data in stable vars for upgrade safety.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Create wedding invitations",
-          "Manage multiple invitations",
-          "Unique invitation URLs",
-          "RSVP form",
-          "Photo Gallery",
-          "Background Music"
-        ]
-      },
-      "acceptanceCriteria": [
-        "createInvitation returns a unique slug-based ID and persists all fields",
-        "getInvitationBySlug returns full invitation data including events, photos, and music for a given slug",
-        "publishInvitation toggles isPublished to true and makes the invitation publicly readable",
-        "submitRSVP stores guest response linked to invitation slug",
-        "addPhoto and setBackgroundMusic persist media references linked to invitation",
-        "All stable vars survive canister upgrades without data loss",
-        "Duplicate slug creation is rejected with a clear error"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Build a multi-step invitation creation wizard (Step 1: Couple Details) as a full-page React form with fields: Bride Name, Groom Name, Couple Photo upload (drag & drop), Wedding Date, Wedding Time, Venue Name, Venue Address, Google Maps Link, Family Details (rich text area), and Invitation Message (rich text area). Show a live progress bar across steps. Persist form state across steps without data loss. On completion of all steps, call the backend createInvitation function and redirect to the creator dashboard for that invitation.",
+      "id": "REQ-14",
+      "text": "Add a prominent dedicated 'View RSVP Responses' button on each invitation card in the creator dashboard (/dashboard) and inside the invitation editor (/dashboard/:slug). Clicking it opens a modal or expands a panel showing all submitted RSVP guest responses for that invitation fetched via getRSVPsByInvitation. Display: Guest Name, Phone, Attending (Yes/No badge), Guest Count, Message, and Submitted At date in a clean styled table/card list. Include a summary row with total responses, total confirmed guests, and total declined. Show a graceful empty state when no responses exist. Style the button prominently (gold/crimson accent, distinct from other action buttons) so it stands out as a special action.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "User enters: Bride Name, Groom Name, Couple Photos, Wedding Date & Time, Venue Details, Google Maps Link, Family Details, Invitation Message"
+          "yes create a special button for that were it shows that"
         ]
       },
       "acceptanceCriteria": [
-        "All listed fields are present and validated before proceeding to next step",
-        "Couple photo can be dragged & dropped or selected via file picker and previewed inline",
-        "Progress bar accurately reflects current step",
-        "Form data is not lost when navigating between steps",
-        "Submitting the final step creates the invitation in the backend and navigates to the creator dashboard"
+        "A visually distinct 'View RSVP Responses' button appears on each invitation card on the /dashboard page",
+        "The same button appears inside the invitation editor at /dashboard/:slug",
+        "Clicking the button opens a modal or expandable panel showing all RSVP submissions",
+        "The panel displays Guest Name, Phone, Attending badge (Yes=green/No=red), Guest Count, Message, and Submitted At",
+        "A summary row shows total responses, total confirmed guests, and total declined",
+        "An elegant empty state is shown when no RSVPs have been submitted",
+        "The button uses a premium gold/crimson accent color distinct from Edit, Preview, Publish, and Delete buttons",
+        "Data is fetched using the existing getRSVPsByInvitation React Query hook pattern"
       ]
     },
     {
-      "id": "REQ-3",
-      "text": "Build Step 2 of the creation wizard: Multi-Event Management. Display a structured event creator UI where users can add multiple events. Each event card includes: Event Type selector (Haldi, Mehndi, Sangeet, Wedding Ceremony, Reception, Custom), Event Title input, Date picker, Time picker, Venue input, and Description textarea. Events are displayed as premium animated cards with gradient backgrounds, icons per event type, and smooth entrance animations. Users can add, edit, reorder, and delete events. Save all events linked to the current invitation via the backend addEvent/updateEvent/deleteEvent functions.",
+      "id": "REQ-15",
+      "text": "Fix the navigation link text visibility in the site header (Header.tsx) on the home/landing page. The 'Home' and 'Dashboard' nav link text is currently hidden/invisible against the dark or image-based background. Apply a light text color (ivory/white or gold) to all navigation links when the header is in its transparent (top-of-page) state, and ensure the text remains readable in the scrolled/filled state as well. Add a subtle semi-transparent dark backdrop or a distinct border/boundary around the navigation links if needed to guarantee contrast on all backgrounds. Update hover states to match the new color scheme.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Add multiple events such as: Haldi, Mehndi, Sangeet, Wedding Ceremony, Reception",
-          "Display events as premium animated cards, not plain text"
+          "on home tab 'home' and 'dashboard wriiten is hides due to background fix it or makes it s own boundry or fix it"
         ]
       },
       "acceptanceCriteria": [
-        "All six event types are selectable with distinct icons and color accents",
-        "Each event card shows all five data fields clearly",
-        "Adding a new event animates the card into the list",
-        "Events can be deleted with a confirmation prompt",
-        "All events are saved to the backend and reloaded correctly on revisit"
+        "'Home' and 'Dashboard' nav link text is clearly legible against the landing page hero background in both transparent and scrolled header states",
+        "Navigation links use a light color (ivory/white or gold) in the transparent header state",
+        "Text remains readable after the header gains a background on scroll",
+        "If a backdrop or boundary treatment is used, it is consistent with the luxury aesthetic",
+        "Hover states are visible and use appropriate gold/blush accent colors",
+        "Fix applies on both desktop and mobile navigation"
       ]
     },
     {
-      "id": "REQ-4",
-      "text": "Build a Template & Theme Selector panel in the creator dashboard. Offer at least 6 templates: 2 Royal Indian (ornate gold/red/maroon with floral motifs), 2 Modern Minimal (clean ivory/blush tones, geometric), and 2 Cinematic Dark (deep jewel tones, dramatic typography). Each template preview renders a live miniature of the guest invitation. Include color scheme picker (preset palettes + custom hex), font pairing selector (at least 4 options including Devanagari-inspired and serif options), and background texture/pattern selector. Switching templates must preserve all invitation data and only change visual presentation. Persist selected template and customization options in the backend updateInvitation call.",
+      "id": "REQ-16",
+      "text": "Fix the floating background music controller (MusicController.tsx) so it activates and functions correctly on mobile devices. Currently the music controller does not open or respond to taps on mobile (works on desktop only). Ensure: the floating button has a sufficiently large touch target (at least 44x44px), tap events are handled correctly (use onClick which works for both touch and mouse), autoplay restrictions on mobile are handled by requiring a user gesture before starting audio, the play/pause state toggles correctly on tap, and the controller panel opens/closes on mobile. Test that audio actually plays after the user taps play on a mobile browser.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Multiple luxury templates",
-          "Royal Indian themes",
-          "Modern minimal themes",
-          "Color customization",
-          "Font customization",
-          "Background customization",
-          "Users can switch templates without losing data"
+          "in mobile music not opens directly in laptop it working"
         ]
       },
       "acceptanceCriteria": [
-        "At least 6 distinct templates are available with live mini-previews",
-        "Switching templates updates the preview instantly without page reload",
-        "Color palette, font, and background changes are reflected in real time in the preview",
-        "All customization choices are saved to the backend",
-        "Invitation data (names, events, photos) is preserved across template switches"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Build a Media Management section in the creator dashboard with two subsystems: (1) Photo Gallery — drag & drop upload area accepting multiple images simultaneously, with lazy-loaded thumbnail grid, elegant hover animations, image reordering, and individual delete. Images are stored via the backend addPhoto function. (2) Background Music — file upload for audio (MP3/WAV), toggle for auto-play on invitation open, and a preview player. Store music via backend setBackgroundMusic. Display a floating music controller button (play/pause/volume) in both the preview and guest invitation view.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Drag & drop upload",
-          "Lazy loading optimization",
-          "Elegant gallery animations",
-          "Upload wedding music",
-          "Auto-play option",
-          "Music controller floating button"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Multiple images can be dropped simultaneously and appear in a lazy-loaded grid",
-        "Each photo has a delete button and hover zoom animation",
-        "Music file uploads and plays in the dashboard preview",
-        "Auto-play toggle is persisted and respected in guest view",
-        "Floating music controller is visible and functional in guest invitation view"
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Build the cinematic guest-facing invitation view at route /[slug] (e.g., /shivangi-avanish). This view is strictly read-only and non-editable. It must include: (1) Full-screen cinematic hero section with couple photo, names in elegant typography, and animated entrance. (2) Animated countdown timer to the wedding date. (3) Couple introduction section with invitation message and family details. (4) Premium event timeline — each event displayed as an animated card with icon, date, time, venue. (5) Photo gallery with lightbox support and smooth scroll reveal animations. (6) Venue section with address and a 'View on Google Maps' button linking to the provided Google Maps URL. (7) RSVP form collecting guest name, phone, attendance confirmation, guest count, and message — submits via backend submitRSVP. (8) WhatsApp share button that shares the invitation URL. (9) Floating background music controller if music is uploaded. The view must be publicly accessible via the slug without any authentication.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Cinematic landing section",
-          "Animated couple introduction",
-          "Countdown timer",
-          "Event timeline",
-          "Gallery",
-          "Venue with Google Maps button",
-          "RSVP form",
-          "WhatsApp share button",
-          "View-only",
-          "Non-editable",
-          "Secure public link"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Navigating to /[slug] loads the guest view without any edit controls visible",
-        "Hero section displays couple photo and names with entrance animation",
-        "Countdown timer correctly counts down to the wedding date/time",
-        "All events are displayed as animated cards in chronological order",
-        "Photo gallery supports lightbox click-to-expand",
-        "Google Maps button opens the provided maps link in a new tab",
-        "RSVP form submits successfully and shows a confirmation message",
-        "WhatsApp share button opens WhatsApp with the invitation URL pre-filled",
-        "Page is accessible without login for any published invitation"
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Build a Creator/Admin Dashboard at route /dashboard and /dashboard/[slug] for managing individual invitations. The dashboard homepage lists all created invitations as cards showing couple names, wedding date, published status, and action buttons (Edit, Preview, Publish, Delete). The individual invitation editor at /dashboard/[slug] provides tabbed navigation across: Couple Details, Events, Template & Theme, Media, and Preview. The Preview tab renders the full guest invitation view in an iframe or embedded component to show live changes. Include a prominent 'Publish Invitation' button that calls the backend publishInvitation function and generates the shareable public link. No login or authentication is required for this initial version.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Edit invitation anytime",
-          "Update photos/events",
-          "Preview changes live",
-          "Publish invitation",
-          "No complicated login system required initially",
-          "Manage multiple invitations"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Dashboard homepage lists all invitations with status badges (Draft/Published)",
-        "Clicking Edit navigates to the tabbed editor for that invitation",
-        "All editor tabs (Couple Details, Events, Template, Media, Preview) are accessible and functional",
-        "Preview tab shows an accurate live render of the guest invitation",
-        "Publish button updates invitation status and displays the shareable public URL",
-        "Newly created invitations appear on the dashboard immediately"
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Apply an ultra-premium, luxury Indian wedding aesthetic consistently across the entire platform. Visual direction: rich gold, ivory, deep crimson, and blush rose as the primary palette; ornate but clean layout inspired by high-end Indian wedding brands; Cinzel or Cormorant Garamond for display headings, Inter for body text; subtle mandala or floral SVG motifs as decorative dividers; Apple-level micro-animations (smooth fade-ins, parallax scrolling on hero sections, staggered card entrances using CSS transitions or Framer Motion); cinematic full-bleed section transitions; glassmorphism cards for event and template selectors; mobile-first fully responsive grid layout. All interactions must feel premium — buttons have hover shimmer effects, form inputs have elegant focus states, and loading states use graceful skeleton screens.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Ultra realistic",
-          "Luxury wedding brand quality",
-          "Apple-level smooth animations",
-          "Cinematic transitions",
-          "Elegant typography",
-          "Indian cultural aesthetics",
-          "Expert-made professional interface"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Gold, ivory, crimson, and blush rose palette is applied consistently across all pages",
-        "Display headings use an elegant serif or Cinzel-style font",
-        "Decorative Indian motifs (mandala/floral SVGs) appear as section dividers",
-        "All cards and sections animate in smoothly on scroll",
-        "Buttons have shimmer/glow hover effects",
-        "Loading states use skeleton screens, not spinners alone",
-        "Layout is fully responsive and visually polished on mobile devices (375px and up)"
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Implement scalable URL routing for the SaaS multi-invitation architecture. Each invitation is accessible at /:slug (e.g., /shivangi-avanish) for the guest view. The creator dashboard is at /dashboard. Individual invitation editors are at /dashboard/:slug. The platform home page at / serves as a landing page showcasing the platform with a hero section, feature highlights, sample invitation previews, and a 'Create Your Invitation' CTA button. Ensure client-side routing handles all paths correctly and unknown slugs show a graceful 404 page.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "yourplatform.com/shivangi-avanish",
-          "Unique invitation URLs",
-          "Multiple invitation creation",
-          "SEO optimized invitations"
-        ]
-      },
-      "acceptanceCriteria": [
-        "/ renders a polished platform landing page with CTA",
-        "/dashboard lists all invitations",
-        "/dashboard/:slug opens the invitation editor",
-        "/:slug loads the guest-facing invitation for published invitations",
-        "Unpublished invitations at /:slug show an appropriate 'Coming Soon' or 404 message",
-        "Unknown routes render a styled 404 page"
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "text": "Generate the following static image assets for use throughout the platform as decorative and branding elements, stored in frontend/public/assets/generated. Render these as img tags or CSS backgrounds where appropriate in the UI.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Indian cultural aesthetics",
-          "Luxury wedding brand quality",
-          "Cinematic landing section"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All generated images are referenced correctly from frontend/public/assets/generated",
-        "Hero section uses the cinematic background image",
-        "Mandala divider appears between major sections on the guest invitation view",
-        "Platform logo is displayed in the dashboard and landing page header"
+        "The floating music controller button is tappable on mobile browsers (iOS Safari, Android Chrome)",
+        "Tapping the floating button opens/closes the music controller panel on mobile",
+        "The touch target for the button is at least 44x44px",
+        "Audio plays after the user taps the play button on mobile (respects mobile autoplay restrictions by requiring user gesture)",
+        "Play/pause state toggles correctly on repeated taps",
+        "The controller remains functional and visible on small screens without layout overflow",
+        "Music controller continues to work on desktop/laptop as before"
       ]
     }
   ],
   "constraints": [
-    "All backend logic must remain in a single Motoko actor in backend/main.mo",
-    "No external authentication or login system in this initial version",
-    "Guest invitation view at /:slug must be strictly read-only with zero edit controls exposed",
-    "Do not modify any files under frontend/src/hooks/ or frontend/src/components/ui",
-    "Media (photos, music) must be stored as base64 strings or URL references in the Motoko stable vars — no external storage service",
-    "All routing must be client-side React Router — no server-side routing"
+    "Do not modify files listed in frontend.immutablePaths",
+    "All backend calls must use existing React Query hooks in useQueries.ts",
+    "Do not change the backend data model or Motoko actor"
   ],
   "nonGoals": [
-    "Payment processing or subscription billing (architecture should be ready but not implemented)",
-    "Internet Identity or any authentication system",
-    "Real-time collaborative editing",
-    "Email or SMS notification services",
-    "Server-side rendering or SEO meta tag injection via a server",
-    "External map embed (only a link to Google Maps is required, not an embedded map iframe)",
-    "AI-generated invitation text or AI design suggestions",
-    "Template marketplace with purchasing flow"
+    "Adding new backend functions — use existing getRSVPsByInvitation",
+    "Redesigning the entire header or navigation structure",
+    "Adding authentication or login to the dashboard",
+    "Changing the music file storage mechanism"
   ],
   "imageRequirements": {
-    "required": [
-      "Cinematic full-bleed Indian wedding hero background with soft golden bokeh lights, flower petals, and deep crimson drapery — dark romantic atmosphere (hero-bg.dim_1920x1080.png)",
-      "Ornate gold mandala divider illustration on transparent background, fine line art style (mandala-divider.dim_1200x120.png)",
-      "Luxury platform logo mark — stylized intertwined rings with a subtle floral motif in gold on transparent background (logo-mark.dim_256x256.png)",
-      "Decorative corner flourish element in gold fine line art for use as invitation frame accents (corner-flourish.dim_256x256.png)",
-      "Abstract blush and gold watercolor texture for invitation card backgrounds (watercolor-texture.dim_1200x800.png)"
-    ],
+    "required": [],
     "edits": []
   }
 }

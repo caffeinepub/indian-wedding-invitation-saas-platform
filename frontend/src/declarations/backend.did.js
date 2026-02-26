@@ -68,6 +68,11 @@ export const RSVPEntry = IDL.Record({
   'attending' : IDL.Bool,
   'guestPhone' : IDL.Text,
 });
+export const RSVPStats = IDL.Record({
+  'totalConfirmedGuests' : IDL.Nat,
+  'totalResponses' : IDL.Nat,
+  'totalDeclined' : IDL.Nat,
+});
 
 export const idlService = IDL.Service({
   'addEvent' : IDL.Func(
@@ -122,6 +127,7 @@ export const idlService = IDL.Service({
       [IDL.Vec(RSVPEntry)],
       ['query'],
     ),
+  'getRSVPsStats' : IDL.Func([IDL.Text], [RSVPStats], ['query']),
   'publishInvitation' : IDL.Func([IDL.Text], [Invitation], []),
   'setBackgroundMusic' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Bool],
@@ -223,6 +229,11 @@ export const idlFactory = ({ IDL }) => {
     'attending' : IDL.Bool,
     'guestPhone' : IDL.Text,
   });
+  const RSVPStats = IDL.Record({
+    'totalConfirmedGuests' : IDL.Nat,
+    'totalResponses' : IDL.Nat,
+    'totalDeclined' : IDL.Nat,
+  });
   
   return IDL.Service({
     'addEvent' : IDL.Func(
@@ -277,6 +288,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(RSVPEntry)],
         ['query'],
       ),
+    'getRSVPsStats' : IDL.Func([IDL.Text], [RSVPStats], ['query']),
     'publishInvitation' : IDL.Func([IDL.Text], [Invitation], []),
     'setBackgroundMusic' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Bool],

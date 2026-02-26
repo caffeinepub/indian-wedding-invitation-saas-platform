@@ -1,17 +1,21 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
+  "projectStateVersion": 7,
   "summary": "AI-powered Indian Wedding Invitation SaaS Platform where couples can create stunning digital invitations, manage multiple events (Haldi, Mehndi, Sangeet, etc.), customize luxury templates, upload photos/music, and share beautiful guest-facing invitation pages via unique URLs. Features premium creator dashboard, animated event cards, RSVP forms, countdown timers, WhatsApp sharing, and a cinematic guest view — all wrapped in ultra-luxury UI with Indian cultural aesthetics, smooth animations, and full mobile responsiveness.",
   "architectural_notes": [
     "SaaS multi-invitation architecture: each invitation gets a unique public URL slug (e.g. /bride-groom)",
     "Guest view must be fully view-only and non-editable; separate from creator/editor routes",
     "No complex authentication required initially; simple creator panel access is sufficient",
     "Template switching must preserve all user data (events, photos, details)",
-    "Media handling: support drag & drop upload, lazy loading for images, floating music controller for audio"
+    "Media handling: support drag & drop upload, lazy loading for images, floating music controller for audio",
+    "Mobile music autoplay requires user gesture interaction first — floating music controller must respond to tap events and not rely on autoplay without gesture"
   ],
-  "known_issues": [],
-  "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- Cinematic full-bleed Indian wedding hero background with soft golden bokeh lights, flower petals, and deep crimson drapery — dark romantic atmosphere (hero-bg.dim_1920x1080.png)\n- Ornate gold mandala divider illustration on transparent background, fine line art style (mandala-divider.dim_1200x120.png)\n- Luxury platform logo mark — stylized intertwined rings with a subtle floral motif in gold on transparent background (logo-mark.dim_256x256.png)\n- Decorative corner flourish element in gold fine line art for use as invitation frame accents (corner-flourish.dim_256x256.png)\n- Abstract blush and gold watercolor texture for invitation card backgrounds (watercolor-texture.dim_1200x800.png)",
+  "known_issues": [
+    "Some text colors in the guest-facing invitation view are hard to read — need color/contrast review",
+    "Mobile: floating music controller does not open/activate on mobile devices — works on desktop only",
+    "Home/landing page: 'Home' and 'Dashboard' nav text hidden by background — needs contrast fix or boundary/border treatment"
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-build-a-multi-step-invitation-creation-wizard-step-1-couple-details-as-a-full-page-react-form-with-fields-bride-name-groom-name-couple-photo-upload-drag-drop-wedding-date-wedding-time-venue-name-venue-address-google-maps-link-family-details-rich-text-area-and-invitation-message-rich-text-area-show-a-live-progress-bar-across-steps-persist-form-state-across-steps-without-data-loss-on-completion-of-all-steps-call-the-backend-createinvitation-function-and-redirect-to-the-creator-dashboard-for-that-invitation",
@@ -84,6 +88,30 @@
         "REQ-10"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-add-a-prominent-dedicated-view-rsvp-responses-button-on-each-invitation-card-in-the-creator-dashboard-dashboard-and-inside-the-invitation-editor-dashboard-slug-clicking-it-opens-a-modal-or-expands-a-panel-showing-all-submitted-rsvp-guest-responses-for-that-invitation-fetched-via-getrsvpsbyinvitation-display-guest-name-phone-attending-yes-no-badge-guest-count-message-and-submitted-at-date-in-a-clean-styled-table-card-list-include-a-summary-row-with-total-responses-total-confirmed-guests-and-total-declined-show-a-graceful-empty-state-when-no-responses-exist-style-the-button-prominently-gold-crimson-accent-distinct-from-other-action-buttons-so-it-stands-out-as-a-special-action",
+      "title": "Add a prominent dedicated 'View RSVP Responses' button on each invitation card in the creator dashboard (/dashboard) and inside the invitation editor (/dashboard/:slug). Clicking it opens a modal or expands a panel showing all submitted RSVP guest responses for that invitation fetched via getRSVPsByInvitation. Display: Guest Name, Phone, Attending (Yes/No badge), Guest Count, Message, and Submitted At date in a clean styled table/card list. Include a summary row with total responses, total confirmed guests, and total declined. Show a graceful empty state when no responses exist. Style the button prominently (gold/crimson accent, distinct from other action buttons) so it stands out as a special action.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-navigation-link-text-visibility-in-the-site-header-header-tsx-on-the-home-landing-page-the-home-and-dashboard-nav-link-text-is-currently-hidden-invisible-against-the-dark-or-image-based-background-apply-a-light-text-color-ivory-white-or-gold-to-all-navigation-links-when-the-header-is-in-its-transparent-top-of-page-state-and-ensure-the-text-remains-readable-in-the-scrolled-filled-state-as-well-add-a-subtle-semi-transparent-dark-backdrop-or-a-distinct-border-boundary-around-the-navigation-links-if-needed-to-guarantee-contrast-on-all-backgrounds-update-hover-states-to-match-the-new-color-scheme",
+      "title": "Fix the navigation link text visibility in the site header (Header.tsx) on the home/landing page. The 'Home' and 'Dashboard' nav link text is currently hidden/invisible against the dark or image-based background. Apply a light text color (ivory/white or gold) to all navigation links when the header is in its transparent (top-of-page) state, and ensure the text remains readable in the scrolled/filled state as well. Add a subtle semi-transparent dark backdrop or a distinct border/boundary around the navigation links if needed to guarantee contrast on all backgrounds. Update hover states to match the new color scheme.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-floating-background-music-controller-musiccontroller-tsx-so-it-activates-and-functions-correctly-on-mobile-devices-currently-the-music-controller-does-not-open-or-respond-to-taps-on-mobile-works-on-desktop-only-ensure-the-floating-button-has-a-sufficiently-large-touch-target-at-least-44x44px-tap-events-are-handled-correctly-use-onclick-which-works-for-both-touch-and-mouse-autoplay-restrictions-on-mobile-are-handled-by-requiring-a-user-gesture-before-starting-audio-the-play-pause-state-toggles-correctly-on-tap-and-the-controller-panel-opens-closes-on-mobile-test-that-audio-actually-plays-after-the-user-taps-play-on-a-mobile-browser",
+      "title": "Fix the floating background music controller (MusicController.tsx) so it activates and functions correctly on mobile devices. Currently the music controller does not open or respond to taps on mobile (works on desktop only). Ensure: the floating button has a sufficiently large touch target (at least 44x44px), tap events are handled correctly (use onClick which works for both touch and mouse), autoplay restrictions on mobile are handled by requiring a user gesture before starting audio, the play/pause state toggles correctly on tap, and the controller panel opens/closes on mobile. Test that audio actually plays after the user taps play on a mobile browser.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -141,6 +169,48 @@
       "reqIds": [
         "REQ-1"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Add RSVP responses viewer in creator dashboard showing all submitted guest responses in a clean table/list view",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Fix the header/navigation tab text contrast on the home (landing) page. The navigation link text is currently black and becomes invisible against the dark or image-based background. Change navigation link text to use a light color (ivory/white or gold) with appropriate hover states so links are always legible regardless of the background behind the fixed header. Ensure the scroll-aware background change in Header.tsx does not leave text unreadable in either the transparent or filled state.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Audit and fix all text color contrast issues across the guest-facing invitation view (GuestInvitation.tsx and its child components: HeroSection, CountdownTimer, CoupleIntroduction, EventTimeline, PhotoGalleryLightbox, VenueSection, RSVPForm). For each of the 6 templates, ensure all body text, labels, headings, form placeholders, and button text meet readable contrast requirements. Pay special attention to: text over semi-transparent or gradient backgrounds, light-colored text on light template backgrounds (Modern Minimal / ivory templates), and dark text on dark templates (Cinematic Dark). Update template-driven color tokens and inline styles so every piece of text is comfortably readable.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Add an RSVP Responses tab/section to the individual invitation editor page at /dashboard/:slug (InvitationEditor.tsx). This section should fetch all RSVP submissions for the invitation via the existing getRSVPsByInvitation backend function and display them in a clean, styled table or card list showing: Guest Name, Phone, Attending (Yes/No badge), Guest Count, Message, and Submitted At date. Include a summary row showing total responses, total confirmed guests, and total declined. Show a graceful empty state when no responses have been submitted yet. The data should be fetched using the existing React Query pattern in useQueries.ts.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Add a dedicated/special button in the creator dashboard to view RSVP responses (not just a tab — a prominent button that opens/shows all submitted RSVP guest responses for the invitation)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Fix mobile music controller: music player/controller does not open or activate on mobile devices (works on laptop/desktop). Ensure the floating music controller button is tappable and functional on mobile, and music plays correctly on mobile browsers (handle autoplay restrictions with user gesture).",
+      "reqIds": [],
       "status": "pending"
     }
   ],

@@ -18,7 +18,7 @@ export default function Header() {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
           ? 'bg-ivory/95 backdrop-blur-md shadow-luxury border-b border-gold/20'
-          : 'bg-transparent'
+          : 'bg-black/30 backdrop-blur-sm'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,8 +38,18 @@ export default function Header() {
               <Heart className="w-8 h-8 text-gold absolute" style={{ display: 'none' }} />
             </div>
             <div>
-              <span className="font-cinzel text-xl font-bold text-gold-dark tracking-wider">VIVAH</span>
-              <p className="text-xs font-inter text-muted-foreground tracking-widest uppercase hidden sm:block">
+              <span
+                className={`font-cinzel text-xl font-bold tracking-wider transition-colors duration-300 ${
+                  isScrolled ? 'text-gold-dark' : 'text-white drop-shadow-md'
+                }`}
+              >
+                VIVAH
+              </span>
+              <p
+                className={`text-xs font-inter tracking-widest uppercase hidden sm:block transition-colors duration-300 ${
+                  isScrolled ? 'text-muted-foreground' : 'text-white/80 drop-shadow-sm'
+                }`}
+              >
                 Wedding Invitations
               </p>
             </div>
@@ -49,18 +59,32 @@ export default function Header() {
           <nav className="hidden md:flex items-center gap-8">
             <Link
               to="/"
-              className="font-inter text-sm font-medium text-foreground/80 hover:text-gold-dark transition-colors tracking-wide"
+              className={`font-inter text-sm font-semibold transition-colors tracking-wide ${
+                isScrolled
+                  ? 'text-foreground/80 hover:text-gold-dark'
+                  : 'text-white hover:text-gold-light drop-shadow-sm'
+              }`}
             >
               Home
             </Link>
             <Link
               to="/dashboard"
-              className="font-inter text-sm font-medium text-foreground/80 hover:text-gold-dark transition-colors tracking-wide"
+              className={`font-inter text-sm font-semibold transition-colors tracking-wide ${
+                isScrolled
+                  ? 'text-foreground/80 hover:text-gold-dark'
+                  : 'text-white hover:text-gold-light drop-shadow-sm'
+              }`}
             >
               Dashboard
             </Link>
             <Link to="/create">
-              <Button className="btn-gold px-6 py-2 rounded-full text-sm font-cinzel tracking-wider">
+              <Button
+                className={`px-6 py-2 rounded-full text-sm font-cinzel tracking-wider transition-all duration-300 ${
+                  isScrolled
+                    ? 'btn-gold'
+                    : 'bg-white/15 border border-white/40 text-white hover:bg-white/25 hover:border-white/60 backdrop-blur-sm'
+                }`}
+              >
                 Create Invitation
               </Button>
             </Link>
@@ -68,8 +92,13 @@ export default function Header() {
 
           {/* Mobile Menu Toggle */}
           <button
-            className="md:hidden p-2 text-foreground/80 hover:text-gold-dark transition-colors"
+            className={`md:hidden p-2 transition-colors rounded-lg ${
+              isScrolled
+                ? 'text-foreground/80 hover:text-gold-dark'
+                : 'text-white hover:text-gold-light'
+            }`}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            style={{ touchAction: 'manipulation' }}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -81,14 +110,14 @@ export default function Header() {
             <nav className="flex flex-col gap-4 px-4">
               <Link
                 to="/"
-                className="font-inter text-sm font-medium text-foreground/80 hover:text-gold-dark transition-colors py-2"
+                className="font-inter text-sm font-semibold text-foreground/80 hover:text-gold-dark transition-colors py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/dashboard"
-                className="font-inter text-sm font-medium text-foreground/80 hover:text-gold-dark transition-colors py-2"
+                className="font-inter text-sm font-semibold text-foreground/80 hover:text-gold-dark transition-colors py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Dashboard

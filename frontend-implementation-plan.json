@@ -1,384 +1,80 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "AI Wedding Invitation SaaS Platform — Frontend Implementation",
+  "title": "RSVP Responses Button, Nav Text Contrast Fix & Mobile Music Controller Fix",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Multi-step invitation creation wizard with Step 1: Couple Details form including all required fields, drag-and-drop photo upload, progress bar, and form state persistence",
+      "id": "REQ-14",
+      "summary": "Add a prominent 'View RSVP Responses' button on invitation cards in /dashboard and /dashboard/:slug that opens a modal displaying all RSVP submissions with guest details, attendance status, and summary statistics",
       "acceptanceCriteria": [
-        "All listed fields are present and validated before proceeding to next step",
-        "Couple photo can be dragged & dropped or selected via file picker and previewed inline",
-        "Progress bar accurately reflects current step",
-        "Form data is not lost when navigating between steps",
-        "Submitting the final step creates the invitation in the backend and navigates to the creator dashboard"
+        "A visually distinct 'View RSVP Responses' button appears on each invitation card on the /dashboard page",
+        "The same button appears inside the invitation editor at /dashboard/:slug",
+        "Clicking the button opens a modal or expandable panel showing all RSVP submissions",
+        "The panel displays Guest Name, Phone, Attending badge (Yes=green/No=red), Guest Count, Message, and Submitted At",
+        "A summary row shows total responses, total confirmed guests, and total declined",
+        "An elegant empty state is shown when no RSVPs have been submitted",
+        "The button uses a premium gold/crimson accent color distinct from Edit, Preview, Publish, and Delete buttons",
+        "Data is fetched using the existing getRSVPsByInvitation React Query hook pattern"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/CreateInvitationWizard.tsx",
+          "path": "frontend/src/components/dashboard/RSVPResponsesModal.tsx",
           "operation": "create",
-          "description": "Create multi-step wizard component with progress bar and step navigation. Include context provider for form state persistence across steps. Wire Step 1: Couple Details with fields for Bride Name, Groom Name, Wedding Date, Wedding Time, Venue Name, Venue Address, Google Maps Link, Family Details (rich text), Invitation Message (rich text), and drag-and-drop couple photo upload with preview."
+          "description": "Create a new modal component that displays RSVP responses for a selected invitation. Use Shadcn Dialog component as the base. Fetch data using useRSVPsByInvitation and useRSVPsStats hooks from useQueries.ts. Display responses in a table or card list showing Guest Name, Phone, Attending status (Yes badge in green, No badge in red), Guest Count, Message, and formatted Submitted At date. Include a summary section at the top showing total responses, total confirmed guests, and total declined from RSVPStats. Show an empty state with decorative icon when no responses exist. Style with luxury gold/ivory theme matching the app aesthetic."
         },
-        {
-          "path": "frontend/src/components/wizard/CoupleDetailsStep.tsx",
-          "operation": "create",
-          "description": "Create Step 1 form component with all required input fields. Implement drag-and-drop file upload area for couple photo using HTML5 drag events, with inline preview. Convert uploaded photo to base64 for storage. Include field validation before allowing navigation to next step."
-        },
-        {
-          "path": "frontend/src/components/wizard/ProgressBar.tsx",
-          "operation": "create",
-          "description": "Create animated progress bar component that displays current step position (1 through 5) with luxury gold gradient styling and smooth transitions between steps."
-        },
-        {
-          "path": "frontend/src/context/InvitationFormContext.tsx",
-          "operation": "create",
-          "description": "Create React context provider to manage form state across all wizard steps, preventing data loss during navigation. Store all form fields including couple details, events, template selections, and media uploads."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add route for /create pointing to CreateInvitationWizard component. Ensure router is configured to handle multi-step navigation."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Step 2: Multi-Event Management UI with animated event cards, event type selection, and CRUD operations for multiple wedding events",
-      "acceptanceCriteria": [
-        "All six event types are selectable with distinct icons and color accents",
-        "Each event card shows all five data fields clearly",
-        "Adding a new event animates the card into the list",
-        "Events can be deleted with a confirmation prompt",
-        "All events are saved to the backend and reloaded correctly on revisit"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/wizard/EventManagementStep.tsx",
-          "operation": "create",
-          "description": "Create Step 2 form component with multi-event creator UI. Display existing events as premium animated cards with gradient backgrounds. Include add event button that reveals event form. Each event card shows Event Type selector (Haldi/Mehndi/Sangeet/Wedding/Reception/Custom), Title, Date picker, Time picker, Venue, and Description. Implement smooth entrance animations using CSS transitions. Support reordering via drag handles."
-        },
-        {
-          "path": "frontend/src/components/events/EventCard.tsx",
-          "operation": "create",
-          "description": "Create animated event card component with gradient background, event type icon, and all event fields displayed. Include edit and delete action buttons. Apply hover effects and smooth animations on mount."
-        },
-        {
-          "path": "frontend/src/components/events/EventForm.tsx",
-          "operation": "create",
-          "description": "Create event form component with all required fields: Event Type selector with six options (each with unique icon and color), Title input, Date picker, Time picker, Venue input, Description textarea. Support both add and edit modes."
-        },
-        {
-          "path": "frontend/src/utils/eventIcons.tsx",
-          "operation": "create",
-          "description": "Create mapping of event types to React icon components and color themes for consistent visual representation across the platform. Include icons for Haldi (yellow/turmeric), Mehndi (green/henna), Sangeet (purple/music), Wedding (gold/rings), Reception (rose/celebration), Custom (gray/star)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Template & Theme Selector with 6 luxury templates, live preview, color scheme picker, font selector, and background customization",
-      "acceptanceCriteria": [
-        "At least 6 distinct templates are available with live mini-previews",
-        "Switching templates updates the preview instantly without page reload",
-        "Color palette, font, and background changes are reflected in real time in the preview",
-        "All customization choices are saved to the backend",
-        "Invitation data (names, events, photos) is preserved across template switches"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/wizard/TemplateThemeStep.tsx",
-          "operation": "create",
-          "description": "Create Step 3 form component with template gallery showing 6 luxury templates (2 Royal Indian, 2 Modern Minimal, 2 Cinematic Dark). Each template shows a live miniature preview of the guest invitation. Include color scheme picker with preset palettes and custom hex input, font pairing selector with 4+ options including Devanagari-inspired and serif fonts, and background texture/pattern selector. All changes update live preview in real-time."
-        },
-        {
-          "path": "frontend/src/components/templates/TemplatePreview.tsx",
-          "operation": "create",
-          "description": "Create miniature invitation preview component that renders a scaled-down version of the guest invitation using current form data and selected template/theme settings. Update instantly when template or customization changes."
-        },
-        {
-          "path": "frontend/src/components/templates/TemplateSelector.tsx",
-          "operation": "create",
-          "description": "Create template selector component displaying 6 template cards in a grid: 2 Royal Indian (ornate gold/red/maroon with floral motifs), 2 Modern Minimal (clean ivory/blush, geometric), 2 Cinematic Dark (deep jewel tones, dramatic typography). Each card shows template name, visual preview thumbnail, and selection state."
-        },
-        {
-          "path": "frontend/src/components/templates/ColorSchemePicker.tsx",
-          "operation": "create",
-          "description": "Create color scheme picker with preset palettes (Gold & Crimson, Blush & Rose, Ivory & Gold, Jewel Tones) and custom hex color input. Display color swatches with selection indicator."
-        },
-        {
-          "path": "frontend/src/components/templates/FontSelector.tsx",
-          "operation": "create",
-          "description": "Create font pairing selector with at least 4 options including Cinzel/Inter, Cormorant Garamond/Inter, Playfair Display/Lato, and a Devanagari-inspired option. Show font samples in each option card."
-        },
-        {
-          "path": "frontend/src/utils/templateDefinitions.ts",
-          "operation": "create",
-          "description": "Define template configurations including layout structure, default color schemes, typography pairings, and background patterns for all 6 templates. Export template metadata for use in preview and guest view rendering."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Media Management section with photo gallery drag-and-drop upload, image reordering, deletion, and background music upload with auto-play toggle and preview player",
-      "acceptanceCriteria": [
-        "Multiple images can be dropped simultaneously and appear in a lazy-loaded grid",
-        "Each photo has a delete button and hover zoom animation",
-        "Music file uploads and plays in the dashboard preview",
-        "Auto-play toggle is persisted and respected in guest view",
-        "Floating music controller is visible and functional in guest invitation view"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/wizard/MediaManagementStep.tsx",
-          "operation": "create",
-          "description": "Create Step 4 form component with two subsections: Photo Gallery and Background Music. Photo Gallery includes drag-and-drop upload area accepting multiple images simultaneously, lazy-loaded thumbnail grid with hover animations, reorder capability, and individual delete buttons. Background Music includes file upload for MP3/WAV, auto-play toggle, and preview audio player. Convert uploaded files to base64 before storing via backend functions."
-        },
-        {
-          "path": "frontend/src/components/media/PhotoGalleryUpload.tsx",
-          "operation": "create",
-          "description": "Create photo gallery upload component with drag-and-drop zone for multiple images. Display uploaded photos in a responsive grid with lazy loading. Each thumbnail has hover zoom effect and delete button. Support image reordering via drag handles. Convert images to base64 and call backend addPhoto function for each upload."
-        },
-        {
-          "path": "frontend/src/components/media/MusicUploader.tsx",
-          "operation": "create",
-          "description": "Create background music uploader component with file input for MP3/WAV files, auto-play toggle switch, and embedded audio preview player. Convert uploaded audio to base64 or store as data URL. Call backend setBackgroundMusic function with music data and auto-play preference."
-        },
-        {
-          "path": "frontend/src/components/media/MusicController.tsx",
-          "operation": "create",
-          "description": "Create floating music controller component with play/pause button, volume slider, and elegant circular design. Position fixed in bottom-right corner. Display only when background music is available. Support both dashboard preview and guest invitation views."
-        },
-        {
-          "path": "frontend/src/hooks/useLazyLoad.ts",
-          "operation": "create",
-          "description": "Create custom hook for lazy loading images in the photo gallery grid. Use IntersectionObserver to load images only when they enter the viewport, improving performance for galleries with many photos."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "Cinematic guest-facing invitation view at /:slug with full-screen hero, countdown timer, event timeline, photo gallery, venue section, RSVP form, WhatsApp share, and music controller",
-      "acceptanceCriteria": [
-        "Navigating to /[slug] loads the guest view without any edit controls visible",
-        "Hero section displays couple photo and names with entrance animation",
-        "Countdown timer correctly counts down to the wedding date/time",
-        "All events are displayed as animated cards in chronological order",
-        "Photo gallery supports lightbox click-to-expand",
-        "Google Maps button opens the provided maps link in a new tab",
-        "RSVP form submits successfully and shows a confirmation message",
-        "WhatsApp share button opens WhatsApp with the invitation URL pre-filled",
-        "Page is accessible without login for any published invitation"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/GuestInvitation.tsx",
-          "operation": "create",
-          "description": "Create guest-facing invitation view component that loads invitation data by slug from backend getInvitationBySlug. Compose all guest view sections: Hero, Countdown, Couple Introduction, Event Timeline, Photo Gallery, Venue, and RSVP. Apply selected template styling and theme. Ensure strictly read-only with no edit controls. Load events, photos, and music via respective backend functions. Reference generated image frontend/public/assets/generated/hero-bg.dim_1920x1080.png as hero background and frontend/public/assets/generated/mandala-divider.dim_1200x120.png as section divider."
-        },
-        {
-          "path": "frontend/src/components/guest/HeroSection.tsx",
-          "operation": "create",
-          "description": "Create full-screen cinematic hero section displaying couple photo, bride and groom names in elegant typography (Cinzel or Cormorant Garamond), and animated entrance effect. Use frontend/public/assets/generated/hero-bg.dim_1920x1080.png as background with overlay. Apply parallax scrolling effect."
-        },
-        {
-          "path": "frontend/src/components/guest/CountdownTimer.tsx",
-          "operation": "create",
-          "description": "Create animated countdown timer component that calculates and displays days, hours, minutes, and seconds remaining until the wedding date/time. Update every second. Apply luxury styling with gold accents and elegant typography."
-        },
-        {
-          "path": "frontend/src/components/guest/CoupleIntroduction.tsx",
-          "operation": "create",
-          "description": "Create couple introduction section displaying invitation message and family details with fade-in animations on scroll. Use elegant typography and include decorative divider elements."
-        },
-        {
-          "path": "frontend/src/components/guest/EventTimeline.tsx",
-          "operation": "create",
-          "description": "Create premium event timeline component displaying all events as animated cards with event type icons, date, time, venue, and description. Events appear in chronological order with staggered entrance animations. Use event type colors and icons from eventIcons utility."
-        },
-        {
-          "path": "frontend/src/components/guest/PhotoGalleryLightbox.tsx",
-          "operation": "create",
-          "description": "Create photo gallery component with lazy-loaded responsive grid layout and lightbox functionality. Clicking a photo opens full-screen lightbox with navigation arrows and close button. Apply smooth scroll reveal animations as gallery enters viewport."
-        },
-        {
-          "path": "frontend/src/components/guest/VenueSection.tsx",
-          "operation": "create",
-          "description": "Create venue section displaying venue name, address, and 'View on Google Maps' button that opens the Google Maps link in a new tab. Include decorative map pin icon and elegant typography."
-        },
-        {
-          "path": "frontend/src/components/guest/RSVPForm.tsx",
-          "operation": "create",
-          "description": "Create RSVP form component collecting guest name, phone number, attendance confirmation (Yes/No radio), guest count (number input), and optional message (textarea). Submit form data via backend submitRSVP function. Show success confirmation message after submission with elegant animation. Apply luxury form styling with focus states."
-        },
-        {
-          "path": "frontend/src/components/guest/WhatsAppShareButton.tsx",
-          "operation": "create",
-          "description": "Create WhatsApp share button that opens WhatsApp with pre-filled message containing the invitation URL. Use WhatsApp's URL scheme (https://wa.me/?text=). Style as floating action button with WhatsApp green and icon."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add dynamic route /:slug to load GuestInvitation component. Ensure slug parameter is passed to the component for fetching invitation data."
-        }
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "summary": "Creator/Admin Dashboard for managing invitations with list view at /dashboard, individual editor at /dashboard/:slug with tabbed navigation, live preview, and publish functionality",
-      "acceptanceCriteria": [
-        "Dashboard homepage lists all invitations with status badges (Draft/Published)",
-        "Clicking Edit navigates to the tabbed editor for that invitation",
-        "All editor tabs (Couple Details, Events, Template, Media, Preview) are accessible and functional",
-        "Preview tab shows an accurate live render of the guest invitation",
-        "Publish button updates invitation status and displays the shareable public URL",
-        "Newly created invitations appear on the dashboard immediately"
-      ],
-      "file_operations": [
         {
           "path": "frontend/src/pages/Dashboard.tsx",
-          "operation": "create",
-          "description": "Create dashboard homepage component that loads all invitations via backend getAllInvitations. Display invitations as cards showing couple names, wedding date, published status badge (Draft/Published), and action buttons (Edit, Preview, Delete). Include 'Create New Invitation' button that navigates to /create. Apply luxury card styling with hover effects."
+          "operation": "modify",
+          "description": "Add a 'View RSVP Responses' button to each invitation card. Style it prominently with gold/crimson accent (bg-gradient-to-r from-gold-400 to-crimson-600) to distinguish it from Edit, Preview, Publish, and Delete buttons. Position it in the card actions area. Add state to track which invitation's RSVPs are being viewed and render the RSVPResponsesModal component, passing the selected invitationId. Use existing invitation data structure to pass invitation.id to the modal."
         },
         {
           "path": "frontend/src/pages/InvitationEditor.tsx",
-          "operation": "create",
-          "description": "Create individual invitation editor component at /dashboard/:slug with tabbed navigation across five tabs: Couple Details, Events, Template & Theme, Media, and Preview. Load existing invitation data by slug on mount. Each tab renders the corresponding wizard step component in edit mode. Include 'Publish Invitation' button in header that calls backend publishInvitation and displays shareable URL modal."
-        },
-        {
-          "path": "frontend/src/components/dashboard/InvitationCard.tsx",
-          "operation": "create",
-          "description": "Create invitation card component for dashboard list view displaying couple names, wedding date, status badge, and action buttons. Apply glassmorphism card styling with hover shimmer effect."
-        },
-        {
-          "path": "frontend/src/components/dashboard/EditorTabs.tsx",
-          "operation": "create",
-          "description": "Create tabbed navigation component for invitation editor with five tabs: Couple Details, Events, Template & Theme, Media, and Preview. Highlight active tab and enable smooth tab switching without losing unsaved changes."
-        },
-        {
-          "path": "frontend/src/components/dashboard/PreviewTab.tsx",
-          "operation": "create",
-          "description": "Create preview tab component that renders the full GuestInvitation component in an embedded iframe or React component using current form data. Show live changes as user edits other tabs. Include refresh button to reload preview."
-        },
-        {
-          "path": "frontend/src/components/dashboard/PublishModal.tsx",
-          "operation": "create",
-          "description": "Create publish modal component that displays after successful publish, showing the shareable public invitation URL (e.g., yourplatform.com/slug). Include copy-to-clipboard button and WhatsApp share option. Apply elegant modal styling with backdrop blur."
-        },
-        {
-          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add routes for /dashboard (Dashboard component) and /dashboard/:slug (InvitationEditor component). Ensure nested routing works correctly."
+          "description": "Add a 'View RSVP Responses' button in a prominent location within the editor interface (e.g., in the header area or as a new tab/section). Style consistently with the dashboard button using gold/crimson gradient. Add state management to control the RSVPResponsesModal visibility. Import and render RSVPResponsesModal, passing the current invitation's ID from the route params. Ensure the button is visible regardless of which tab (Couple Details, Events, Template & Theme, Media) is active."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Verify that useRSVPsByInvitation and useRSVPsStats hooks are properly exported and functional. If they don't exist, add React Query hooks that call getRSVPsByInvitation(invitationId) and getRSVPsStats(invitationId) backend methods. Use the existing query pattern with proper query keys (e.g., ['rsvps', invitationId] and ['rsvp-stats', invitationId]). Ensure hooks return loading, error, and data states appropriately."
         }
       ]
     },
     {
-      "id": "REQ-8",
-      "summary": "Apply ultra-premium luxury Indian wedding aesthetic with rich gold/crimson/ivory palette, elegant typography, decorative motifs, Apple-level animations, and fully responsive design",
+      "id": "REQ-15",
+      "summary": "Fix navigation link text visibility in the Header component by applying light text colors (ivory/white/gold) in the transparent header state and ensuring readability across all backgrounds with proper contrast treatments",
       "acceptanceCriteria": [
-        "Gold, ivory, crimson, and blush rose palette is applied consistently across all pages",
-        "Display headings use an elegant serif or Cinzel-style font",
-        "Decorative Indian motifs (mandala/floral SVGs) appear as section dividers",
-        "All cards and sections animate in smoothly on scroll",
-        "Buttons have shimmer/glow hover effects",
-        "Loading states use skeleton screens, not spinners alone",
-        "Layout is fully responsive and visually polished on mobile devices (375px and up)"
+        "'Home' and 'Dashboard' nav link text is clearly legible against the landing page hero background in both transparent and scrolled header states",
+        "Navigation links use a light color (ivory/white or gold) in the transparent header state",
+        "Text remains readable after the header gains a background on scroll",
+        "If a backdrop or boundary treatment is used, it is consistent with the luxury aesthetic",
+        "Hover states are visible and use appropriate gold/blush accent colors",
+        "Fix applies on both desktop and mobile navigation"
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Define global CSS custom properties for luxury color palette (gold: #D4AF37, crimson: #8B0000, ivory: #FFFFF0, blush rose: #FFB6C1). Import Google Fonts for Cinzel (display headings) and Inter (body text). Add base styles for smooth scrolling, elegant transitions, and typography hierarchy. Include utility classes for gradient backgrounds, glassmorphism effects, and shimmer animations."
-        },
-        {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Extend Tailwind theme with custom luxury color palette (gold, crimson, ivory, blush), font families (Cinzel, Cormorant Garamond, Inter), and custom animations (fadeIn, slideUp, shimmer, staggeredEntrance). Configure responsive breakpoints optimized for mobile-first design starting at 375px."
-        },
-        {
-          "path": "frontend/src/components/layout/DecorativeDivider.tsx",
-          "operation": "create",
-          "description": "Create decorative section divider component that uses frontend/public/assets/generated/mandala-divider.dim_1200x120.png or frontend/public/assets/generated/corner-flourish.dim_256x256.png as ornamental separators between major sections. Support multiple styles (mandala, flourish, line)."
-        },
-        {
-          "path": "frontend/src/components/ui/SkeletonLoader.tsx",
-          "operation": "create",
-          "description": "Create skeleton loading component for graceful loading states using animated gradient placeholders. Support different variants (card, text, image) to match content being loaded. Apply luxury styling with subtle shimmer animation."
-        },
-        {
-          "path": "frontend/src/utils/animations.ts",
-          "operation": "create",
-          "description": "Define reusable animation variants for Framer Motion or CSS keyframes: fadeIn, slideUp, staggeredChildren, parallax, shimmer, glowPulse. Export as constants for consistent animation timing and easing across components."
-        },
-        {
-          "path": "frontend/src/hooks/useScrollAnimation.ts",
-          "operation": "create",
-          "description": "Create custom hook using IntersectionObserver to trigger entrance animations when elements scroll into viewport. Return isVisible state and ref to attach to animated elements."
-        }
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "summary": "Scalable URL routing with / for platform landing page, /dashboard for creator dashboard, /dashboard/:slug for editors, /:slug for guest invitations, and graceful 404 handling",
-      "acceptanceCriteria": [
-        "/ renders a polished platform landing page with CTA",
-        "/dashboard lists all invitations",
-        "/dashboard/:slug opens the invitation editor",
-        "/:slug loads the guest-facing invitation for published invitations",
-        "Unpublished invitations at /:slug show an appropriate 'Coming Soon' or 404 message",
-        "Unknown routes render a styled 404 page"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/LandingPage.tsx",
-          "operation": "create",
-          "description": "Create platform landing page at / with cinematic hero section using frontend/public/assets/generated/hero-bg.dim_1920x1080.png, feature highlights (multi-event support, luxury templates, RSVP management), sample invitation previews (3 cards showing template variety), and prominent 'Create Your Invitation' CTA button navigating to /create. Display frontend/public/assets/generated/logo-mark.dim_256x256.png in header. Apply luxury branding and smooth parallax scrolling."
-        },
-        {
-          "path": "frontend/src/pages/NotFound.tsx",
-          "operation": "create",
-          "description": "Create styled 404 page component with elegant error message, decorative elements, and navigation buttons back to / or /dashboard. Match luxury aesthetic with gold/ivory styling."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Configure React Router with all required routes: / (LandingPage), /create (CreateInvitationWizard), /dashboard (Dashboard), /dashboard/:slug (InvitationEditor), /:slug (GuestInvitation with published check), and catch-all * (NotFound). Ensure dynamic slug routes resolve correctly and published status is validated before rendering guest view. For unpublished invitations at /:slug, redirect to NotFound or show 'Coming Soon' message."
-        },
-        {
-          "path": "frontend/src/components/layout/Header.tsx",
-          "operation": "create",
-          "description": "Create global header component with platform logo (frontend/public/assets/generated/logo-mark.dim_256x256.png), navigation links (Home, Dashboard, Create), and luxury styling. Display on all pages except guest invitation view. Include sticky positioning with glassmorphism background on scroll."
-        }
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "summary": "Reference generated static image assets throughout the platform for hero backgrounds, decorative dividers, logo, and textures",
-      "acceptanceCriteria": [
-        "All generated images are referenced correctly from frontend/public/assets/generated",
-        "Hero section uses the cinematic background image",
-        "Mandala divider appears between major sections on the guest invitation view",
-        "Platform logo is displayed in the dashboard and landing page header"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/GuestInvitation.tsx",
-          "operation": "modify",
-          "description": "Ensure HeroSection receives frontend/public/assets/generated/hero-bg.dim_1920x1080.png as background prop. Place frontend/public/assets/generated/mandala-divider.dim_1200x120.png between major sections (after Hero, after Events, after Gallery). Verify exact workspace paths are used in img src attributes."
-        },
-        {
-          "path": "frontend/src/pages/LandingPage.tsx",
-          "operation": "modify",
-          "description": "Ensure hero section uses frontend/public/assets/generated/hero-bg.dim_1920x1080.png as background image. Display frontend/public/assets/generated/logo-mark.dim_256x256.png in header and hero branding section."
-        },
         {
           "path": "frontend/src/components/layout/Header.tsx",
           "operation": "modify",
-          "description": "Reference frontend/public/assets/generated/logo-mark.dim_256x256.png as platform logo in header navigation. Ensure img src uses exact workspace file path."
-        },
+          "description": "Fix navigation link text visibility by applying proper text colors based on scroll state. When isScrolled is false (transparent header at top), apply text-ivory-100 or text-gold-200 to all nav links ('Home', 'Dashboard', 'Create Invitation' button text) to ensure visibility against dark/image backgrounds. When isScrolled is true (header with background), ensure text uses sufficient contrast (text-slate-800 or similar). Update hover states to use gold/blush accent colors (hover:text-gold-400) that remain visible in both states. For mobile menu, ensure the same color treatment applies to the hamburger icon and menu items. Consider adding a subtle text-shadow or semi-transparent backdrop (backdrop-blur-sm with bg-black/20) to nav items in transparent state for guaranteed readability across all background images."
+        }
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "summary": "Fix the MusicController component to work on mobile devices by ensuring proper touch event handling, sufficient touch target size, and correct audio playback after user gesture to respect mobile autoplay restrictions",
+      "acceptanceCriteria": [
+        "The floating music controller button is tappable on mobile browsers (iOS Safari, Android Chrome)",
+        "Tapping the floating button opens/closes the music controller panel on mobile",
+        "The touch target for the button is at least 44x44px",
+        "Audio plays after the user taps the play button on mobile (respects mobile autoplay restrictions by requiring user gesture)",
+        "Play/pause state toggles correctly on repeated taps",
+        "The controller remains functional and visible on small screens without layout overflow",
+        "Music controller continues to work on desktop/laptop as before"
+      ],
+      "file_operations": [
         {
-          "path": "frontend/src/components/templates/TemplatePreview.tsx",
+          "path": "frontend/src/components/media/MusicController.tsx",
           "operation": "modify",
-          "description": "For templates requiring textured backgrounds, reference frontend/public/assets/generated/watercolor-texture.dim_1200x800.png or frontend/public/assets/generated/corner-flourish.dim_256x256.png as CSS background-image or img elements depending on template design. Use exact workspace paths."
+          "description": "Fix mobile functionality by ensuring all interactive elements use onClick handlers (which work for both touch and mouse events) instead of any mouse-specific events. Verify the floating button has a minimum size of 44x44px (w-11 h-11 or larger, and add p-3 for comfortable tap target). Ensure the audio element respects mobile autoplay restrictions by only calling audio.play() in response to direct user interaction (inside onClick handlers). Add explicit touch-action: manipulation CSS to prevent double-tap zoom. Test that isPlaying state updates correctly on tap and that the play() promise is handled with proper error catching for mobile browsers. Ensure the expanded controller panel doesn't overflow on small screens and remains accessible. Consider adding user-select-none to prevent text selection on repeated taps. Verify volume controls work with touch events."
         }
       ]
     }

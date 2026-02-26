@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from '@tanstack/react-router';
-import { Globe, Eye, Loader2, Heart, Copy, Check, ArrowLeft } from 'lucide-react';
+import { Globe, Eye, Loader2, Heart, Copy, Check, ArrowLeft, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -19,6 +19,7 @@ import EventManagementStep from '@/components/wizard/EventManagementStep';
 import TemplateThemeStep from '@/components/wizard/TemplateThemeStep';
 import MediaManagementStep from '@/components/wizard/MediaManagementStep';
 import SkeletonLoader from '@/components/SkeletonLoader';
+import RSVPResponsesModal from '@/components/dashboard/RSVPResponsesModal';
 import {
   useGetInvitationBySlug,
   useUpdateInvitation,
@@ -115,6 +116,7 @@ function EditorContent({
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [showRSVPModal, setShowRSVPModal] = useState(false);
   const navigate = useNavigate();
 
   const updateInvitation = useUpdateInvitation();
@@ -183,6 +185,18 @@ function EditorContent({
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
+            {/* RSVP Responses Button — always visible */}
+            <Button
+              size="sm"
+              onClick={() => setShowRSVPModal(true)}
+              className="rounded-full font-cinzel text-xs tracking-wider border-2 border-gold/40 bg-gradient-to-r from-gold/15 to-crimson/10 text-gold-dark hover:from-gold/25 hover:to-crimson/15 hover:border-gold/60 hidden sm:flex"
+              variant="outline"
+              style={{ touchAction: 'manipulation' }}
+            >
+              <Users className="w-3.5 h-3.5 mr-1.5" />
+              RSVP Responses
+            </Button>
+
             {invitation.isPublished && (
               <Button
                 variant="outline"
@@ -232,6 +246,18 @@ function EditorContent({
             )}
           </div>
         </div>
+
+        {/* Mobile RSVP button row */}
+        <div className="sm:hidden px-4 pb-3">
+          <button
+            onClick={() => setShowRSVPModal(true)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-cinzel text-xs tracking-wider transition-all duration-200 border-2 border-gold/40 bg-gradient-to-r from-gold/15 via-gold/10 to-crimson/10 text-gold-dark hover:from-gold/25 hover:to-crimson/15 hover:border-gold/60"
+            style={{ touchAction: 'manipulation' }}
+          >
+            <Users className="w-3.5 h-3.5" />
+            View RSVP Responses
+          </button>
+        </div>
       </header>
 
       {/* Tabs */}
@@ -272,6 +298,13 @@ function EditorContent({
         slug={slug}
         isOpen={showPublishModal}
         onClose={() => setShowPublishModal(false)}
+      />
+
+      <RSVPResponsesModal
+        invitationId={slug}
+        invitationTitle={`${invitation.brideName} & ${invitation.groomName}`}
+        isOpen={showRSVPModal}
+        onClose={() => setShowRSVPModal(false)}
       />
     </div>
   );

@@ -68,6 +68,11 @@ export interface RSVPEntry {
   'attending' : boolean,
   'guestPhone' : string,
 }
+export interface RSVPStats {
+  'totalConfirmedGuests' : bigint,
+  'totalResponses' : bigint,
+  'totalDeclined' : bigint,
+}
 export interface _SERVICE {
   'addEvent' : ActorMethod<
     [string, string, string, string, string, string, string, EventType],
@@ -102,6 +107,7 @@ export interface _SERVICE {
   'getInvitationBySlug' : ActorMethod<[string], Invitation>,
   'getPhotosByInvitation' : ActorMethod<[string], Array<Photo>>,
   'getRSVPsByInvitation' : ActorMethod<[string], Array<RSVPEntry>>,
+  'getRSVPsStats' : ActorMethod<[string], RSVPStats>,
   'publishInvitation' : ActorMethod<[string], Invitation>,
   'setBackgroundMusic' : ActorMethod<
     [string, string, string, boolean],

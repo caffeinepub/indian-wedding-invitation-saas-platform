@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { Plus, Edit2, Eye, Trash2, Globe, Clock, Heart } from 'lucide-react';
+import { Plus, Edit2, Eye, Trash2, Globe, Clock, Heart, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -17,6 +17,7 @@ import {
 import Header from '@/components/layout/Header';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import { useGetAllInvitations, useDeleteInvitation, usePublishInvitation } from '@/hooks/useQueries';
+import RSVPResponsesModal from '@/components/dashboard/RSVPResponsesModal';
 import { toast } from 'sonner';
 import type { Invitation } from '@/backend';
 
@@ -24,10 +25,12 @@ function InvitationCard({
   invitation,
   onDelete,
   onPublish,
+  onViewRSVPs,
 }: {
   invitation: Invitation;
   onDelete: (slug: string) => void;
   onPublish: (slug: string) => void;
+  onViewRSVPs: (invitation: Invitation) => void;
 }) {
   const navigate = useNavigate();
 
@@ -81,6 +84,16 @@ function InvitationCard({
           </div>
         )}
       </div>
+
+      {/* RSVP Button — prominent, full-width, distinct style */}
+      <button
+        onClick={() => onViewRSVPs(invitation)}
+        className="w-full mb-3 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-cinzel text-xs tracking-wider transition-all duration-200 border-2 border-gold/40 bg-gradient-to-r from-gold/15 via-gold/10 to-crimson/10 text-gold-dark hover:from-gold/25 hover:via-gold/20 hover:to-crimson/15 hover:border-gold/60 hover:shadow-md active:scale-95"
+        style={{ touchAction: 'manipulation' }}
+      >
+        <Users className="w-3.5 h-3.5 flex-shrink-0" />
+        View RSVP Responses
+      </button>
 
       {/* Actions */}
       <div className="flex flex-wrap gap-2">
@@ -161,6 +174,8 @@ export default function Dashboard() {
   const deleteMutation = useDeleteInvitation();
   const publishMutation = usePublishInvitation();
 
+  const [rsvpModalInvitation, setRsvpModalInvitation] = useState<Invitation | null>(null);
+
   const handleDelete = async (slug: string) => {
     try {
       await deleteMutation.mutateAsync(slug);
@@ -221,6 +236,7 @@ export default function Dashboard() {
                     invitation={inv}
                     onDelete={handleDelete}
                     onPublish={handlePublish}
+                    onViewRSVPs={setRsvpModalInvitation}
                   />
                 </div>
               ))}
@@ -266,6 +282,16 @@ export default function Dashboard() {
           </p>
         </div>
       </footer>
+
+      {/* RSVP Responses Modal */}
+      {rsvpModalInvitation && (
+        <RSVPResponsesModal
+          invitationId={rsvpModalInvitation.id}
+          invitationTitle={`${rsvpModalInvitation.brideName} & ${rsvpModalInvitation.groomName}`}
+          isOpen={!!rsvpModalInvitation}
+          onClose={() => setRsvpModalInvitation(null)}
+        />
+      )}
     </div>
   );
 }

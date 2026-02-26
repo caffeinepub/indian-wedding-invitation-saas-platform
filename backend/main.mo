@@ -72,6 +72,12 @@ actor {
     uploadedAt : Int;
   };
 
+  type RSVPStats = {
+    totalResponses : Nat;
+    totalConfirmedGuests : Nat;
+    totalDeclined : Nat;
+  };
+
   let invitationStore = Map.empty<Text, Invitation>();
   let eventStore = Map.empty<Text, Event>();
   let rsvpStore = Map.empty<Text, RSVPEntry>();
@@ -257,6 +263,29 @@ actor {
       };
     };
     list.toArray();
+  };
+
+  public query ({ caller }) func getRSVPsStats(invitationId : Text) : async RSVPStats {
+    var totalResponses = 0;
+    var totalConfirmedGuests = 0;
+    var totalDeclined = 0;
+
+    for (rsvp in rsvpStore.values()) {
+      if (rsvp.invitationId == invitationId) {
+        totalResponses += 1;
+        if (rsvp.attending) {
+          totalConfirmedGuests += rsvp.guestCount;
+        } else {
+          totalDeclined += 1;
+        };
+      };
+    };
+
+    {
+      totalResponses;
+      totalConfirmedGuests;
+      totalDeclined;
+    };
   };
 
   public shared ({ caller }) func addPhoto(invitationId : Text, photoId : Text, imageUrl : Text) : async Photo {
