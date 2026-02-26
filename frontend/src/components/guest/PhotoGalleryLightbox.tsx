@@ -1,44 +1,29 @@
 import React, { useState } from 'react';
-import { Photo } from '@/backend';
+import { Invitation } from '@/backend';
 import { getTemplateById } from '@/utils/templateDefinitions';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface TemplateData {
-  selectedTemplate: string;
-  colorScheme: string;
-  fontChoice: string;
-  backgroundChoice: string;
-}
-
 export interface PhotoGalleryLightboxProps {
-  photos: Photo[];
-  templateData: TemplateData;
+  photos: string[];
+  invitation: Invitation;
 }
 
-export default function PhotoGalleryLightbox({ photos, templateData }: PhotoGalleryLightboxProps) {
-  const { ref, isVisible } = useScrollAnimation();
+export default function PhotoGalleryLightbox({ photos, invitation }: PhotoGalleryLightboxProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  const template = getTemplateById(templateData.selectedTemplate) ?? getTemplateById('royal-gold')!;
+  const template = getTemplateById(invitation.selectedTemplate) ?? getTemplateById('royal-gold')!;
 
   const openLightbox = (index: number) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
   const prevPhoto = () => setLightboxIndex(i => (i !== null ? (i - 1 + photos.length) % photos.length : null));
   const nextPhoto = () => setLightboxIndex(i => (i !== null ? (i + 1) % photos.length : null));
 
+  if (photos.length === 0) return null;
+
   return (
     <section className="py-16 px-4" style={{ background: `${template.primaryColor}08` }}>
       <div className="max-w-5xl mx-auto">
-        <div
-          ref={ref}
-          className="text-center mb-10"
-          style={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-            transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
-          }}
-        >
+        <div className="text-center mb-10">
           <p className="font-elegant text-sm tracking-[0.3em] uppercase mb-3" style={{ color: template.primaryColor }}>
             Our Memories
           </p>
@@ -51,14 +36,14 @@ export default function PhotoGalleryLightbox({ photos, templateData }: PhotoGall
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {photos.map((photo, index) => (
+          {photos.map((photoUrl, index) => (
             <div
-              key={photo.id}
+              key={index}
               className="aspect-square overflow-hidden rounded-xl cursor-pointer group"
               onClick={() => openLightbox(index)}
             >
               <img
-                src={photo.imageUrl}
+                src={photoUrl}
                 alt={`Photo ${index + 1}`}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
@@ -83,7 +68,7 @@ export default function PhotoGalleryLightbox({ photos, templateData }: PhotoGall
             <ChevronLeft className="w-5 h-5" />
           </button>
           <img
-            src={photos[lightboxIndex].imageUrl}
+            src={photos[lightboxIndex]}
             alt={`Photo ${lightboxIndex + 1}`}
             className="max-w-full max-h-full object-contain rounded-xl"
             style={{ maxHeight: '85vh', maxWidth: '90vw' }}

@@ -1,36 +1,18 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Wedding invitation app with couple details, event management, RSVP, and themed designs. Currently fixing UI issues including separate bride/groom photo uploads, Home tab layout problems, and other refinements.",
+  "summary": "New project",
   "architectural_notes": [],
   "known_issues": [
-    "Publish controls on Home tab get hidden while editing an invitation",
-    "'Create Invitation' text appears on every page, overlapping other sections",
-    "Editing existing invitation does not load previously added events (shows 'No event created')"
+    "App broken after version 18 deployment; user requested full rollback to version 5"
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-in-the-couple-details-step-coupledetailsstep-tsx-and-the-invitation-editor-s-couple-details-tab-invitationeditor-tsx-replace-the-single-couple-photo-url-input-field-with-two-separate-file-upload-inputs-one-labeled-bride-photo-and-one-labeled-groom-photo-each-upload-should-allow-the-user-to-select-an-image-file-show-a-preview-thumbnail-and-store-the-uploaded-photo-independently-the-invitationformcontext-must-be-updated-to-hold-separate-bridephoto-and-groomphoto-fields-instead-of-a-single-couplephoto-field-the-backend-invitation-type-in-main-mo-must-be-updated-to-store-bridephoto-and-groomphoto-as-separate-optional-text-fields-the-guest-facing-invitation-pages-herosection-coupleintroduction-must-render-both-photos-side-by-side-where-a-couple-photo-is-currently-displayed",
-      "title": "In the Couple Details step (CoupleDetailsStep.tsx) and the Invitation Editor's couple details tab (InvitationEditor.tsx), replace the single 'couple photo URL' input field with two separate file upload inputs — one labeled 'Bride Photo' and one labeled 'Groom Photo'. Each upload should allow the user to select an image file, show a preview thumbnail, and store the uploaded photo independently. The InvitationFormContext must be updated to hold separate bridePhoto and groomPhoto fields instead of a single couplePhoto field. The backend Invitation type in main.mo must be updated to store bridePhoto and groomPhoto as separate optional Text fields. The guest-facing invitation pages (HeroSection, CoupleIntroduction) must render both photos side by side where a couple photo is currently displayed.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-on-the-dashboard-page-dashboard-tsx-fix-the-layout-so-that-invitation-management-controls-including-the-publish-button-and-any-similar-action-buttons-remain-fully-visible-and-accessible-at-all-times-including-while-an-invitation-is-in-an-editing-state-no-action-button-should-be-hidden-clipped-or-obscured-based-on-editing-state",
-      "title": "On the Dashboard page (Dashboard.tsx), fix the layout so that invitation management controls — including the Publish button and any similar action buttons — remain fully visible and accessible at all times, including while an invitation is in an editing state. No action button should be hidden, clipped, or obscured based on editing state.",
+      "id": "feature-restore-all-frontend-files-to-their-exact-version-5-state-this-includes-app-tsx-routes-and-providers-all-pages-landingpage-dashboard-createinvitationwizard-invitationeditor-guestinvitation-notfound-all-components-authguard-header-wizard-steps-guest-components-media-templates-events-layout-all-hooks-usequeries-ts-context-invitationformcontext-tsx-utils-and-stylesheets-revert-any-login-gating-removal-anonymous-actor-changes-or-any-other-modifications-made-after-version-5-the-app-must-look-and-behave-exactly-as-it-did-in-version-5",
+      "title": "Restore all frontend files to their exact Version 5 state. This includes: App.tsx (routes and providers), all pages (LandingPage, Dashboard, CreateInvitationWizard, InvitationEditor, GuestInvitation, NotFound), all components (AuthGuard, Header, wizard steps, guest components, media, templates, events, layout), all hooks (useQueries.ts), context (InvitationFormContext.tsx), utils, and stylesheets. Revert any login-gating removal, anonymous actor changes, or any other modifications made after Version 5. The app must look and behave exactly as it did in Version 5.",
       "reqIds": [
         "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-remove-or-conditionally-hide-the-create-invitation-call-to-action-text-button-from-pages-where-it-does-not-belong-it-should-only-appear-on-the-landing-page-and-dashboard-page-it-must-not-appear-inside-the-invitation-editor-the-create-wizard-steps-or-the-guest-facing-invitation-page-also-fix-the-header-component-header-tsx-so-its-create-invitation-cta-does-not-render-on-editor-or-wizard-routes-preventing-it-from-overlapping-other-page-sections",
-      "title": "Remove or conditionally hide the 'Create Invitation' call-to-action text/button from pages where it does not belong. It should only appear on the Landing page and Dashboard page. It must NOT appear inside the invitation editor, the create wizard steps, or the guest-facing invitation page. Also fix the Header component (Header.tsx) so its 'Create Invitation' CTA does not render on editor or wizard routes, preventing it from overlapping other page sections.",
-      "reqIds": [
-        "REQ-3"
       ],
       "version": 1
     }
@@ -38,37 +20,14 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Replace single couple photo URL field with separate upload options for Bride and Groom photos in Couple Details section",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Fix Home tab: Publish controls hidden while editing, and 'Create Invitation' text appearing on every page overlapping other sections",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Fix editing existing invitation: previously added events not loading and showing 'No event created'",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Redesign theme designs to look more premium and professional",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Resize and refine RSVP section in invitation layout — currently too large and unbalanced",
-      "reqIds": [],
+      "summary": "Restore the backend (backend/main.mo) to its exact Version 5 state, including all data types (Invitation, Event, RSVP, Photo, Music), CRUD operations, blob storage, and access control logic that were present in Version 5. Undo all backend changes introduced after Version 5.",
+      "reqIds": [
+        "REQ-1"
+      ],
       "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "Wedding Invitation App",
+  "projectName": "Wedding Invitations",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

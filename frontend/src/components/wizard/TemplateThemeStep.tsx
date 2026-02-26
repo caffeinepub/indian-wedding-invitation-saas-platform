@@ -95,7 +95,7 @@ export default function TemplateThemeStep({ invitationId }: TemplateThemeStepPro
 
   const handleDeleteVariant = async (index: number) => {
     if (!invitationId) return;
-    await deleteThemeMutation.mutateAsync({ invitationId, themeIndex: BigInt(index) });
+    await deleteThemeMutation.mutateAsync({ invitationId, themeIndex: index });
   };
 
   const sections = [
@@ -112,24 +112,23 @@ export default function TemplateThemeStep({ invitationId }: TemplateThemeStepPro
       <div className="rounded-xl overflow-hidden border border-charcoal-700 bg-charcoal-900/50">
         <div className="flex items-center gap-2 px-4 py-2 border-b border-charcoal-700 bg-charcoal-800/50">
           <Eye className="w-4 h-4 text-gold-400" />
-          <span className="text-sm font-medium text-ivory-200">Live Preview</span>
-          <span className="text-xs text-charcoal-400 ml-1">— updates instantly as you make changes</span>
+          <span className="text-xs text-charcoal-300 font-medium">Live Preview</span>
         </div>
-        <div className="p-4">
+        <div className="h-48 overflow-hidden">
           <TemplatePreview />
         </div>
       </div>
 
       {/* Section Navigation */}
-      <div className="flex gap-1 bg-charcoal-800 rounded-lg p-1 overflow-x-auto">
+      <div className="flex gap-1 overflow-x-auto pb-1">
         {sections.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setActiveSection(id)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap flex-1 justify-center ${
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
               activeSection === id
-                ? 'bg-gold-500 text-charcoal-900'
-                : 'text-charcoal-300 hover:text-ivory-100 hover:bg-charcoal-700'
+                ? 'bg-gold text-charcoal'
+                : 'bg-charcoal-800 text-charcoal-300 hover:bg-charcoal-700'
             }`}
           >
             <Icon className="w-3.5 h-3.5" />
@@ -138,125 +137,111 @@ export default function TemplateThemeStep({ invitationId }: TemplateThemeStepPro
         ))}
       </div>
 
-      {/* Template Selection — TemplateSelector reads/writes context internally */}
-      {activeSection === 'template' && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-ivory-100">Choose Template</h3>
-          <TemplateSelector />
-        </div>
-      )}
+      {/* Section Content */}
+      <div>
+        {activeSection === 'template' && (
+          <div>
+            <h3 className="text-sm font-medium text-charcoal-200 mb-3">Choose Template</h3>
+            <TemplateSelector />
+          </div>
+        )}
 
-      {/* Color Scheme — ColorSchemePicker reads/writes context internally */}
-      {activeSection === 'color' && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-ivory-100">Color Scheme</h3>
-          <ColorSchemePicker />
-        </div>
-      )}
+        {activeSection === 'color' && (
+          <div>
+            <h3 className="text-sm font-medium text-charcoal-200 mb-3">Color Scheme</h3>
+            <ColorSchemePicker />
+          </div>
+        )}
 
-      {/* Font Pairing */}
-      {activeSection === 'font' && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-ivory-100">Font Pairing</h3>
-          <FontSelector
-            value={formData.fontChoice}
-            onChange={(fontId) => updateFormData({ fontChoice: fontId })}
-          />
-        </div>
-      )}
+        {activeSection === 'font' && (
+          <div>
+            <h3 className="text-sm font-medium text-charcoal-200 mb-3">Font Pairing</h3>
+            <FontSelector
+              value={formData.fontChoice}
+              onChange={(fontId) => updateFormData({ fontChoice: fontId })}
+            />
+          </div>
+        )}
 
-      {/* Background Style */}
-      {activeSection === 'background' && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-ivory-100">Background Style</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {BACKGROUND_STYLES.map((style) => {
-              const isSelected = (formData.backgroundChoice || 'minimal') === style.id;
-              return (
+        {activeSection === 'background' && (
+          <div>
+            <h3 className="text-sm font-medium text-charcoal-200 mb-3">Background Style</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {BACKGROUND_STYLES.map((style) => (
                 <button
                   key={style.id}
                   onClick={() => updateFormData({ backgroundChoice: style.id })}
-                  className={`p-3 rounded-lg border-2 text-left transition-all ${
-                    isSelected
-                      ? 'border-gold-500 bg-gold-500/10'
-                      : 'border-charcoal-700 bg-charcoal-800/50 hover:border-gold-400/50'
+                  className={`p-3 rounded-lg border text-left transition-all ${
+                    formData.backgroundChoice === style.id
+                      ? 'border-gold bg-gold/10'
+                      : 'border-charcoal-700 bg-charcoal-800 hover:border-charcoal-600'
                   }`}
                 >
-                  <p className={`text-sm font-medium ${isSelected ? 'text-gold-400' : 'text-ivory-200'}`}>
+                  <p className={`text-xs font-medium ${formData.backgroundChoice === style.id ? 'text-gold' : 'text-charcoal-200'}`}>
                     {style.label}
                   </p>
                   <p className="text-xs text-charcoal-400 mt-0.5">{style.description}</p>
                 </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Saved Themes */}
-      {activeSection === 'saved' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-ivory-100">Saved Themes</h3>
-            {invitationId && (
-              <button
-                onClick={() => setShowSaveInput(!showSaveInput)}
-                className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-gold-500/20 text-gold-400 hover:bg-gold-500/30 transition-colors"
-              >
-                <Save className="w-3.5 h-3.5" />
-                Save Current
-              </button>
-            )}
-          </div>
-
-          {showSaveInput && (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={saveThemeName}
-                onChange={(e) => setSaveThemeName(e.target.value)}
-                placeholder="Theme name (e.g. Royal Gold)"
-                className="flex-1 px-3 py-2 rounded-lg bg-charcoal-800 border border-charcoal-600 text-ivory-100 placeholder-charcoal-400 text-sm focus:outline-none focus:border-gold-500"
-                onKeyDown={(e) => e.key === 'Enter' && handleSaveTheme()}
-              />
-              <button
-                onClick={handleSaveTheme}
-                disabled={!saveThemeName.trim() || saveThemeMutation.isPending}
-                className="px-3 py-2 rounded-lg bg-gold-500 text-charcoal-900 font-medium text-sm hover:bg-gold-400 disabled:opacity-50 transition-colors"
-              >
-                {saveThemeMutation.isPending ? '...' : 'Save'}
-              </button>
-            </div>
-          )}
-
-          {savedSuccess && (
-            <div className="flex items-center gap-2 text-sm text-green-400 bg-green-400/10 px-3 py-2 rounded-lg">
-              <Check className="w-4 h-4" />
-              Theme saved successfully!
-            </div>
-          )}
-
-          {themeVariants.length === 0 ? (
-            <div className="text-center py-8 text-charcoal-400">
-              <Save className="w-8 h-8 mx-auto mb-2 opacity-40" />
-              <p className="text-sm">No saved themes yet.</p>
-              <p className="text-xs mt-1">Save your current theme to reuse it later.</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {themeVariants.map((variant, index) => (
-                <ThemeVariantCard
-                  key={index}
-                  variant={variant}
-                  index={index}
-                  onApply={() => handleApplyVariant(variant)}
-                  onDelete={() => handleDeleteVariant(index)}
-                />
               ))}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+
+        {activeSection === 'saved' && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-charcoal-200">Saved Themes</h3>
+              {invitationId && (
+                <button
+                  onClick={() => setShowSaveInput(!showSaveInput)}
+                  className="flex items-center gap-1 text-xs text-gold hover:text-gold-light transition-colors"
+                >
+                  <Save className="w-3 h-3" />
+                  Save Current
+                </button>
+              )}
+            </div>
+
+            {showSaveInput && (
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="text"
+                  value={saveThemeName}
+                  onChange={(e) => setSaveThemeName(e.target.value)}
+                  placeholder="Theme name..."
+                  className="flex-1 px-3 py-1.5 text-xs rounded-lg bg-charcoal-800 border border-charcoal-600 text-charcoal-100 placeholder-charcoal-500 focus:outline-none focus:border-gold"
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveTheme()}
+                />
+                <button
+                  onClick={handleSaveTheme}
+                  disabled={!saveThemeName.trim() || saveThemeMutation.isPending}
+                  className="px-3 py-1.5 text-xs rounded-lg bg-gold text-charcoal font-medium disabled:opacity-50 hover:bg-gold-light transition-colors"
+                >
+                  {savedSuccess ? <Check className="w-3 h-3" /> : 'Save'}
+                </button>
+              </div>
+            )}
+
+            {themeVariants.length === 0 ? (
+              <p className="text-xs text-charcoal-400 text-center py-6">
+                No saved themes yet.{invitationId ? ' Save your current theme to reuse it later.' : ''}
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {themeVariants.map((variant, index) => (
+                  <ThemeVariantCard
+                    key={index}
+                    variant={variant}
+                    index={index}
+                    onApply={() => handleApplyVariant(variant)}
+                    onDelete={() => handleDeleteVariant(index)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

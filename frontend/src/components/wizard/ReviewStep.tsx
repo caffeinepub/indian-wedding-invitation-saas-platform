@@ -5,13 +5,14 @@ import { Loader2, ChevronLeft } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 
-interface ReviewStepProps {
+export interface ReviewStepProps {
   onBack: () => void;
   onSubmit: (slug: string) => Promise<void>;
   isSubmitting: boolean;
+  submitError?: string | null;
 }
 
-export default function ReviewStep({ onBack, onSubmit, isSubmitting }: ReviewStepProps) {
+export default function ReviewStep({ onBack, onSubmit, isSubmitting, submitError }: ReviewStepProps) {
   const { formData } = useInvitationForm();
   const [slug, setSlug] = useState('');
   const [slugError, setSlugError] = useState('');
@@ -117,6 +118,12 @@ export default function ReviewStep({ onBack, onSubmit, isSubmitting }: ReviewSte
           This will be the unique URL for your invitation. Use only lowercase letters, numbers, and hyphens.
         </p>
       </div>
+
+      {submitError && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-elegant">
+          <strong>Error:</strong> {submitError}
+        </div>
+      )}
 
       <div className="flex justify-between">
         <button

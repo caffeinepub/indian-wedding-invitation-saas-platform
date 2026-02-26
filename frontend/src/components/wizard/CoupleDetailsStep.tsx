@@ -1,278 +1,248 @@
-import React, { useRef } from 'react';
 import { useInvitationForm } from '../../context/InvitationFormContext';
-import { User, Upload, X, Camera } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { useRef } from 'react';
+import { Camera, X } from 'lucide-react';
 
 interface CoupleDetailsStepProps {
   onNext: () => void;
-  hideNavigation?: boolean;
 }
 
-export default function CoupleDetailsStep({ onNext, hideNavigation }: CoupleDetailsStepProps) {
+export default function CoupleDetailsStep({ onNext }: CoupleDetailsStepProps) {
   const { formData, updateFormData } = useInvitationForm();
   const bridePhotoRef = useRef<HTMLInputElement>(null);
   const groomPhotoRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (field: 'bridePhoto' | 'groomPhoto', file: File | null) => {
-    updateFormData({ [field]: file });
+  const handlePhotoChange = (type: 'bridePhoto' | 'groomPhoto', file: File | null) => {
+    updateFormData({ [type]: file });
   };
 
-  const handlePhotoSelect = (field: 'bridePhoto' | 'groomPhoto', e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    handleFileChange(field, file);
-  };
-
-  const getPreviewUrl = (file: File | null): string | null => {
+  const getPhotoPreview = (file: File | null): string | null => {
     if (!file) return null;
     return URL.createObjectURL(file);
   };
 
-  const isValid = formData.brideName && formData.groomName && formData.weddingDate && formData.venueName;
+  const isValid = formData.brideName && formData.groomName && formData.weddingDate;
 
   return (
-    <div className="space-y-6">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 mb-4">
-          <User className="w-8 h-8 text-gold" />
-        </div>
-        <h2 className="text-2xl font-serif text-charcoal dark:text-ivory font-bold">Couple Details</h2>
-        <p className="text-charcoal/60 dark:text-ivory/60 mt-1">Tell us about the happy couple</p>
+    <div className="space-y-8">
+      <div className="text-center">
+        <h2 className="text-3xl font-serif text-charcoal mb-2">Couple Details</h2>
+        <p className="text-charcoal/60">Tell us about the happy couple</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Bride Name */}
-        <div>
-          <label className="block text-sm font-medium text-charcoal dark:text-ivory mb-2">
-            Bride's Name <span className="text-crimson">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.brideName}
-            onChange={e => updateFormData({ brideName: e.target.value })}
-            placeholder="Enter bride's name"
-            className="w-full px-4 py-3 rounded-lg border border-gold/30 bg-white dark:bg-charcoal/50 text-charcoal dark:text-ivory placeholder-charcoal/40 dark:placeholder-ivory/40 focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors"
-          />
-        </div>
-
-        {/* Groom Name */}
-        <div>
-          <label className="block text-sm font-medium text-charcoal dark:text-ivory mb-2">
-            Groom's Name <span className="text-crimson">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.groomName}
-            onChange={e => updateFormData({ groomName: e.target.value })}
-            placeholder="Enter groom's name"
-            className="w-full px-4 py-3 rounded-lg border border-gold/30 bg-white dark:bg-charcoal/50 text-charcoal dark:text-ivory placeholder-charcoal/40 dark:placeholder-ivory/40 focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors"
-          />
-        </div>
-
-        {/* Wedding Date */}
-        <div>
-          <label className="block text-sm font-medium text-charcoal dark:text-ivory mb-2">
-            Wedding Date <span className="text-crimson">*</span>
-          </label>
-          <input
-            type="date"
-            value={formData.weddingDate}
-            onChange={e => updateFormData({ weddingDate: e.target.value })}
-            className="w-full px-4 py-3 rounded-lg border border-gold/30 bg-white dark:bg-charcoal/50 text-charcoal dark:text-ivory focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors"
-          />
-        </div>
-
-        {/* Wedding Time */}
-        <div>
-          <label className="block text-sm font-medium text-charcoal dark:text-ivory mb-2">
-            Wedding Time
-          </label>
-          <input
-            type="time"
-            value={formData.weddingTime}
-            onChange={e => updateFormData({ weddingTime: e.target.value })}
-            className="w-full px-4 py-3 rounded-lg border border-gold/30 bg-white dark:bg-charcoal/50 text-charcoal dark:text-ivory focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors"
-          />
-        </div>
-
-        {/* Venue Name */}
-        <div>
-          <label className="block text-sm font-medium text-charcoal dark:text-ivory mb-2">
-            Venue Name <span className="text-crimson">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.venueName}
-            onChange={e => updateFormData({ venueName: e.target.value })}
-            placeholder="Enter venue name"
-            className="w-full px-4 py-3 rounded-lg border border-gold/30 bg-white dark:bg-charcoal/50 text-charcoal dark:text-ivory placeholder-charcoal/40 dark:placeholder-ivory/40 focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors"
-          />
-        </div>
-
-        {/* Venue Address */}
-        <div>
-          <label className="block text-sm font-medium text-charcoal dark:text-ivory mb-2">
-            Venue Address
-          </label>
-          <input
-            type="text"
-            value={formData.venueAddress}
-            onChange={e => updateFormData({ venueAddress: e.target.value })}
-            placeholder="Enter venue address"
-            className="w-full px-4 py-3 rounded-lg border border-gold/30 bg-white dark:bg-charcoal/50 text-charcoal dark:text-ivory placeholder-charcoal/40 dark:placeholder-ivory/40 focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors"
-          />
-        </div>
-      </div>
-
-      {/* Google Maps Link */}
-      <div>
-        <label className="block text-sm font-medium text-charcoal dark:text-ivory mb-2">
-          Google Maps Link
-        </label>
-        <input
-          type="url"
-          value={formData.googleMapsLink}
-          onChange={e => updateFormData({ googleMapsLink: e.target.value })}
-          placeholder="https://maps.google.com/..."
-          className="w-full px-4 py-3 rounded-lg border border-gold/30 bg-white dark:bg-charcoal/50 text-charcoal dark:text-ivory placeholder-charcoal/40 dark:placeholder-ivory/40 focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors"
-        />
-      </div>
-
-      {/* Couple Photos */}
-      <div>
-        <label className="block text-sm font-medium text-charcoal dark:text-ivory mb-3">
-          Couple Photos
-        </label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Bride Photo */}
-          <div className="space-y-2">
-            <p className="text-sm text-charcoal/70 dark:text-ivory/70 font-medium flex items-center gap-1">
-              <Camera className="w-4 h-4 text-gold" /> Bride Photo
-            </p>
-            <div
-              className="relative border-2 border-dashed border-gold/30 rounded-xl overflow-hidden cursor-pointer hover:border-gold/60 transition-colors bg-gold/5 dark:bg-gold/10"
-              style={{ minHeight: '180px' }}
-              onClick={() => bridePhotoRef.current?.click()}
-            >
-              {formData.bridePhoto ? (
-                <div className="relative w-full h-full">
-                  <img
-                    src={getPreviewUrl(formData.bridePhoto) || ''}
-                    alt="Bride preview"
-                    className="w-full h-44 object-cover rounded-xl"
-                  />
-                  <button
-                    type="button"
-                    onClick={e => { e.stopPropagation(); handleFileChange('bridePhoto', null); if (bridePhotoRef.current) bridePhotoRef.current.value = ''; }}
-                    className="absolute top-2 right-2 bg-crimson text-white rounded-full p-1 shadow-lg hover:bg-crimson/80 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                  <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
-                    {formData.bridePhoto.name}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-44 gap-2 text-charcoal/40 dark:text-ivory/40">
-                  <Upload className="w-8 h-8 text-gold/60" />
-                  <span className="text-sm">Click to upload bride photo</span>
-                  <span className="text-xs">JPG, PNG, WEBP</span>
-                </div>
-              )}
-            </div>
+      {/* Photo Upload Section */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Bride Photo */}
+        <div className="text-center">
+          <Label className="text-charcoal font-medium mb-3 block">Bride's Photo</Label>
+          <div className="relative inline-block">
+            {formData.bridePhoto ? (
+              <div className="relative">
+                <img
+                  src={getPhotoPreview(formData.bridePhoto)!}
+                  alt="Bride"
+                  className="w-32 h-32 object-cover rounded-full border-4 border-gold/60 shadow-lg ring-2 ring-gold/20"
+                />
+                <button
+                  onClick={() => handlePhotoChange('bridePhoto', null)}
+                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 shadow"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => bridePhotoRef.current?.click()}
+                className="w-32 h-32 border-2 border-dashed border-gold/40 rounded-full flex flex-col items-center justify-center text-charcoal/40 hover:border-gold hover:text-gold transition-colors"
+              >
+                <Camera size={24} />
+                <span className="text-xs mt-1">Add Photo</span>
+              </button>
+            )}
             <input
               ref={bridePhotoRef}
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={e => handlePhotoSelect('bridePhoto', e)}
+              onChange={(e) => handlePhotoChange('bridePhoto', e.target.files?.[0] || null)}
             />
           </div>
-
-          {/* Groom Photo */}
-          <div className="space-y-2">
-            <p className="text-sm text-charcoal/70 dark:text-ivory/70 font-medium flex items-center gap-1">
-              <Camera className="w-4 h-4 text-gold" /> Groom Photo
-            </p>
-            <div
-              className="relative border-2 border-dashed border-gold/30 rounded-xl overflow-hidden cursor-pointer hover:border-gold/60 transition-colors bg-gold/5 dark:bg-gold/10"
-              style={{ minHeight: '180px' }}
-              onClick={() => groomPhotoRef.current?.click()}
+          {formData.bridePhoto && (
+            <button
+              onClick={() => bridePhotoRef.current?.click()}
+              className="mt-2 text-xs text-gold hover:underline"
             >
-              {formData.groomPhoto ? (
-                <div className="relative w-full h-full">
-                  <img
-                    src={getPreviewUrl(formData.groomPhoto) || ''}
-                    alt="Groom preview"
-                    className="w-full h-44 object-cover rounded-xl"
-                  />
-                  <button
-                    type="button"
-                    onClick={e => { e.stopPropagation(); handleFileChange('groomPhoto', null); if (groomPhotoRef.current) groomPhotoRef.current.value = ''; }}
-                    className="absolute top-2 right-2 bg-crimson text-white rounded-full p-1 shadow-lg hover:bg-crimson/80 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                  <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
-                    {formData.groomPhoto.name}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-44 gap-2 text-charcoal/40 dark:text-ivory/40">
-                  <Upload className="w-8 h-8 text-gold/60" />
-                  <span className="text-sm">Click to upload groom photo</span>
-                  <span className="text-xs">JPG, PNG, WEBP</span>
-                </div>
-              )}
-            </div>
+              Change Photo
+            </button>
+          )}
+        </div>
+
+        {/* Groom Photo */}
+        <div className="text-center">
+          <Label className="text-charcoal font-medium mb-3 block">Groom's Photo</Label>
+          <div className="relative inline-block">
+            {formData.groomPhoto ? (
+              <div className="relative">
+                <img
+                  src={getPhotoPreview(formData.groomPhoto)!}
+                  alt="Groom"
+                  className="w-32 h-32 object-cover rounded-full border-4 border-gold/60 shadow-lg ring-2 ring-gold/20"
+                />
+                <button
+                  onClick={() => handlePhotoChange('groomPhoto', null)}
+                  className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 shadow"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => groomPhotoRef.current?.click()}
+                className="w-32 h-32 border-2 border-dashed border-gold/40 rounded-full flex flex-col items-center justify-center text-charcoal/40 hover:border-gold hover:text-gold transition-colors"
+              >
+                <Camera size={24} />
+                <span className="text-xs mt-1">Add Photo</span>
+              </button>
+            )}
             <input
               ref={groomPhotoRef}
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={e => handlePhotoSelect('groomPhoto', e)}
+              onChange={(e) => handlePhotoChange('groomPhoto', e.target.files?.[0] || null)}
             />
           </div>
+          {formData.groomPhoto && (
+            <button
+              onClick={() => groomPhotoRef.current?.click()}
+              className="mt-2 text-xs text-gold hover:underline"
+            >
+              Change Photo
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Family Details */}
-      <div>
-        <label className="block text-sm font-medium text-charcoal dark:text-ivory mb-2">
-          Family Details
-        </label>
-        <textarea
-          value={formData.familyDetails}
-          onChange={e => updateFormData({ familyDetails: e.target.value })}
-          placeholder="Share details about both families..."
-          rows={3}
-          className="w-full px-4 py-3 rounded-lg border border-gold/30 bg-white dark:bg-charcoal/50 text-charcoal dark:text-ivory placeholder-charcoal/40 dark:placeholder-ivory/40 focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors resize-none"
-        />
-      </div>
-
-      {/* Invitation Message */}
-      <div>
-        <label className="block text-sm font-medium text-charcoal dark:text-ivory mb-2">
-          Invitation Message
-        </label>
-        <textarea
-          value={formData.invitationMessage}
-          onChange={e => updateFormData({ invitationMessage: e.target.value })}
-          placeholder="Write a heartfelt message for your guests..."
-          rows={4}
-          className="w-full px-4 py-3 rounded-lg border border-gold/30 bg-white dark:bg-charcoal/50 text-charcoal dark:text-ivory placeholder-charcoal/40 dark:placeholder-ivory/40 focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors resize-none"
-        />
-      </div>
-
-      {!hideNavigation && (
-        <div className="flex justify-end pt-4">
-          <button
-            onClick={onNext}
-            disabled={!isValid}
-            className="px-8 py-3 bg-gold text-white rounded-full font-medium hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-luxury"
-          >
-            Next: Choose Theme →
-          </button>
+      {/* Names */}
+      <div className="grid grid-cols-2 gap-6">
+        <div>
+          <Label htmlFor="brideName" className="text-charcoal font-medium">Bride's Name *</Label>
+          <Input
+            id="brideName"
+            value={formData.brideName}
+            onChange={(e) => updateFormData({ brideName: e.target.value })}
+            placeholder="Enter bride's name"
+            className="mt-1 border-gold/30 focus:border-gold"
+          />
         </div>
-      )}
+        <div>
+          <Label htmlFor="groomName" className="text-charcoal font-medium">Groom's Name *</Label>
+          <Input
+            id="groomName"
+            value={formData.groomName}
+            onChange={(e) => updateFormData({ groomName: e.target.value })}
+            placeholder="Enter groom's name"
+            className="mt-1 border-gold/30 focus:border-gold"
+          />
+        </div>
+      </div>
+
+      {/* Date & Time */}
+      <div className="grid grid-cols-2 gap-6">
+        <div>
+          <Label htmlFor="weddingDate" className="text-charcoal font-medium">Wedding Date *</Label>
+          <Input
+            id="weddingDate"
+            type="date"
+            value={formData.weddingDate}
+            onChange={(e) => updateFormData({ weddingDate: e.target.value })}
+            className="mt-1 border-gold/30 focus:border-gold"
+          />
+        </div>
+        <div>
+          <Label htmlFor="weddingTime" className="text-charcoal font-medium">Wedding Time</Label>
+          <Input
+            id="weddingTime"
+            type="time"
+            value={formData.weddingTime}
+            onChange={(e) => updateFormData({ weddingTime: e.target.value })}
+            className="mt-1 border-gold/30 focus:border-gold"
+          />
+        </div>
+      </div>
+
+      {/* Venue */}
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="venueName" className="text-charcoal font-medium">Venue Name</Label>
+          <Input
+            id="venueName"
+            value={formData.venueName}
+            onChange={(e) => updateFormData({ venueName: e.target.value })}
+            placeholder="e.g., The Grand Ballroom"
+            className="mt-1 border-gold/30 focus:border-gold"
+          />
+        </div>
+        <div>
+          <Label htmlFor="venueAddress" className="text-charcoal font-medium">Venue Address</Label>
+          <Input
+            id="venueAddress"
+            value={formData.venueAddress}
+            onChange={(e) => updateFormData({ venueAddress: e.target.value })}
+            placeholder="Full address"
+            className="mt-1 border-gold/30 focus:border-gold"
+          />
+        </div>
+        <div>
+          <Label htmlFor="googleMapsLink" className="text-charcoal font-medium">Google Maps Link</Label>
+          <Input
+            id="googleMapsLink"
+            value={formData.googleMapsLink}
+            onChange={(e) => updateFormData({ googleMapsLink: e.target.value })}
+            placeholder="https://maps.google.com/..."
+            className="mt-1 border-gold/30 focus:border-gold"
+          />
+        </div>
+      </div>
+
+      {/* Family Details & Message */}
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="familyDetails" className="text-charcoal font-medium">Family Details</Label>
+          <Textarea
+            id="familyDetails"
+            value={formData.familyDetails}
+            onChange={(e) => updateFormData({ familyDetails: e.target.value })}
+            placeholder="e.g., Son of Mr. & Mrs. Sharma..."
+            className="mt-1 border-gold/30 focus:border-gold resize-none"
+            rows={3}
+          />
+        </div>
+        <div>
+          <Label htmlFor="invitationMessage" className="text-charcoal font-medium">Invitation Message</Label>
+          <Textarea
+            id="invitationMessage"
+            value={formData.invitationMessage}
+            onChange={(e) => updateFormData({ invitationMessage: e.target.value })}
+            placeholder="Write a heartfelt message for your guests..."
+            className="mt-1 border-gold/30 focus:border-gold resize-none"
+            rows={4}
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <Button
+          onClick={onNext}
+          disabled={!isValid}
+          className="bg-gold hover:bg-gold/90 text-white px-8"
+        >
+          Next: Events →
+        </Button>
+      </div>
     </div>
   );
 }

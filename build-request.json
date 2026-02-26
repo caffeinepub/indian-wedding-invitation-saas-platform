@@ -1,77 +1,58 @@
 {
   "kind": "build_request",
-  "title": "Separate Bride/Groom Photo Uploads & Fix Home Tab Layout Issues",
-  "projectName": "Wedding Invitation Builder",
-  "priority": "normal",
+  "title": "Rollback to Version 5 — Full Restore",
+  "projectName": "Wedding Invitations",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "In the Couple Details step (CoupleDetailsStep.tsx) and the Invitation Editor's couple details tab (InvitationEditor.tsx), replace the single 'couple photo URL' input field with two separate file upload inputs — one labeled 'Bride Photo' and one labeled 'Groom Photo'. Each upload should allow the user to select an image file, show a preview thumbnail, and store the uploaded photo independently. The InvitationFormContext must be updated to hold separate bridePhoto and groomPhoto fields instead of a single couplePhoto field. The backend Invitation type in main.mo must be updated to store bridePhoto and groomPhoto as separate optional Text fields. The guest-facing invitation pages (HeroSection, CoupleIntroduction) must render both photos side by side where a couple photo is currently displayed.",
-      "target": "both",
+      "text": "Restore the backend (backend/main.mo) to its exact Version 5 state, including all data types (Invitation, Event, RSVP, Photo, Music), CRUD operations, blob storage, and access control logic that were present in Version 5. Undo all backend changes introduced after Version 5.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-4"
         ],
         "quotes": [
-          "replace the single couple photo URL field with separate upload options for Bride and Groom photos"
+          "get back my exact same app of version 5 make sure every thing same as version 5"
         ]
       },
       "acceptanceCriteria": [
-        "CoupleDetailsStep shows two distinct upload controls: 'Bride Photo' and 'Groom Photo', with no single 'couple photo URL' field present",
-        "Each upload control accepts an image file, displays a preview thumbnail after selection, and allows removal",
-        "InvitationFormContext stores bridePhoto and groomPhoto as separate fields",
-        "Backend Invitation record stores bridePhoto and groomPhoto as separate optional Text fields",
-        "Guest invitation page renders both the bride and groom photos side by side where applicable",
-        "Existing invitations with a legacy single couple photo field do not crash"
+        "All data types and CRUD operations match Version 5 exactly.",
+        "Access control and blob storage logic are identical to Version 5.",
+        "No changes introduced after Version 5 remain in the backend."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "On the Dashboard page (Dashboard.tsx), fix the layout so that invitation management controls — including the Publish button and any similar action buttons — remain fully visible and accessible at all times, including while an invitation is in an editing state. No action button should be hidden, clipped, or obscured based on editing state.",
+      "text": "Restore all frontend files to their exact Version 5 state. This includes: App.tsx (routes and providers), all pages (LandingPage, Dashboard, CreateInvitationWizard, InvitationEditor, GuestInvitation, NotFound), all components (AuthGuard, Header, wizard steps, guest components, media, templates, events, layout), all hooks (useQueries.ts), context (InvitationFormContext.tsx), utils, and stylesheets. Revert any login-gating removal, anonymous actor changes, or any other modifications made after Version 5. The app must look and behave exactly as it did in Version 5.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-latest"
+          "msg-4"
         ],
         "quotes": [
-          "options like Publish (or similar controls) are getting hidden while editing"
+          "get back my exact same app of version 5 make sure every thing same as version 5"
         ]
       },
       "acceptanceCriteria": [
-        "The Publish button and all other invitation action controls on the Dashboard (Home tab) are always visible regardless of whether the user is currently editing an invitation",
-        "No invitation card action is clipped or hidden by z-index, overflow, or conditional rendering tied to edit state"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Remove or conditionally hide the 'Create Invitation' call-to-action text/button from pages where it does not belong. It should only appear on the Landing page and Dashboard page. It must NOT appear inside the invitation editor, the create wizard steps, or the guest-facing invitation page. Also fix the Header component (Header.tsx) so its 'Create Invitation' CTA does not render on editor or wizard routes, preventing it from overlapping other page sections.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-latest"
-        ],
-        "quotes": [
-          "the text 'Create Invitation' is appearing on every page and overlapping other sections"
-        ]
-      },
-      "acceptanceCriteria": [
-        "'Create Invitation' text/button does not appear on the InvitationEditor page",
-        "'Create Invitation' text/button does not appear on CreateInvitationWizard pages",
-        "'Create Invitation' text/button does not appear on the GuestInvitation page",
-        "No visual overlap or layout displacement caused by the 'Create Invitation' element on any page other than Landing and Dashboard",
-        "The Header CTA is hidden on editor and wizard routes"
+        "All frontend pages render correctly as they did in Version 5.",
+        "Authentication gating (AuthGuard) is restored if it existed in Version 5.",
+        "useQueries.ts uses the authenticated actor as it did in Version 5.",
+        "Dashboard, CreateInvitationWizard, InvitationEditor, and all other pages function identically to Version 5.",
+        "No login/auth removal changes from versions after Version 5 are present.",
+        "All routes, layouts, and components match Version 5 exactly."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files listed in frontend.immutablePaths: useInternetIdentity.ts, useActor.ts, main.tsx, and frontend/src/components/ui",
-    "All Motoko logic must remain in the single backend/main.mo actor file",
-    "Preserve all existing invitation data and CRUD functionality; do not break existing queries or mutations"
+    "Do not introduce any new features or changes beyond what existed in Version 5.",
+    "Every file must match Version 5 state exactly — no partial rollbacks.",
+    "Do not modify frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui (immutable paths)."
   ],
   "nonGoals": [
-    "Redesigning theme templates to look more premium (deferred to a separate request)",
-    "Resizing or refining the RSVP section layout (deferred to a separate request)",
-    "Fixing the existing invitation event-loading bug ('No event created' while editing) — not included in this request scope"
+    "Any new features or UI improvements beyond Version 5.",
+    "Any changes introduced in Versions 6 through 18.",
+    "Migration of post-Version-5 data models."
   ],
   "imageRequirements": {
     "required": [],

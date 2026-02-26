@@ -7,18 +7,17 @@ import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
 import InviteLinksModule "invite-links/invite-links-module";
 import Random "mo:core/Random";
-import AccessControl "authorization/access-control";
 import Principal "mo:core/Principal";
-import MixinAuthorization "authorization/MixinAuthorization";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
-import Migration "migration";
+import AccessControl "authorization/access-control";
+import MixinAuthorization "authorization/MixinAuthorization";
 
-(with migration = Migration.run)
 actor {
+  include MixinStorage();
+
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
-  include MixinStorage();
 
   type UserProfile = {
     name : Text;
@@ -386,6 +385,7 @@ actor {
     list.toArray();
   };
 
+  // RSVP submission is open to all (including guests)
   public shared func submitWeddingInvitationRSVP(
     invitationId : Text,
     rsvpId : Text,
@@ -582,8 +582,8 @@ actor {
   };
 
   public shared ({ caller }) func generateInviteCode() : async Text {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can generate invite codes");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can generate invite codes");
     };
     let blob = await Random.blob();
     let code = InviteLinksModule.generateUUID(blob);
@@ -591,20 +591,21 @@ actor {
     code;
   };
 
+  // RSVP submission via invite code is open to all (including guests)
   public shared func submitRSVP(name : Text, attending : Bool, inviteCode : Text) : async () {
     InviteLinksModule.submitRSVP(inviteState, name, attending, inviteCode);
   };
 
   public query ({ caller }) func getAllRSVPs() : async [InviteLinksModule.RSVP] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can view RSVPs");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view all RSVPs");
     };
     InviteLinksModule.getAllRSVPs(inviteState);
   };
 
   public query ({ caller }) func getInviteCodes() : async [InviteLinksModule.InviteCode] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can view invite codes");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view invite codes");
     };
     InviteLinksModule.getInviteCodes(inviteState);
   };

@@ -22,7 +22,6 @@ export default function RSVPForm({ invitation, templateData }: RSVPFormProps) {
   });
   const [submitted, setSubmitted] = useState(false);
 
-  // Determine if template has a dark background
   const isDarkTemplate =
     invitation.backgroundChoice === 'dark-floral' ||
     invitation.backgroundChoice === 'dark-minimal' ||
@@ -30,7 +29,6 @@ export default function RSVPForm({ invitation, templateData }: RSVPFormProps) {
     template.id?.includes('midnight') ||
     template.id?.includes('cinematic');
 
-  // Always use high-contrast colors for form readability
   const sectionBg = isDarkTemplate
     ? 'rgba(15, 10, 5, 0.85)'
     : 'rgba(255, 255, 255, 0.92)';
@@ -39,7 +37,6 @@ export default function RSVPForm({ invitation, templateData }: RSVPFormProps) {
   const inputBg = isDarkTemplate ? 'rgba(30, 20, 10, 0.8)' : 'rgba(255, 255, 255, 0.95)';
   const inputBorder = isDarkTemplate ? 'rgba(180, 140, 80, 0.4)' : 'rgba(180, 140, 80, 0.5)';
   const inputText = isDarkTemplate ? '#f0e8d8' : '#2c1810';
-  const placeholderClass = isDarkTemplate ? 'placeholder-amber-700/60' : 'placeholder-stone-400';
   const primaryColor = template.primaryColor || '#c9a84c';
   const mutedText = isDarkTemplate ? '#a09070' : '#7a6050';
 
@@ -52,7 +49,7 @@ export default function RSVPForm({ invitation, templateData }: RSVPFormProps) {
       guestName: formState.guestName,
       guestPhone: formState.guestPhone,
       attending: formState.attending,
-      guestCount: BigInt(formState.guestCount),
+      guestCount: formState.guestCount,
       message: formState.message,
     });
     setSubmitted(true);
@@ -78,17 +75,12 @@ export default function RSVPForm({ invitation, templateData }: RSVPFormProps) {
               color: headingColor,
             }}
           >
-            {formState.attending ? 'See You There!' : 'Thank You'}
+            {formState.attending ? 'See You There! 🎉' : 'Thank You for Letting Us Know'}
           </h2>
-          <p className="text-lg mb-2" style={{ color: labelColor }}>
+          <p style={{ color: mutedText }}>
             {formState.attending
               ? `We're so excited to celebrate with you, ${formState.guestName}!`
-              : `Thank you for letting us know, ${formState.guestName}.`}
-          </p>
-          <p className="text-sm" style={{ color: mutedText }}>
-            {formState.attending
-              ? `We look forward to seeing you at ${invitation.venueName}.`
-              : 'You will be missed on our special day.'}
+              : `We'll miss you, ${formState.guestName}. Thank you for your response.`}
           </p>
         </div>
       </section>
@@ -96,235 +88,155 @@ export default function RSVPForm({ invitation, templateData }: RSVPFormProps) {
   }
 
   return (
-    <section
-      id="rsvp"
-      className="py-16 px-4"
-      style={{ background: isDarkTemplate ? 'rgba(10, 8, 4, 0.9)' : 'rgba(253, 248, 240, 0.95)' }}
-    >
+    <section className="py-16 px-4" style={{ background: isDarkTemplate ? 'rgba(10, 8, 4, 0.9)' : 'rgba(253, 248, 240, 0.95)' }}>
       <div className="max-w-lg mx-auto">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-px w-12" style={{ background: `linear-gradient(90deg, transparent, ${primaryColor})` }} />
-            <Heart className="w-5 h-5" style={{ color: primaryColor }} />
-            <div className="h-px w-12" style={{ background: `linear-gradient(90deg, ${primaryColor}, transparent)` }} />
-          </div>
-          <h2
-            className="text-4xl font-bold mb-3"
-            style={{
-              fontFamily: `'${template.headingFont}', serif`,
-              color: headingColor,
-            }}
-          >
-            RSVP
-          </h2>
-          <p className="text-base" style={{ color: labelColor }}>
-            Kindly respond by{' '}
-            {invitation.weddingDate
-              ? new Date(invitation.weddingDate).toLocaleDateString('en-US', {
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric',
-                })
-              : 'the wedding date'}
-          </p>
-        </div>
-
-        {/* Form Card */}
         <div
-          className="rounded-2xl p-6 sm:p-8 shadow-2xl"
-          style={{
-            background: sectionBg,
-            border: `1px solid ${primaryColor}30`,
-          }}
+          className="rounded-2xl p-8 shadow-2xl"
+          style={{ background: sectionBg, border: `1px solid ${inputBorder}` }}
         >
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="text-center mb-8">
+            <Heart className="w-8 h-8 mx-auto mb-3" style={{ color: primaryColor }} />
+            <h2
+              className="text-3xl font-bold mb-2"
+              style={{ fontFamily: `'${template.headingFont}', serif`, color: headingColor }}
+            >
+              RSVP
+            </h2>
+            <p style={{ color: mutedText, fontSize: '0.9rem' }}>
+              Please let us know if you'll be joining us
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Guest Name */}
             <div>
-              <label
-                className="block text-sm font-semibold mb-2"
-                style={{ color: labelColor }}
-              >
-                Your Full Name *
+              <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>
+                Your Name *
               </label>
               <input
                 type="text"
                 required
                 value={formState.guestName}
-                onChange={(e) => setFormState({ ...formState, guestName: e.target.value })}
+                onChange={e => setFormState(prev => ({ ...prev, guestName: e.target.value }))}
                 placeholder="Enter your full name"
-                className={`w-full px-4 py-3 rounded-xl text-sm outline-none transition-all ${placeholderClass}`}
+                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all"
                 style={{
                   background: inputBg,
-                  border: `1.5px solid ${inputBorder}`,
+                  border: `1px solid ${inputBorder}`,
                   color: inputText,
                 }}
-                onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                onBlur={(e) => (e.target.style.borderColor = inputBorder)}
               />
             </div>
 
             {/* Phone */}
             <div>
-              <label
-                className="block text-sm font-semibold mb-2"
-                style={{ color: labelColor }}
-              >
-                <span className="flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5" />
-                  Phone Number
-                </span>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>
+                <Phone className="w-4 h-4 inline mr-1" />
+                Phone Number
               </label>
               <input
                 type="tel"
                 value={formState.guestPhone}
-                onChange={(e) => setFormState({ ...formState, guestPhone: e.target.value })}
-                placeholder="+91 98765 43210"
-                className={`w-full px-4 py-3 rounded-xl text-sm outline-none transition-all ${placeholderClass}`}
+                onChange={e => setFormState(prev => ({ ...prev, guestPhone: e.target.value }))}
+                placeholder="+91 XXXXX XXXXX"
+                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all"
                 style={{
                   background: inputBg,
-                  border: `1.5px solid ${inputBorder}`,
+                  border: `1px solid ${inputBorder}`,
                   color: inputText,
                 }}
-                onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                onBlur={(e) => (e.target.style.borderColor = inputBorder)}
               />
             </div>
 
-            {/* Attendance */}
+            {/* Attending */}
             <div>
-              <label className="block text-sm font-semibold mb-3" style={{ color: labelColor }}>
+              <label className="block text-sm font-medium mb-2" style={{ color: labelColor }}>
                 Will you be attending? *
               </label>
               <div className="grid grid-cols-2 gap-3">
-                {[
-                  { value: true, label: '✓ Joyfully Accept', emoji: '🎉' },
-                  { value: false, label: '✗ Regretfully Decline', emoji: '💌' },
-                ].map(({ value, label, emoji }) => (
-                  <button
-                    key={String(value)}
-                    type="button"
-                    onClick={() => setFormState({ ...formState, attending: value })}
-                    className="py-3 px-4 rounded-xl text-sm font-semibold transition-all"
-                    style={{
-                      background:
-                        formState.attending === value
-                          ? primaryColor
-                          : isDarkTemplate
-                          ? 'rgba(40, 30, 15, 0.8)'
-                          : 'rgba(240, 235, 225, 0.9)',
-                      color:
-                        formState.attending === value
-                          ? '#1a1008'
-                          : isDarkTemplate
-                          ? '#c8b898'
-                          : '#4a3728',
-                      border: `1.5px solid ${formState.attending === value ? primaryColor : inputBorder}`,
-                    }}
-                  >
-                    {label}
-                  </button>
-                ))}
+                <button
+                  type="button"
+                  onClick={() => setFormState(prev => ({ ...prev, attending: true }))}
+                  className="py-3 rounded-xl text-sm font-semibold transition-all"
+                  style={{
+                    background: formState.attending ? primaryColor : inputBg,
+                    color: formState.attending ? '#fff' : inputText,
+                    border: `1px solid ${formState.attending ? primaryColor : inputBorder}`,
+                  }}
+                >
+                  ✓ Yes, I'll attend
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormState(prev => ({ ...prev, attending: false }))}
+                  className="py-3 rounded-xl text-sm font-semibold transition-all"
+                  style={{
+                    background: !formState.attending ? '#888' : inputBg,
+                    color: !formState.attending ? '#fff' : inputText,
+                    border: `1px solid ${!formState.attending ? '#888' : inputBorder}`,
+                  }}
+                >
+                  ✗ Can't make it
+                </button>
               </div>
             </div>
 
             {/* Guest Count */}
             {formState.attending && (
               <div>
-                <label className="block text-sm font-semibold mb-2" style={{ color: labelColor }}>
-                  <span className="flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5" />
-                    Number of Guests
-                  </span>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>
+                  <Users className="w-4 h-4 inline mr-1" />
+                  Number of Guests
                 </label>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFormState({ ...formState, guestCount: Math.max(1, formState.guestCount - 1) })}
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all"
-                    style={{
-                      background: isDarkTemplate ? 'rgba(40, 30, 15, 0.8)' : 'rgba(240, 235, 225, 0.9)',
-                      border: `1.5px solid ${inputBorder}`,
-                      color: isDarkTemplate ? '#c8b898' : '#4a3728',
-                    }}
-                  >
-                    −
-                  </button>
-                  <span
-                    className="text-2xl font-bold w-12 text-center"
-                    style={{ color: headingColor }}
-                  >
-                    {formState.guestCount}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setFormState({ ...formState, guestCount: Math.min(20, formState.guestCount + 1) })}
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all"
-                    style={{
-                      background: isDarkTemplate ? 'rgba(40, 30, 15, 0.8)' : 'rgba(240, 235, 225, 0.9)',
-                      border: `1.5px solid ${inputBorder}`,
-                      color: isDarkTemplate ? '#c8b898' : '#4a3728',
-                    }}
-                  >
-                    +
-                  </button>
-                </div>
+                <input
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={formState.guestCount}
+                  onChange={e => setFormState(prev => ({ ...prev, guestCount: parseInt(e.target.value) || 1 }))}
+                  className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all"
+                  style={{
+                    background: inputBg,
+                    border: `1px solid ${inputBorder}`,
+                    color: inputText,
+                  }}
+                />
               </div>
             )}
 
             {/* Message */}
             <div>
-              <label className="block text-sm font-semibold mb-2" style={{ color: labelColor }}>
-                <span className="flex items-center gap-1.5">
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  Message for the Couple (optional)
-                </span>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>
+                <MessageSquare className="w-4 h-4 inline mr-1" />
+                Message (Optional)
               </label>
               <textarea
                 value={formState.message}
-                onChange={(e) => setFormState({ ...formState, message: e.target.value })}
-                placeholder="Share your wishes or a special message..."
+                onChange={e => setFormState(prev => ({ ...prev, message: e.target.value }))}
+                placeholder="Share your wishes..."
                 rows={3}
-                className={`w-full px-4 py-3 rounded-xl text-sm outline-none transition-all resize-none ${placeholderClass}`}
+                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all resize-none"
                 style={{
                   background: inputBg,
-                  border: `1.5px solid ${inputBorder}`,
+                  border: `1px solid ${inputBorder}`,
                   color: inputText,
                 }}
-                onFocus={(e) => (e.target.style.borderColor = primaryColor)}
-                onBlur={(e) => (e.target.style.borderColor = inputBorder)}
               />
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
-              disabled={submitRSVP.isPending || !formState.guestName.trim()}
-              className="w-full py-4 rounded-xl font-bold text-base transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-              style={{
-                background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}cc)`,
-                color: '#1a1008',
-                boxShadow: `0 4px 20px ${primaryColor}40`,
-              }}
+              disabled={submitRSVP.isPending || !formState.guestName}
+              className="w-full py-4 rounded-xl font-semibold text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              style={{ background: primaryColor }}
             >
               {submitRSVP.isPending ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Submitting...</span>
-                </>
+                <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <>
-                  <Heart className="w-5 h-5" />
-                  <span>{formState.attending ? 'Confirm Attendance' : 'Send Response'}</span>
-                </>
+                <Heart className="w-5 h-5 fill-current" />
               )}
+              {submitRSVP.isPending ? 'Submitting...' : 'Send RSVP'}
             </button>
-
-            {submitRSVP.isError && (
-              <p className="text-center text-sm" style={{ color: '#e05555' }}>
-                Something went wrong. Please try again.
-              </p>
-            )}
           </form>
         </div>
       </div>

@@ -1,46 +1,77 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import {
-  Invitation,
-  Event,
-  RSVPEntry,
-  Photo,
-  BackgroundMusic,
-  ThemeConfig,
-  EventType,
-  ExternalBlob,
-} from '../backend';
+import { EventType, type Invitation, type Event, type RSVPEntry, type RSVPStats, type Photo, type BackgroundMusic, type ThemeConfig, type UserProfile } from '../backend';
+import { ExternalBlob } from '../backend';
 
-// ─── Invitations ──────────────────────────────────────────────────────────────
+// ─── User Profile ────────────────────────────────────────────────────────────
+
+export function useGetCallerUserProfile() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  const query = useQuery<UserProfile | null>({
+    queryKey: ['currentUserProfile'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getCallerUserProfile();
+    },
+    enabled: !!actor && !actorFetching,
+    retry: false,
+  });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
+}
+
+export function useSaveCallerUserProfile() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (profile: UserProfile) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.saveCallerUserProfile(profile);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    },
+  });
+}
+
+// ─── Invitations ─────────────────────────────────────────────────────────────
 
 export function useGetAllInvitations() {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
+
   return useQuery<Invitation[]>({
     queryKey: ['invitations'],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getAllInvitations();
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor && !actorFetching,
   });
 }
 
 export function useGetInvitationBySlug(slug: string) {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
+
   return useQuery<Invitation>({
     queryKey: ['invitation', slug],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
       return actor.getInvitationBySlug(slug);
     },
-    enabled: !!actor && !isFetching && !!slug,
-    retry: false,
+    enabled: !!actor && !actorFetching && !!slug,
   });
 }
 
 export function useCreateInvitation() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: {
       slug: string;
@@ -85,6 +116,7 @@ export function useCreateInvitation() {
 export function useUpdateInvitation() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: {
       slug: string;
@@ -127,9 +159,40 @@ export function useUpdateInvitation() {
   });
 }
 
+export function usePublishInvitation() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (slug: string) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.publishInvitation(slug);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invitations'] });
+    },
+  });
+}
+
+export function useDeleteInvitation() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (slug: string) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.deleteInvitation(slug);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invitations'] });
+    },
+  });
+}
+
 export function useAddPhotos() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: {
       invitationId: string;
@@ -146,51 +209,25 @@ export function useAddPhotos() {
   });
 }
 
-export function usePublishInvitation() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (slug: string) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.publishInvitation(slug);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invitations'] });
-    },
-  });
-}
-
-export function useDeleteInvitation() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (slug: string) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.deleteInvitation(slug);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invitations'] });
-    },
-  });
-}
-
 // ─── Events ───────────────────────────────────────────────────────────────────
 
 export function useGetEventsByInvitation(invitationId: string) {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
+
   return useQuery<Event[]>({
     queryKey: ['events', invitationId],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getEventsByInvitation(invitationId);
     },
-    enabled: !!actor && !isFetching && !!invitationId,
+    enabled: !!actor && !actorFetching && !!invitationId,
   });
 }
 
 export function useAddEvent() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: {
       invitationId: string;
@@ -223,6 +260,7 @@ export function useAddEvent() {
 export function useUpdateEvent() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: {
       eventId: string;
@@ -254,6 +292,7 @@ export function useUpdateEvent() {
 export function useDeleteEvent() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: { eventId: string; invitationId: string }) => {
       if (!actor) throw new Error('Actor not available');
@@ -265,36 +304,11 @@ export function useDeleteEvent() {
   });
 }
 
-// ─── RSVP ─────────────────────────────────────────────────────────────────────
+// ─── RSVPs ────────────────────────────────────────────────────────────────────
 
-export function useGetRSVPsByInvitation(invitationId: string) {
-  const { actor, isFetching } = useActor();
-  return useQuery<RSVPEntry[]>({
-    queryKey: ['rsvps', invitationId],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getRSVPsByInvitation(invitationId);
-    },
-    enabled: !!actor && !isFetching && !!invitationId,
-  });
-}
-
-export function useGetRSVPsStats(invitationId: string) {
-  const { actor, isFetching } = useActor();
-  return useQuery({
-    queryKey: ['rsvpStats', invitationId],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getRSVPsStats(invitationId);
-    },
-    enabled: !!actor && !isFetching && !!invitationId,
-  });
-}
-
-/** Submit a wedding RSVP response from a guest */
 export function useSubmitWeddingRSVP() {
   const { actor } = useActor();
-  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: {
       invitationId: string;
@@ -302,7 +316,7 @@ export function useSubmitWeddingRSVP() {
       guestName: string;
       guestPhone: string;
       attending: boolean;
-      guestCount: bigint;
+      guestCount: number;
       message: string;
     }) => {
       if (!actor) throw new Error('Actor not available');
@@ -312,34 +326,58 @@ export function useSubmitWeddingRSVP() {
         params.guestName,
         params.guestPhone,
         params.attending,
-        params.guestCount,
+        BigInt(params.guestCount),
         params.message,
       );
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['rsvps', variables.invitationId] });
-      queryClient.invalidateQueries({ queryKey: ['rsvpStats', variables.invitationId] });
+  });
+}
+
+export function useGetRSVPsByInvitation(invitationId: string) {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<RSVPEntry[]>({
+    queryKey: ['rsvps', invitationId],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getRSVPsByInvitation(invitationId);
     },
+    enabled: !!actor && !actorFetching && !!invitationId,
+  });
+}
+
+export function useGetRSVPsStats(invitationId: string) {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<RSVPStats>({
+    queryKey: ['rsvpStats', invitationId],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.getRSVPsStats(invitationId);
+    },
+    enabled: !!actor && !actorFetching && !!invitationId,
   });
 }
 
 // ─── Photos ───────────────────────────────────────────────────────────────────
 
 export function useGetPhotosByInvitation(invitationId: string) {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
+
   return useQuery<Photo[]>({
     queryKey: ['photos', invitationId],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getPhotosByInvitation(invitationId);
     },
-    enabled: !!actor && !isFetching && !!invitationId,
+    enabled: !!actor && !actorFetching && !!invitationId,
   });
 }
 
 export function useAddPhoto() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: { invitationId: string; photoId: string; imageUrl: string }) => {
       if (!actor) throw new Error('Actor not available');
@@ -354,6 +392,7 @@ export function useAddPhoto() {
 export function useDeletePhoto() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: { photoId: string; invitationId: string }) => {
       if (!actor) throw new Error('Actor not available');
@@ -368,20 +407,22 @@ export function useDeletePhoto() {
 // ─── Background Music ─────────────────────────────────────────────────────────
 
 export function useGetBackgroundMusic(invitationId: string) {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
+
   return useQuery<BackgroundMusic[]>({
     queryKey: ['music', invitationId],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getBackgroundMusic(invitationId);
     },
-    enabled: !!actor && !isFetching && !!invitationId,
+    enabled: !!actor && !actorFetching && !!invitationId,
   });
 }
 
 export function useSetBackgroundMusic() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: {
       invitationId: string;
@@ -406,20 +447,22 @@ export function useSetBackgroundMusic() {
 // ─── Theme Variants ───────────────────────────────────────────────────────────
 
 export function useGetThemeVariants(invitationId: string) {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
+
   return useQuery<ThemeConfig[]>({
     queryKey: ['themes', invitationId],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getThemeVariants(invitationId);
     },
-    enabled: !!actor && !isFetching && !!invitationId,
+    enabled: !!actor && !actorFetching && !!invitationId,
   });
 }
 
 export function useSaveThemeVariant() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (params: { invitationId: string; themeConfig: ThemeConfig }) => {
       if (!actor) throw new Error('Actor not available');
@@ -434,47 +477,14 @@ export function useSaveThemeVariant() {
 export function useDeleteThemeVariant() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: async (params: { invitationId: string; themeIndex: bigint }) => {
+    mutationFn: async (params: { invitationId: string; themeIndex: number }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.deleteThemeVariant(params.invitationId, params.themeIndex);
+      return actor.deleteThemeVariant(params.invitationId, BigInt(params.themeIndex));
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['themes', variables.invitationId] });
-    },
-  });
-}
-
-// ─── User Profile ─────────────────────────────────────────────────────────────
-
-export function useGetCallerUserProfile() {
-  const { actor, isFetching: actorFetching } = useActor();
-  const query = useQuery({
-    queryKey: ['currentUserProfile'],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getCallerUserProfile();
-    },
-    enabled: !!actor && !actorFetching,
-    retry: false,
-  });
-  return {
-    ...query,
-    isLoading: actorFetching || query.isLoading,
-    isFetched: !!actor && query.isFetched,
-  };
-}
-
-export function useSaveCallerUserProfile() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (profile: { name: string; email: string }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.saveCallerUserProfile(profile);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
     },
   });
 }

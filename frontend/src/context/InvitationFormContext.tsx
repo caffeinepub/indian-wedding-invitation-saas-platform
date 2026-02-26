@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { EventType } from '../backend';
 
 export interface EventData {
@@ -11,11 +11,13 @@ export interface EventData {
   eventType: EventType;
 }
 
-// Alias for backward compatibility
-export type LocalEvent = EventData;
+export interface LocalEvent extends EventData {
+  isNew?: boolean;
+  isDeleted?: boolean;
+  isModified?: boolean;
+}
 
 export interface FormData {
-  // Couple details
   brideName: string;
   groomName: string;
   weddingDate: string;
@@ -25,35 +27,21 @@ export interface FormData {
   googleMapsLink: string;
   familyDetails: string;
   invitationMessage: string;
-
-  // Couple photos (separate for bride and groom)
-  bridePhoto: File | null;
-  groomPhoto: File | null;
-
-  // Events
-  events: EventData[];
-
-  // Template & theme
   selectedTemplate: string;
   colorScheme: string;
   fontChoice: string;
   backgroundChoice: string;
-  backgroundStyle: string;
-  accentIntensity: string;
-  borderStyle: string;
-  layoutDensity: string;
-
-  // Media
+  events: LocalEvent[];
   photos: string[];
   musicUrl: string;
   musicAutoPlay: boolean;
+  bridePhoto: File | null;
+  groomPhoto: File | null;
 }
 
-export interface InvitationFormContextType {
+interface InvitationFormContextType {
   formData: FormData;
-  currentStep: number;
-  setCurrentStep: (step: number) => void;
-  updateFormData: (data: Partial<FormData>) => void;
+  updateFormData: (updates: Partial<FormData>) => void;
   addEvent: (event: EventData) => void;
   updateEvent: (event: EventData) => void;
   deleteEvent: (id: string) => void;
@@ -70,68 +58,63 @@ const defaultFormData: FormData = {
   googleMapsLink: '',
   familyDetails: '',
   invitationMessage: '',
-  bridePhoto: null,
-  groomPhoto: null,
-  events: [],
   selectedTemplate: 'royal-gold',
-  colorScheme: 'gold-ivory',
+  colorScheme: 'gold-crimson',
   fontChoice: 'playfair-lato',
   backgroundChoice: 'floral',
-  backgroundStyle: 'soft',
-  accentIntensity: 'medium',
-  borderStyle: 'ornate',
-  layoutDensity: 'comfortable',
+  events: [],
   photos: [],
   musicUrl: '',
   musicAutoPlay: false,
+  bridePhoto: null,
+  groomPhoto: null,
 };
 
-const InvitationFormContext = createContext<InvitationFormContextType | undefined>(undefined);
+const InvitationFormContext = createContext<InvitationFormContextType | null>(null);
 
-export function InvitationFormProvider({ children }: { children: ReactNode }) {
+export function InvitationFormProvider({ children }: { children: React.ReactNode }) {
   const [formData, setFormData] = useState<FormData>(defaultFormData);
-  const [currentStep, setCurrentStep] = useState(0);
 
-  const updateFormData = (data: Partial<FormData>) => {
-    setFormData(prev => ({ ...prev, ...data }));
-  };
+  const updateFormData = useCallback((updates: Partial<FormData>) => {
+    setFormData(prev => ({ ...prev, ...updates }));
+  }, []);
 
-  const addEvent = (event: EventData) => {
-    setFormData(prev => ({ ...prev, events: [...prev.events, event] }));
-  };
-
-  const updateEvent = (event: EventData) => {
+  const addEvent = useCallback((event: EventData) => {
     setFormData(prev => ({
       ...prev,
-      events: prev.events.map(e => (e.id === event.id ? event : e)),
+      events: [...prev.events, { ...event, isNew: true }],
     }));
-  };
+  }, []);
 
-  const deleteEvent = (id: string) => {
+  const updateEvent = useCallback((event: EventData) => {
+    setFormData(prev => ({
+      ...prev,
+      events: prev.events.map(e =>
+        e.id === event.id ? { ...e, ...event, isModified: !e.isNew } : e
+      ),
+    }));
+  }, []);
+
+  const deleteEvent = useCallback((id: string) => {
     setFormData(prev => ({
       ...prev,
       events: prev.events.filter(e => e.id !== id),
     }));
-  };
+  }, []);
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setFormData(defaultFormData);
-    setCurrentStep(0);
-  };
+  }, []);
 
   return (
-    <InvitationFormContext.Provider
-      value={{
-        formData,
-        currentStep,
-        setCurrentStep,
-        updateFormData,
-        addEvent,
-        updateEvent,
-        deleteEvent,
-        resetForm,
-      }}
-    >
+    <InvitationFormContext.Provider value={{
+      formData,
+      updateFormData,
+      addEvent,
+      updateEvent,
+      deleteEvent,
+      resetForm,
+    }}>
       {children}
     </InvitationFormContext.Provider>
   );
@@ -140,7 +123,7 @@ export function InvitationFormProvider({ children }: { children: ReactNode }) {
 export function useInvitationForm() {
   const context = useContext(InvitationFormContext);
   if (!context) {
-    throw new Error('useInvitationForm must be used within an InvitationFormProvider');
+    throw new Error('useInvitationForm must be used within InvitationFormProvider');
   }
   return context;
 }

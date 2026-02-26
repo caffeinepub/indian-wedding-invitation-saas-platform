@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Heart, Home, LayoutDashboard } from 'lucide-react';
 
@@ -6,38 +5,36 @@ export default function NotFound() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-ivory flex items-center justify-center px-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-ivory-50 to-gold-50 dark:from-charcoal-900 dark:to-charcoal-800 px-4">
       <div className="text-center max-w-md mx-auto">
-        {/* Floating heart icon */}
         <div className="relative mb-8">
-          <div className="text-8xl animate-bounce inline-block">
-            <Heart className="w-24 h-24 text-gold fill-gold mx-auto" />
+          <div className="text-9xl font-serif text-gold-200 dark:text-gold-900 select-none">404</div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Heart className="w-16 h-16 text-gold-400 fill-current animate-pulse" />
           </div>
-          <div className="absolute -top-2 -right-2 text-4xl">💍</div>
         </div>
 
-        <h1 className="font-cinzel text-6xl text-gold mb-4">404</h1>
-        <h2 className="font-display text-3xl text-charcoal mb-4">
-          Invitation Not Found
-        </h2>
-        <p className="font-serif text-charcoal-light text-lg mb-8 leading-relaxed">
-          The wedding invitation you're looking for seems to have wandered off.
-          Perhaps it's celebrating somewhere else?
+        <h1 className="text-3xl font-serif text-charcoal-800 dark:text-ivory-100 mb-3">
+          Page Not Found
+        </h1>
+        <p className="text-charcoal-500 dark:text-ivory-400 mb-8 leading-relaxed font-sans">
+          The page you're looking for doesn't exist or has been moved.
+          Let's get you back to celebrating love.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={() => navigate({ to: '/' })}
-            className="flex items-center gap-2 bg-gold hover:bg-gold-dark text-charcoal font-elegant font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-luxury"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-gold-500 hover:bg-gold-400 text-charcoal-900 font-semibold rounded-full transition-all duration-300 shadow-luxury"
           >
-            <Home className="w-5 h-5" />
+            <Home className="w-4 h-4" />
             Go Home
           </button>
           <button
             onClick={() => navigate({ to: '/dashboard' })}
-            className="flex items-center gap-2 border-2 border-gold text-gold hover:bg-gold hover:text-charcoal font-elegant font-semibold px-8 py-3 rounded-full transition-all duration-300"
+            className="flex items-center justify-center gap-2 px-6 py-3 border-2 border-gold-300 text-gold-600 hover:bg-gold-50 dark:hover:bg-gold-900/20 font-semibold rounded-full transition-all duration-300"
           >
-            <LayoutDashboard className="w-5 h-5" />
+            <LayoutDashboard className="w-4 h-4" />
             Dashboard
           </button>
         </div>

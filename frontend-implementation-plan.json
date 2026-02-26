@@ -1,97 +1,239 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Separate Bride/Groom Photo Uploads & Fix Home Tab Layout Issues",
+  "title": "Rollback to Version 5 — Frontend Restore",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Replace single couple photo field with separate bride and groom photo upload inputs throughout the application",
-      "acceptanceCriteria": [
-        "CoupleDetailsStep shows two distinct upload controls: 'Bride Photo' and 'Groom Photo', with no single 'couple photo URL' field present",
-        "Each upload control accepts an image file, displays a preview thumbnail after selection, and allows removal",
-        "InvitationFormContext stores bridePhoto and groomPhoto as separate fields",
-        "Backend Invitation record stores bridePhoto and groomPhoto as separate optional Text fields",
-        "Guest invitation page renders both the bride and groom photos side by side where applicable",
-        "Existing invitations with a legacy single couple photo field do not crash"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/context/InvitationFormContext.tsx",
-          "operation": "modify",
-          "description": "Replace the single couplePhoto field (currently likely stored as a string or similar) with two separate fields: bridePhoto and groomPhoto, both typed as ExternalBlob | null. Update the initial state, the form state type, and any setter functions to handle these two fields independently. Remove all references to couplePhoto."
-        },
-        {
-          "path": "frontend/src/components/wizard/CoupleDetailsStep.tsx",
-          "operation": "modify",
-          "description": "Remove the single couple photo URL text input. Add two separate file upload input controls labeled 'Bride Photo' and 'Groom Photo'. Each should allow the user to select an image file from their device. After selection, display a preview thumbnail for each photo. Include a remove/clear button for each uploaded photo. Wire both inputs to the InvitationFormContext's bridePhoto and groomPhoto fields using ExternalBlob.fromBytes for file conversion. Verify the blob-storage component's usage instructions before implementing file handling."
-        },
-        {
-          "path": "frontend/src/pages/InvitationEditor.tsx",
-          "operation": "modify",
-          "description": "In the couple details tab section of the editor, replace any single couple photo input with two separate file upload controls for bridePhoto and groomPhoto, mirroring the pattern used in CoupleDetailsStep. Ensure the editor loads existing bridePhoto and groomPhoto values from the backend into the form context and displays their previews. Verify the blob-storage component's usage instructions before implementing file handling."
-        },
-        {
-          "path": "frontend/src/components/guest/HeroSection.tsx",
-          "operation": "modify",
-          "description": "Update the hero section to render both bridePhoto and groomPhoto side by side if they are present. Use the ExternalBlob.getDirectURL() method to get cacheable image URLs for each photo. Ensure the layout gracefully handles cases where one or both photos are missing (e.g., show placeholder or omit the missing photo). Maintain existing template theming and overlay styling. Verify the blob-storage component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/guest/CoupleIntroduction.tsx",
-          "operation": "modify",
-          "description": "If this component currently displays a single couple photo, update it to render both bridePhoto and groomPhoto side by side using ExternalBlob.getDirectURL(). Ensure the layout adapts if one or both photos are absent. Maintain scroll-triggered animations and template styling. Verify the blob-storage component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Update any invitation-related query hooks (e.g., getInvitationBySlug, getAllInvitations) and mutation hooks (e.g., createInvitation, updateInvitation) to handle bridePhoto and groomPhoto as separate ExternalBlob | null fields instead of a single couplePhoto field. Ensure proper serialization/deserialization when sending to and receiving from the backend. If the backend returns legacy invitations with a single couple photo field, handle gracefully (e.g., assign to bridePhoto and leave groomPhoto null)."
-        }
-      ]
-    },
-    {
       "id": "REQ-2",
-      "summary": "Fix Dashboard layout to keep all invitation action controls (including Publish button) always visible regardless of editing state",
+      "summary": "Restore all frontend files to their exact Version 5 state, including authentication gating, routes, pages, components, hooks, context, and stylesheets",
       "acceptanceCriteria": [
-        "The Publish button and all other invitation action controls on the Dashboard (Home tab) are always visible regardless of whether the user is currently editing an invitation",
-        "No invitation card action is clipped or hidden by z-index, overflow, or conditional rendering tied to edit state"
+        "All frontend pages render correctly as they did in Version 5.",
+        "Authentication gating (AuthGuard) is restored if it existed in Version 5.",
+        "useQueries.ts uses the authenticated actor as it did in Version 5.",
+        "Dashboard, CreateInvitationWizard, InvitationEditor, and all other pages function identically to Version 5.",
+        "No login/auth removal changes from versions after Version 5 are present.",
+        "All routes, layouts, and components match Version 5 exactly."
       ],
       "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Restore App.tsx to Version 5 state, including any AuthGuard wrappers on protected routes, the original route configuration for landing, dashboard, create, edit, invitation, and 404 pages, and any providers that existed in Version 5."
+        },
+        {
+          "path": "frontend/src/components/auth/AuthGuard.tsx",
+          "operation": "modify",
+          "description": "Restore AuthGuard.tsx to Version 5 state, re-implementing authentication gating logic that protects admin/user routes by checking identity and redirecting unauthenticated users."
+        },
+        {
+          "path": "frontend/src/pages/LandingPage.tsx",
+          "operation": "modify",
+          "description": "Restore LandingPage.tsx to Version 5 state, ensuring the marketing hero section, feature highlights, and navigation match the original design and behavior."
+        },
         {
           "path": "frontend/src/pages/Dashboard.tsx",
           "operation": "modify",
-          "description": "Review the invitation card rendering and action button layout. If the Publish button or other action controls are conditionally hidden, clipped by overflow styles, or obscured by z-index issues when an invitation is in an editing state, refactor the layout to ensure all action buttons remain fully visible and clickable at all times. This may involve adjusting flexbox/grid layouts, removing conditional visibility logic, or fixing CSS overflow/z-index properties. Ensure action buttons are not dependent on hover or focus states to become visible."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Remove or conditionally hide 'Create Invitation' CTA from pages where it does not belong (editor, wizard, guest invitation) and fix Header overlap",
-      "acceptanceCriteria": [
-        "'Create Invitation' text/button does not appear on the InvitationEditor page",
-        "'Create Invitation' text/button does not appear on CreateInvitationWizard pages",
-        "'Create Invitation' text/button does not appear on the GuestInvitation page",
-        "No visual overlap or layout displacement caused by the 'Create Invitation' element on any page other than Landing and Dashboard",
-        "The Header CTA is hidden on editor and wizard routes"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/layout/Header.tsx",
-          "operation": "modify",
-          "description": "Add logic to conditionally hide the 'Create Invitation' CTA button in the Header when the current route is the InvitationEditor, CreateInvitationWizard, or GuestInvitation page. Use the router's current location or a route-matching utility to determine the active page. Ensure the CTA only renders on the LandingPage and Dashboard routes. This will prevent the CTA from overlapping other page sections on routes where it should not appear."
-        },
-        {
-          "path": "frontend/src/pages/InvitationEditor.tsx",
-          "operation": "modify",
-          "description": "If there is a standalone 'Create Invitation' button or CTA text rendered within this page component (outside the Header), remove it entirely. Ensure no 'Create Invitation' text or button is present in the editor UI."
+          "description": "Restore Dashboard.tsx to Version 5 state, including the invitation list UI, publish/delete/copy actions, RSVP responses modal integration, and any authentication-dependent rendering logic."
         },
         {
           "path": "frontend/src/pages/CreateInvitationWizard.tsx",
           "operation": "modify",
-          "description": "If there is a standalone 'Create Invitation' button or CTA text rendered within this wizard page (outside the Header), remove it entirely. Ensure no 'Create Invitation' text or button is present in the wizard steps."
+          "description": "Restore CreateInvitationWizard.tsx to Version 5 state, ensuring the multi-step wizard flow (couple details, events, template, media, review) matches the original progression and submission logic."
+        },
+        {
+          "path": "frontend/src/pages/InvitationEditor.tsx",
+          "operation": "modify",
+          "description": "Restore InvitationEditor.tsx to Version 5 state, including the tabbed editor interface for updating invitation details, photos, and events with data fetching and mutation hooks as they existed."
         },
         {
           "path": "frontend/src/pages/GuestInvitation.tsx",
           "operation": "modify",
-          "description": "If there is a standalone 'Create Invitation' button or CTA text rendered within this guest-facing page (outside the Header), remove it entirely. Ensure no 'Create Invitation' text or button is present on the public invitation view."
+          "description": "Restore GuestInvitation.tsx to Version 5 state, ensuring the public-facing invitation page renders correctly with all themed sections (hero, couple intro, events, photo gallery, RSVP form, venue) and handles loading/error/unpublished states."
+        },
+        {
+          "path": "frontend/src/pages/NotFound.tsx",
+          "operation": "modify",
+          "description": "Restore NotFound.tsx to Version 5 state with the original 404 error page layout and navigation buttons."
+        },
+        {
+          "path": "frontend/src/components/layout/Header.tsx",
+          "operation": "modify",
+          "description": "Restore Header.tsx to Version 5 state, including the responsive navigation bar with scroll transitions, mobile menu, and any authentication-dependent UI elements (login button, user menu)."
+        },
+        {
+          "path": "frontend/src/components/layout/DecorativeDivider.tsx",
+          "operation": "modify",
+          "description": "Restore DecorativeDivider.tsx to Version 5 state with its original three variants (mandala, line, flourish) and SVG fallback logic."
+        },
+        {
+          "path": "frontend/src/components/wizard/CoupleDetailsStep.tsx",
+          "operation": "modify",
+          "description": "Restore CoupleDetailsStep.tsx to Version 5 state, ensuring the form fields, validation, and photo upload functionality match the original implementation."
+        },
+        {
+          "path": "frontend/src/components/wizard/EventManagementStep.tsx",
+          "operation": "modify",
+          "description": "Restore EventManagementStep.tsx to Version 5 state, including the event CRUD UI, card display, and navigation buttons as they existed."
+        },
+        {
+          "path": "frontend/src/components/wizard/TemplateThemeStep.tsx",
+          "operation": "modify",
+          "description": "Restore TemplateThemeStep.tsx to Version 5 state, including template selection, color scheme picker, font selector, background style chooser, and theme variant save/apply functionality."
+        },
+        {
+          "path": "frontend/src/components/wizard/MediaManagementStep.tsx",
+          "operation": "modify",
+          "description": "Restore MediaManagementStep.tsx to Version 5 state with photo gallery upload and music uploader sections as they existed."
+        },
+        {
+          "path": "frontend/src/components/wizard/ReviewStep.tsx",
+          "operation": "modify",
+          "description": "Restore ReviewStep.tsx to Version 5 state, including the summary view of couple details, events, template/theme, media, and URL slug collection before submission."
+        },
+        {
+          "path": "frontend/src/components/wizard/ProgressBar.tsx",
+          "operation": "modify",
+          "description": "Restore ProgressBar.tsx to Version 5 state with the original multi-step progress indicator styling and animation."
+        },
+        {
+          "path": "frontend/src/components/templates/TemplateSelector.tsx",
+          "operation": "modify",
+          "description": "Restore TemplateSelector.tsx to Version 5 state, ensuring the template grid display and selection logic match the original implementation."
+        },
+        {
+          "path": "frontend/src/components/templates/TemplatePreview.tsx",
+          "operation": "modify",
+          "description": "Restore TemplatePreview.tsx to Version 5 state, including the live preview card rendering with theme resolution for colors, fonts, and backgrounds."
+        },
+        {
+          "path": "frontend/src/components/templates/ColorSchemePicker.tsx",
+          "operation": "modify",
+          "description": "Restore ColorSchemePicker.tsx to Version 5 state with the original color scheme grid and selection behavior."
+        },
+        {
+          "path": "frontend/src/components/templates/FontSelector.tsx",
+          "operation": "modify",
+          "description": "Restore FontSelector.tsx to Version 5 state, including the FONT_CHOICES list and font pairing selector UI."
+        },
+        {
+          "path": "frontend/src/components/guest/HeroSection.tsx",
+          "operation": "modify",
+          "description": "Restore HeroSection.tsx to Version 5 state with the full-screen hero layout showing couple photos, names, wedding date, and venue over the parallax background."
+        },
+        {
+          "path": "frontend/src/components/guest/CoupleIntroduction.tsx",
+          "operation": "modify",
+          "description": "Restore CoupleIntroduction.tsx to Version 5 state with the couple photos and names section, theme support, and scroll animation."
+        },
+        {
+          "path": "frontend/src/components/guest/EventTimeline.tsx",
+          "operation": "modify",
+          "description": "Restore EventTimeline.tsx to Version 5 state, including the event cards with type-specific styling, icons, gradients, and scroll animations."
+        },
+        {
+          "path": "frontend/src/components/guest/PhotoGalleryLightbox.tsx",
+          "operation": "modify",
+          "description": "Restore PhotoGalleryLightbox.tsx to Version 5 state with the responsive gallery grid and fullscreen lightbox navigation."
+        },
+        {
+          "path": "frontend/src/components/guest/RSVPForm.tsx",
+          "operation": "modify",
+          "description": "Restore RSVPForm.tsx to Version 5 state, including the guest RSVP form fields, theme styling, submission logic, and confirmation screen."
+        },
+        {
+          "path": "frontend/src/components/guest/VenueSection.tsx",
+          "operation": "modify",
+          "description": "Restore VenueSection.tsx to Version 5 state with the venue card display, scroll animation, and Google Maps link."
+        },
+        {
+          "path": "frontend/src/components/guest/CountdownTimer.tsx",
+          "operation": "modify",
+          "description": "Restore CountdownTimer.tsx to Version 5 state with the live countdown timer display and template-based styling."
+        },
+        {
+          "path": "frontend/src/components/guest/WhatsAppShareButton.tsx",
+          "operation": "modify",
+          "description": "Restore WhatsAppShareButton.tsx to Version 5 state with the fixed floating share button and pre-filled link generation."
+        },
+        {
+          "path": "frontend/src/components/events/EventCard.tsx",
+          "operation": "modify",
+          "description": "Restore EventCard.tsx to Version 5 state, including the event type-specific styling, date/time/venue display, and edit/delete action buttons."
+        },
+        {
+          "path": "frontend/src/components/events/EventForm.tsx",
+          "operation": "modify",
+          "description": "Restore EventForm.tsx to Version 5 state with the create/edit form for events, including event type selector and all input fields."
+        },
+        {
+          "path": "frontend/src/components/media/PhotoGalleryUpload.tsx",
+          "operation": "modify",
+          "description": "Restore PhotoGalleryUpload.tsx to Version 5 state, including the drag-and-drop upload interface, preview grid, and data URL storage."
+        },
+        {
+          "path": "frontend/src/components/media/MusicUploader.tsx",
+          "operation": "modify",
+          "description": "Restore MusicUploader.tsx to Version 5 state with the audio file upload, preview/play functionality, and auto-play toggle."
+        },
+        {
+          "path": "frontend/src/components/media/MusicController.tsx",
+          "operation": "modify",
+          "description": "Restore MusicController.tsx to Version 5 state, including the floating audio player widget with play/pause, mute, and volume controls."
+        },
+        {
+          "path": "frontend/src/components/dashboard/RSVPResponsesModal.tsx",
+          "operation": "modify",
+          "description": "Restore RSVPResponsesModal.tsx to Version 5 state, displaying RSVP responses list and summary stats using the original data fetching hooks."
+        },
+        {
+          "path": "frontend/src/components/SkeletonLoader.tsx",
+          "operation": "modify",
+          "description": "Restore SkeletonLoader.tsx to Version 5 state with all four skeleton variants (card, text, image, invitation-card) and shimmer animation."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Restore useQueries.ts to Version 5 state, ensuring all React Query hooks use the authenticated actor as they did originally, reverting any anonymous actor changes or login-gating removals introduced after Version 5."
+        },
+        {
+          "path": "frontend/src/context/InvitationFormContext.tsx",
+          "operation": "modify",
+          "description": "Restore InvitationFormContext.tsx to Version 5 state, including the original form state shape, CRUD helpers for events, and any authentication-dependent logic."
+        },
+        {
+          "path": "frontend/src/utils/templateDefinitions.ts",
+          "operation": "modify",
+          "description": "Restore templateDefinitions.ts to Version 5 state, ensuring the TEMPLATES array contains the exact styling metadata (colors, fonts, gradients) for all invitation templates as they existed."
+        },
+        {
+          "path": "frontend/src/utils/eventIcons.tsx",
+          "operation": "modify",
+          "description": "Restore eventIcons.tsx to Version 5 state with the original EventType-to-config mapping for icons, colors, and gradients."
+        },
+        {
+          "path": "frontend/src/utils/animations.ts",
+          "operation": "modify",
+          "description": "Restore animations.ts to Version 5 state, including all animation constants, easing curves, Framer Motion presets, and helper functions."
+        },
+        {
+          "path": "frontend/src/utils/urlParams.ts",
+          "operation": "modify",
+          "description": "Restore urlParams.ts to Version 5 state with the original URL parameter reading, storing, and clearing utilities."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Restore index.css to Version 5 state, ensuring Google Fonts imports, Tailwind directives, and CSS custom properties for color palettes (gold, crimson, ivory, charcoal) match the original."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Restore tailwind.config.js to Version 5 state, including the original wedding luxury theme with custom color palettes, typography, shadows, and dark mode configuration."
+        },
+        {
+          "path": "frontend/index.css",
+          "operation": "modify",
+          "description": "Restore frontend/index.css to Version 5 state with the original global Tailwind CSS entry point and CSS custom properties for theme tokens."
         }
       ]
     }

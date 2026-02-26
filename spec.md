@@ -1,13 +1,14 @@
 # Specification
 
 ## Summary
-**Goal:** Fix three issues in the Wedding Invitation Builder: separate bride/groom photo uploads, fix hidden action buttons on the Dashboard, and prevent "Create Invitation" CTA from appearing on wrong pages.
+**Goal:** Fully restore the Wedding Invitations app to its exact Version 5 state by rolling back all backend and frontend changes introduced after Version 5.
 
 **Planned changes:**
-- Replace the single couple photo field with two separate file upload inputs ("Bride Photo" and "Groom Photo") in CoupleDetailsStep and InvitationEditor, including preview thumbnails and independent storage
-- Update InvitationFormContext to store `bridePhoto` and `groomPhoto` as separate fields, and update the backend Invitation type in main.mo accordingly
-- Render both bride and groom photos side by side on the guest-facing invitation pages (HeroSection, CoupleIntroduction)
-- Fix Dashboard layout so the Publish button and all invitation action controls remain visible and accessible regardless of editing state
-- Hide the "Create Invitation" CTA from the Header on editor and wizard routes, and ensure it does not appear on the InvitationEditor, CreateInvitationWizard, or GuestInvitation pages
+- Restore `backend/main.mo` to Version 5, including all data types (Invitation, Event, RSVP, Photo, Music), CRUD operations, blob storage, and access control logic
+- Restore `App.tsx` routes and providers to Version 5
+- Restore all frontend pages (LandingPage, Dashboard, CreateInvitationWizard, InvitationEditor, GuestInvitation, NotFound) to Version 5
+- Restore all components (AuthGuard, Header, wizard steps, guest components, media, templates, events, layout) to Version 5
+- Restore `useQueries.ts`, `InvitationFormContext.tsx`, utils, and stylesheets to Version 5
+- Revert any login-gating removal, anonymous actor changes, or other modifications made after Version 5
 
-**User-visible outcome:** Users can upload separate photos for the bride and groom; the Dashboard always shows action buttons like Publish; and the "Create Invitation" button no longer appears or overlaps content on editor, wizard, or guest invitation pages.
+**User-visible outcome:** The app looks and behaves exactly as it did in Version 5, with all authentication gating, pages, and functionality fully restored.

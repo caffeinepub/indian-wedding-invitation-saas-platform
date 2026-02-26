@@ -2,15 +2,13 @@ import React from 'react';
 import { SiWhatsapp } from 'react-icons/si';
 
 interface WhatsAppShareButtonProps {
-  slug: string;
-  brideName: string;
-  groomName: string;
+  invitationUrl: string;
+  coupleName: string;
 }
 
-export default function WhatsAppShareButton({ slug, brideName, groomName }: WhatsAppShareButtonProps) {
-  const url = `${window.location.origin}/${slug}`;
+export default function WhatsAppShareButton({ invitationUrl, coupleName }: WhatsAppShareButtonProps) {
   const text = encodeURIComponent(
-    `You're cordially invited to the wedding of ${brideName} & ${groomName}! 💍\n\nView the invitation: ${url}`
+    `You're cordially invited to the wedding of ${coupleName}! 💍\n\nView the invitation: ${invitationUrl}`
   );
 
   return (
