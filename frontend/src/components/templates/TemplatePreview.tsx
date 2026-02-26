@@ -1,237 +1,223 @@
 import React from 'react';
-import { FormData } from '@/context/InvitationFormContext';
-import { getTemplateById, COLOR_SCHEMES, FONT_CHOICES } from '@/utils/templateDefinitions';
+import { useInvitationForm } from '../../context/InvitationFormContext';
+import { getTemplateById, COLOR_SCHEMES, FONT_CHOICES as TEMPLATE_FONT_CHOICES } from '../../utils/templateDefinitions';
+import { FONT_CHOICES } from './FontSelector';
 
-interface TemplatePreviewProps {
-  formData: FormData;
-  scale?: number;
+function getBackgroundStyle(backgroundChoice: string, primaryColor: string) {
+  switch (backgroundChoice) {
+    case 'floral':
+      return {
+        background: `radial-gradient(ellipse at 20% 20%, ${primaryColor}22 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, ${primaryColor}18 0%, transparent 50%), linear-gradient(135deg, #fdf8f0 0%, #faf4e8 100%)`,
+      };
+    case 'paisley':
+      return {
+        background: `repeating-linear-gradient(45deg, ${primaryColor}08 0px, ${primaryColor}08 2px, transparent 2px, transparent 12px), linear-gradient(135deg, #fdf8f0 0%, #f5ede0 100%)`,
+      };
+    case 'watercolor':
+      return {
+        background: `radial-gradient(ellipse at 30% 40%, ${primaryColor}30 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, ${primaryColor}20 0%, transparent 50%), linear-gradient(180deg, #fdf9f4 0%, #f8f0e8 100%)`,
+      };
+    case 'dark-floral':
+      return {
+        background: `radial-gradient(ellipse at 20% 20%, ${primaryColor}40 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, ${primaryColor}30 0%, transparent 50%), linear-gradient(135deg, #1a1208 0%, #0d0a05 100%)`,
+      };
+    case 'dark-minimal':
+      return {
+        background: `linear-gradient(135deg, #1c1c1c 0%, #0a0a0a 100%)`,
+      };
+    case 'minimal':
+    default:
+      return {
+        background: `linear-gradient(135deg, #fdfcfb 0%, #f8f5f0 100%)`,
+      };
+  }
 }
 
-function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : null;
+function isDarkBackground(backgroundChoice: string): boolean {
+  return backgroundChoice === 'dark-floral' || backgroundChoice === 'dark-minimal';
 }
 
-function scaleColor(hex: string, intensity: number): string {
-  const rgb = hexToRgb(hex);
-  if (!rgb) return hex;
-  const factor = intensity / 100;
-  const r = Math.min(255, Math.round(rgb.r * factor));
-  const g = Math.min(255, Math.round(rgb.g * factor));
-  const b = Math.min(255, Math.round(rgb.b * factor));
-  return `rgb(${r}, ${g}, ${b})`;
-}
+export default function TemplatePreview() {
+  const { formData } = useInvitationForm();
 
-export default function TemplatePreview({ formData }: TemplatePreviewProps) {
   const template = getTemplateById(formData.selectedTemplate);
-  const isDark = template.category === 'cinematic-dark';
 
-  const intensity = formData.accentIntensity ?? 100;
-  const backgroundStyle = formData.backgroundStyle ?? 'gradient';
-  const borderStyle = formData.borderStyle ?? 'classic';
-  const layoutDensity = formData.layoutDensity ?? 'spacious';
+  // Resolve color scheme
+  const colorSchemeObj = COLOR_SCHEMES.find((cs) => cs.id === formData.colorScheme);
+  const primaryColor = colorSchemeObj?.primary || template?.primaryColor || '#c9a84c';
+  const secondaryColor = colorSchemeObj?.secondary || template?.secondaryColor || '#8b6914';
+  const accentColor = colorSchemeObj?.accent || template?.accentColor || '#f0e6d0';
 
-  // Resolve color scheme: use selected colorScheme from COLOR_SCHEMES if available,
-  // otherwise fall back to template defaults.
-  const colorSchemeData = COLOR_SCHEMES.find((s) => s.id === formData.colorScheme);
-  const primaryColor = colorSchemeData ? colorSchemeData.colors[0] : template.primaryColor;
-  const accentColor = colorSchemeData ? colorSchemeData.colors[1] : template.accentColor;
-  const bgColor = colorSchemeData ? colorSchemeData.colors[2] : template.bgColor;
+  // Resolve font
+  const fontChoice = FONT_CHOICES.find((f) => f.id === formData.fontChoice);
+  const headingFont = fontChoice?.heading || template?.headingFont || 'Cormorant Garamond';
+  const headingWeight = fontChoice?.headingWeight || '600';
+  const bodyFont = fontChoice?.body || template?.bodyFont || 'Lato';
 
-  // Resolve font choice: use selected fontChoice from FONT_CHOICES if available,
-  // otherwise fall back to template defaults.
-  const fontChoiceData = FONT_CHOICES.find((f) => f.id === formData.fontChoice);
-  const headingFont = fontChoiceData ? fontChoiceData.heading : template.headingFont;
+  const bgStyle = getBackgroundStyle(formData.backgroundChoice || 'minimal', primaryColor);
+  const isDark = isDarkBackground(formData.backgroundChoice || 'minimal');
 
-  const scaledPrimary = scaleColor(primaryColor, intensity);
-  const scaledAccent = scaleColor(accentColor, intensity);
+  const textColor = isDark ? '#f5f0e8' : '#2c1810';
+  const subtextColor = isDark ? '#d4c4a8' : '#6b4c3b';
+  const dividerColor = primaryColor;
 
-  // Map backgroundChoice (floral/paisley/minimal/watercolor/dark-floral/dark-minimal)
-  // to a backgroundStyle override so the main Background Style selector is reflected.
-  const backgroundChoiceStyleMap: Record<string, string> = {
-    floral: 'texture',
-    paisley: 'pattern',
-    minimal: 'solid',
-    watercolor: 'texture',
-    'dark-floral': 'texture',
-    'dark-minimal': 'solid',
-  };
-  // backgroundChoice takes precedence over the advanced backgroundStyle toggle
-  const effectiveBackgroundStyle =
-    formData.backgroundChoice && backgroundChoiceStyleMap[formData.backgroundChoice]
-      ? backgroundChoiceStyleMap[formData.backgroundChoice]
-      : backgroundStyle;
+  const brideName = formData.brideName || 'Priya';
+  const groomName = formData.groomName || 'Arjun';
+  const weddingDate = formData.weddingDate || '2025-02-14';
+  const venueName = formData.venueName || 'Grand Palace';
 
-  // Background computation using resolved colors
-  let bgStyle: React.CSSProperties = { background: bgColor };
-  if (effectiveBackgroundStyle === 'gradient') {
-    bgStyle = {
-      background: `linear-gradient(160deg, ${bgColor} 0%, ${accentColor}18 60%, ${primaryColor}12 100%)`,
-    };
-  } else if (effectiveBackgroundStyle === 'solid') {
-    bgStyle = { background: bgColor };
-  } else if (effectiveBackgroundStyle === 'pattern') {
-    bgStyle = {
-      background: bgColor,
-      backgroundImage: `radial-gradient(${primaryColor}15 1px, transparent 1px)`,
-      backgroundSize: '12px 12px',
-    };
-  } else if (effectiveBackgroundStyle === 'texture') {
-    bgStyle = {
-      background: `linear-gradient(135deg, ${bgColor} 25%, ${accentColor}20 50%, ${bgColor} 75%)`,
-      backgroundSize: '20px 20px',
-    };
-  }
-
-  // Border computation
-  let borderCss: React.CSSProperties = {};
-  if (borderStyle === 'classic') {
-    borderCss = {
-      border: `2px solid ${scaledPrimary}50`,
-      boxShadow: `0 0 0 4px ${scaledPrimary}10, 0 8px 32px ${scaledPrimary}20`,
-    };
-  } else if (borderStyle === 'ornate') {
-    borderCss = {
-      border: `3px double ${scaledPrimary}70`,
-      boxShadow: `inset 0 0 0 2px ${scaledAccent}20, 0 8px 32px ${scaledPrimary}25`,
-      outline: `1px solid ${scaledPrimary}30`,
-      outlineOffset: '3px',
-    };
-  } else {
-    // none
-    borderCss = { border: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' };
-  }
-
-  const isCompact = layoutDensity === 'compact';
-  const padClass = isCompact ? 'p-3' : 'p-5';
-  const gapClass = isCompact ? 'gap-1' : 'gap-2';
-  const photoSize = isCompact ? 'w-12 h-12' : 'w-16 h-16';
-  const nameSizeClass = isCompact ? 'text-xs' : 'text-sm';
-  const eventPad = isCompact ? 'p-1.5' : 'p-2';
-
-  // Text color derived from bgColor brightness
-  const textColor = isDark ? template.textColor : template.textColor;
+  const formattedDate = weddingDate
+    ? new Date(weddingDate).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : 'February 14, 2025';
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl"
+      className="rounded-xl overflow-hidden shadow-2xl border"
       style={{
-        width: '100%',
-        aspectRatio: '9/16',
-        maxWidth: '260px',
-        margin: '0 auto',
         ...bgStyle,
-        ...borderCss,
+        borderColor: `${primaryColor}40`,
+        minHeight: '420px',
       }}
     >
-      {/* Watercolor texture overlay for light themes */}
-      {!isDark && effectiveBackgroundStyle === 'texture' && (
-        <img
-          src="/assets/generated/watercolor-texture.dim_1200x800.png"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: 0.15 }}
-        />
-      )}
-      {!isDark && effectiveBackgroundStyle !== 'texture' && effectiveBackgroundStyle !== 'pattern' && (
-        <img
-          src="/assets/generated/watercolor-texture.dim_1200x800.png"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: 0.06 }}
-        />
-      )}
-
-      {/* Ornate border overlay */}
-      {borderStyle === 'ornate' && (
+      {/* Top ornament */}
+      <div className="flex justify-center pt-6 pb-2">
         <div
-          className="absolute inset-2 rounded-xl pointer-events-none z-20"
-          style={{ border: `1px solid ${scaledPrimary}30` }}
+          className="w-16 h-0.5 rounded-full"
+          style={{ background: `linear-gradient(90deg, transparent, ${primaryColor}, transparent)` }}
         />
+      </div>
+
+      {/* Header */}
+      <div className="text-center px-6 py-2">
+        <p
+          className="text-xs uppercase tracking-[0.3em] mb-3"
+          style={{ color: subtextColor, fontFamily: `'${bodyFont}', sans-serif` }}
+        >
+          Together with their families
+        </p>
+        <h1
+          className="text-4xl leading-tight mb-1"
+          style={{
+            fontFamily: `'${headingFont}', serif`,
+            fontWeight: headingWeight,
+            color: primaryColor,
+          }}
+        >
+          {brideName}
+        </h1>
+        <div
+          className="text-lg my-2"
+          style={{ color: subtextColor, fontFamily: `'${bodyFont}', sans-serif` }}
+        >
+          &amp;
+        </div>
+        <h1
+          className="text-4xl leading-tight"
+          style={{
+            fontFamily: `'${headingFont}', serif`,
+            fontWeight: headingWeight,
+            color: primaryColor,
+          }}
+        >
+          {groomName}
+        </h1>
+      </div>
+
+      {/* Divider */}
+      <div className="flex items-center justify-center gap-3 my-4 px-8">
+        <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, transparent, ${dividerColor}60)` }} />
+        <div className="w-2 h-2 rounded-full" style={{ background: primaryColor }} />
+        <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, ${dividerColor}60, transparent)` }} />
+      </div>
+
+      {/* Date & Venue */}
+      <div className="text-center px-6 pb-4">
+        <p
+          className="text-sm font-medium mb-1"
+          style={{ color: textColor, fontFamily: `'${bodyFont}', sans-serif` }}
+        >
+          {formattedDate}
+        </p>
+        <p
+          className="text-xs"
+          style={{ color: subtextColor, fontFamily: `'${bodyFont}', sans-serif` }}
+        >
+          {venueName}
+        </p>
+      </div>
+
+      {/* Invitation message preview */}
+      {formData.invitationMessage && (
+        <div
+          className="mx-6 mb-4 p-3 rounded-lg text-center"
+          style={{ background: `${primaryColor}12`, borderLeft: `2px solid ${primaryColor}40` }}
+        >
+          <p
+            className="text-xs italic leading-relaxed line-clamp-3"
+            style={{ color: subtextColor, fontFamily: `'${bodyFont}', sans-serif` }}
+          >
+            "{formData.invitationMessage}"
+          </p>
+        </div>
       )}
 
-      {/* Content */}
-      <div className={`relative z-10 flex flex-col items-center justify-start h-full ${padClass} text-center ${gapClass}`}>
-        {/* Header ornament */}
-        <div className="w-full flex items-center justify-center mb-1">
-          <div className="flex-1 h-px" style={{ background: `${scaledPrimary}40` }} />
-          <div className="mx-2 text-xs" style={{ color: scaledPrimary }}>✦</div>
-          <div className="flex-1 h-px" style={{ background: `${scaledPrimary}40` }} />
-        </div>
-
-        {/* Couple photo */}
-        {formData.couplePhotoUrl ? (
-          <div
-            className={`${photoSize} rounded-full overflow-hidden border-2 ${isCompact ? 'mb-1' : 'mb-2'}`}
-            style={{ borderColor: scaledPrimary }}
-          >
-            <img src={formData.couplePhotoUrl} alt="Couple" className="w-full h-full object-cover" />
-          </div>
-        ) : (
-          <div
-            className={`${photoSize} rounded-full ${isCompact ? 'mb-1' : 'mb-2'} flex items-center justify-center text-xl`}
-            style={{ background: `${scaledPrimary}20`, border: `2px solid ${scaledPrimary}40` }}
-          >
-            💑
-          </div>
-        )}
-
-        {/* Names */}
-        <div style={{ fontFamily: headingFont, color: scaledPrimary }}>
-          <p className={`${nameSizeClass} font-bold`}>{formData.brideName || 'Bride'}</p>
-          <p className="text-xs opacity-60 my-0.5" style={{ color: textColor }}>&</p>
-          <p className={`${nameSizeClass} font-bold`}>{formData.groomName || 'Groom'}</p>
-        </div>
-
-        {/* Date */}
-        {formData.weddingDate && (
-          <p className="text-xs font-inter" style={{ color: textColor, opacity: 0.7 }}>
-            {new Date(formData.weddingDate).toLocaleDateString('en-IN', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}
-          </p>
-        )}
-
-        {/* Venue */}
-        {formData.venueName && (
-          <p className="text-xs font-inter" style={{ color: textColor, opacity: 0.6 }}>
-            {formData.venueName}
-          </p>
-        )}
-
-        {/* Divider */}
-        <div className="w-full flex items-center justify-center my-1">
-          <div className="flex-1 h-px" style={{ background: `${scaledPrimary}30` }} />
-          <div className="mx-2 text-xs" style={{ color: scaledAccent }}>✦</div>
-          <div className="flex-1 h-px" style={{ background: `${scaledPrimary}30` }} />
-        </div>
-
-        {/* Events preview */}
-        {formData.events.slice(0, isCompact ? 1 : 2).map((event, i) => (
-          <div
-            key={i}
-            className={`w-full text-left ${eventPad} rounded-lg`}
-            style={{ background: `${scaledPrimary}15` }}
-          >
-            <p
-              className="text-xs font-bold"
-              style={{ fontFamily: headingFont, color: scaledPrimary }}
+      {/* Template & theme info */}
+      <div className="px-6 pb-6">
+        <div className="flex flex-wrap gap-2 justify-center">
+          {template && (
+            <span
+              className="text-xs px-2 py-1 rounded-full"
+              style={{
+                background: `${primaryColor}20`,
+                color: isDark ? '#e8d5b0' : subtextColor,
+                fontFamily: `'${bodyFont}', sans-serif`,
+              }}
             >
-              {event.title}
-            </p>
-            <p className="text-xs font-inter" style={{ color: textColor, opacity: 0.6 }}>
-              {event.date} • {event.venue}
-            </p>
-          </div>
-        ))}
+              {template.name}
+            </span>
+          )}
+          {colorSchemeObj && (
+            <span
+              className="text-xs px-2 py-1 rounded-full flex items-center gap-1"
+              style={{
+                background: `${primaryColor}20`,
+                color: isDark ? '#e8d5b0' : subtextColor,
+                fontFamily: `'${bodyFont}', sans-serif`,
+              }}
+            >
+              <span
+                className="w-2 h-2 rounded-full inline-block"
+                style={{ background: primaryColor }}
+              />
+              {colorSchemeObj.name}
+            </span>
+          )}
+          {fontChoice && (
+            <span
+              className="text-xs px-2 py-1 rounded-full"
+              style={{
+                background: `${primaryColor}20`,
+                color: isDark ? '#e8d5b0' : subtextColor,
+                fontFamily: `'${headingFont}', serif`,
+              }}
+            >
+              {fontChoice.name}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom ornament */}
+      <div className="flex justify-center pb-6">
+        <div
+          className="w-16 h-0.5 rounded-full"
+          style={{ background: `linear-gradient(90deg, transparent, ${primaryColor}, transparent)` }}
+        />
       </div>
     </div>
   );

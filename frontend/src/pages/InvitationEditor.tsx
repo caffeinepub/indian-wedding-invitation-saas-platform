@@ -1,128 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from '@tanstack/react-router';
-import { Globe, Eye, Loader2, Heart, Copy, Check, ArrowLeft, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
-import {
-  InvitationFormProvider,
-  useInvitationForm,
-} from '@/context/InvitationFormContext';
-import CoupleDetailsStep from '@/components/wizard/CoupleDetailsStep';
-import EventManagementStep from '@/components/wizard/EventManagementStep';
-import TemplateThemeStep from '@/components/wizard/TemplateThemeStep';
-import MediaManagementStep from '@/components/wizard/MediaManagementStep';
-import SkeletonLoader from '@/components/SkeletonLoader';
-import RSVPResponsesModal from '@/components/dashboard/RSVPResponsesModal';
-import {
-  useGetInvitationBySlug,
-  useUpdateInvitation,
-  usePublishInvitation,
-  useGetEvents,
-  useGetPhotos,
-  useGetBackgroundMusic,
-} from '@/hooks/useQueries';
-import { toast } from 'sonner';
-import type { Invitation } from '@/backend';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate } from '@tanstack/react-router';
+import { Save, Eye, ArrowLeft, Settings, Calendar, Image, Music, Loader2, Upload, X, Camera } from 'lucide-react';
+import { useGetInvitationBySlug, useUpdateInvitation, useAddPhotos } from '../hooks/useQueries';
+import { InvitationFormProvider, useInvitationForm } from '../context/InvitationFormContext';
+import { ExternalBlob } from '../backend';
+import CoupleDetailsStep from '../components/wizard/CoupleDetailsStep';
+import EventManagementStep from '../components/wizard/EventManagementStep';
+import TemplateThemeStep from '../components/wizard/TemplateThemeStep';
+import MediaManagementStep from '../components/wizard/MediaManagementStep';
 
-function PublishModal({
-  slug,
-  isOpen,
-  onClose,
-}: {
-  slug: string;
-  isOpen: boolean;
-  onClose: () => void;
-}) {
-  const [copied, setCopied] = useState(false);
-  const url = `${window.location.origin}/${slug}`;
+type TabId = 'details' | 'events' | 'theme' | 'media';
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
+const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
+  { id: 'details', label: 'Details', icon: <Settings className="w-4 h-4" /> },
+  { id: 'events', label: 'Events', icon: <Calendar className="w-4 h-4" /> },
+  { id: 'theme', label: 'Theme', icon: <Image className="w-4 h-4" /> },
+  { id: 'media', label: 'Media', icon: <Music className="w-4 h-4" /> },
+];
 
-  const handleWhatsApp = () => {
-    const text = encodeURIComponent(
-      `You're invited! View our wedding invitation: ${url}`
-    );
-    window.open(`https://wa.me/?text=${text}`, '_blank');
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="luxury-card max-w-md">
-        <DialogHeader>
-          <DialogTitle className="font-cinzel text-xl text-gold-dark text-center">
-            🎉 Invitation Published!
-          </DialogTitle>
-          <DialogDescription className="font-inter text-center text-muted-foreground">
-            Your invitation is now live and shareable
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 pt-2">
-          <div className="bg-secondary/50 rounded-xl p-4 border border-gold/20">
-            <p className="font-inter text-xs text-muted-foreground mb-1">Your invitation URL</p>
-            <p className="font-cinzel text-sm font-bold text-gold-dark break-all">{url}</p>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              onClick={handleCopy}
-              className="btn-gold flex-1 rounded-full font-cinzel tracking-wider"
-            >
-              {copied ? (
-                <Check className="w-4 h-4 mr-2" />
-              ) : (
-                <Copy className="w-4 h-4 mr-2" />
-              )}
-              {copied ? 'Copied!' : 'Copy Link'}
-            </Button>
-            <Button
-              onClick={handleWhatsApp}
-              className="flex-1 rounded-full font-cinzel tracking-wider bg-green-600 hover:bg-green-700 text-white"
-            >
-              WhatsApp
-            </Button>
-          </div>
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="w-full rounded-full font-cinzel border-gold/30"
-          >
-            Close
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function EditorContent({
-  slug,
-  invitation,
-}: {
-  slug: string;
-  invitation: Invitation;
-}) {
-  const { formData } = useInvitationForm();
-  const [isSaving, setIsSaving] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [showPublishModal, setShowPublishModal] = useState(false);
-  const [showRSVPModal, setShowRSVPModal] = useState(false);
+function EditorContent({ slug }: { slug: string }) {
   const navigate = useNavigate();
+  const { updateFormData, formData } = useInvitationForm();
+  const [activeTab, setActiveTab] = useState<TabId>('details');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
+  // Photo state for editor
+  const [bridePhotoFile, setBridePhotoFile] = useState<File | null>(null);
+  const [groomPhotoFile, setGroomPhotoFile] = useState<File | null>(null);
+  const [bridePhotoPreview, setBridePhotoPreview] = useState<string | null>(null);
+  const [groomPhotoPreview, setGroomPhotoPreview] = useState<string | null>(null);
+  const bridePhotoRef = useRef<HTMLInputElement>(null);
+  const groomPhotoRef = useRef<HTMLInputElement>(null);
+
+  const { data: invitation, isLoading } = useGetInvitationBySlug(slug);
   const updateInvitation = useUpdateInvitation();
-  const publishInvitation = usePublishInvitation();
+  const addPhotos = useAddPhotos();
+
+  // Initialize form data from existing invitation
+  useEffect(() => {
+    if (invitation && !initialized) {
+      updateFormData({
+        brideName: invitation.brideName,
+        groomName: invitation.groomName,
+        weddingDate: invitation.weddingDate,
+        weddingTime: invitation.weddingTime,
+        venueName: invitation.venueName,
+        venueAddress: invitation.venueAddress,
+        googleMapsLink: invitation.googleMapsLink,
+        familyDetails: invitation.familyDetails,
+        invitationMessage: invitation.invitationMessage,
+        selectedTemplate: invitation.selectedTemplate,
+        colorScheme: invitation.colorScheme,
+        fontChoice: invitation.fontChoice,
+        backgroundChoice: invitation.backgroundChoice,
+        bridePhoto: null,
+        groomPhoto: null,
+      });
+
+      // Load existing photos from backend
+      if (invitation.bridePhoto) {
+        setBridePhotoPreview(invitation.bridePhoto.getDirectURL());
+      }
+      if (invitation.groomPhoto) {
+        setGroomPhotoPreview(invitation.groomPhoto.getDirectURL());
+      }
+
+      setInitialized(true);
+    }
+  }, [invitation, initialized, updateFormData]);
+
+  const handleBridePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setBridePhotoFile(file);
+    if (file) {
+      setBridePhotoPreview(URL.createObjectURL(file));
+    } else {
+      setBridePhotoPreview(null);
+    }
+  };
+
+  const handleGroomPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setGroomPhotoFile(file);
+    if (file) {
+      setGroomPhotoPreview(URL.createObjectURL(file));
+    } else {
+      setGroomPhotoPreview(null);
+    }
+  };
 
   const handleSave = async () => {
+    if (!slug) return;
     setIsSaving(true);
     try {
       await updateInvitation.mutateAsync({
@@ -141,258 +111,284 @@ function EditorContent({
         fontChoice: formData.fontChoice,
         backgroundChoice: formData.backgroundChoice,
       });
-      toast.success('Changes saved successfully');
-    } catch {
-      toast.error('Failed to save changes');
+
+      // Upload photos if new files were selected
+      if (bridePhotoFile || groomPhotoFile) {
+        let brideBlob: ExternalBlob | null = null;
+        let groomBlob: ExternalBlob | null = null;
+
+        if (bridePhotoFile) {
+          const bytes = new Uint8Array(await bridePhotoFile.arrayBuffer());
+          brideBlob = ExternalBlob.fromBytes(bytes);
+        } else if (invitation?.bridePhoto) {
+          brideBlob = invitation.bridePhoto;
+        }
+
+        if (groomPhotoFile) {
+          const bytes = new Uint8Array(await groomPhotoFile.arrayBuffer());
+          groomBlob = ExternalBlob.fromBytes(bytes);
+        } else if (invitation?.groomPhoto) {
+          groomBlob = invitation.groomPhoto;
+        }
+
+        await addPhotos.mutateAsync({
+          invitationId: slug,
+          bridePhoto: brideBlob,
+          groomPhoto: groomBlob,
+        });
+      }
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (error) {
+      console.error('Save failed:', error);
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handlePublish = async () => {
-    setIsPublishing(true);
-    try {
-      await publishInvitation.mutateAsync(slug);
-      setShowPublishModal(true);
-    } catch {
-      toast.error('Failed to publish invitation');
-    } finally {
-      setIsPublishing(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-ivory">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-ivory/95 backdrop-blur-md border-b border-gold/20 shadow-xs">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link to="/dashboard">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full text-muted-foreground hover:text-gold-dark"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
-            <div className="min-w-0">
-              <h1 className="font-cinzel text-lg font-bold text-foreground truncate">
-                {invitation.brideName} & {invitation.groomName}
-              </h1>
-              <p className="font-inter text-xs text-muted-foreground">/{slug}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {/* RSVP Responses Button — always visible */}
-            <Button
-              size="sm"
-              onClick={() => setShowRSVPModal(true)}
-              className="rounded-full font-cinzel text-xs tracking-wider border-2 border-gold/40 bg-gradient-to-r from-gold/15 to-crimson/10 text-gold-dark hover:from-gold/25 hover:to-crimson/15 hover:border-gold/60 hidden sm:flex"
-              variant="outline"
-              style={{ touchAction: 'manipulation' }}
-            >
-              <Users className="w-3.5 h-3.5 mr-1.5" />
-              RSVP Responses
-            </Button>
-
-            {invitation.isPublished && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate({ to: '/$slug', params: { slug } })}
-                className="rounded-full font-cinzel text-xs border-gold/30 text-gold-dark hover:bg-gold/5 hidden sm:flex"
-              >
-                <Eye className="w-3.5 h-3.5 mr-1.5" />
-                View Live
-              </Button>
-            )}
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={isSaving}
-              variant="outline"
-              className="rounded-full font-cinzel text-xs border-gold/30 text-gold-dark hover:bg-gold/5"
-            >
-              {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save'}
-            </Button>
-            {!invitation.isPublished && (
-              <Button
-                size="sm"
-                onClick={handlePublish}
-                disabled={isPublishing}
-                className="btn-gold rounded-full font-cinzel text-xs tracking-wider"
-              >
-                {isPublishing ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <>
-                    <Globe className="w-3.5 h-3.5 mr-1.5" />
-                    Publish
-                  </>
-                )}
-              </Button>
-            )}
-            {invitation.isPublished && (
-              <Button
-                size="sm"
-                onClick={() => setShowPublishModal(true)}
-                className="btn-gold rounded-full font-cinzel text-xs tracking-wider"
-              >
-                <Globe className="w-3.5 h-3.5 mr-1.5" />
-                Share
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile RSVP button row */}
-        <div className="sm:hidden px-4 pb-3">
-          <button
-            onClick={() => setShowRSVPModal(true)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-cinzel text-xs tracking-wider transition-all duration-200 border-2 border-gold/40 bg-gradient-to-r from-gold/15 via-gold/10 to-crimson/10 text-gold-dark hover:from-gold/25 hover:to-crimson/15 hover:border-gold/60"
-            style={{ touchAction: 'manipulation' }}
-          >
-            <Users className="w-3.5 h-3.5" />
-            View RSVP Responses
-          </button>
-        </div>
-      </header>
-
-      {/* Tabs */}
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <Tabs defaultValue="details">
-          <TabsList className="w-full mb-8 bg-secondary/50 rounded-2xl p-1 h-auto flex-wrap gap-1">
-            {['details', 'events', 'template', 'media'].map((tab) => (
-              <TabsTrigger
-                key={tab}
-                value={tab}
-                className="flex-1 rounded-xl font-cinzel text-xs tracking-wider capitalize data-[state=active]:bg-gold data-[state=active]:text-foreground data-[state=active]:shadow-gold"
-              >
-                {tab === 'details'
-                  ? 'Couple Details'
-                  : tab === 'template'
-                  ? 'Template'
-                  : tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent value="details">
-            <CoupleDetailsStep />
-          </TabsContent>
-          <TabsContent value="events">
-            <EventManagementStep />
-          </TabsContent>
-          <TabsContent value="template">
-            <TemplateThemeStep invitationId={slug} />
-          </TabsContent>
-          <TabsContent value="media">
-            <MediaManagementStep />
-          </TabsContent>
-        </Tabs>
-      </main>
-
-      <PublishModal
-        slug={slug}
-        isOpen={showPublishModal}
-        onClose={() => setShowPublishModal(false)}
-      />
-
-      <RSVPResponsesModal
-        invitationId={slug}
-        invitationTitle={`${invitation.brideName} & ${invitation.groomName}`}
-        isOpen={showRSVPModal}
-        onClose={() => setShowRSVPModal(false)}
-      />
-    </div>
-  );
-}
-
-function EditorLoader({ slug }: { slug: string }) {
-  const { data: invitation, isLoading } = useGetInvitationBySlug(slug);
-  const { updateFormData } = useInvitationForm();
-  const { data: events } = useGetEvents(slug);
-  const { data: photos } = useGetPhotos(slug);
-  const { data: musicList } = useGetBackgroundMusic(slug);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (invitation) {
-      updateFormData({
-        brideName: invitation.brideName,
-        groomName: invitation.groomName,
-        weddingDate: invitation.weddingDate,
-        weddingTime: invitation.weddingTime,
-        venueName: invitation.venueName,
-        venueAddress: invitation.venueAddress,
-        googleMapsLink: invitation.googleMapsLink,
-        familyDetails: invitation.familyDetails,
-        invitationMessage: invitation.invitationMessage,
-        selectedTemplate: invitation.selectedTemplate,
-        colorScheme: invitation.colorScheme,
-        fontChoice: invitation.fontChoice,
-        backgroundChoice: invitation.backgroundChoice,
-      });
-    }
-  }, [invitation]);
-
-  useEffect(() => {
-    if (events) {
-      updateFormData({
-        events: events.map((e) => ({
-          id: e.id,
-          title: e.title,
-          date: e.date,
-          time: e.time,
-          venue: e.venue,
-          description: e.description,
-          eventType: e.eventType,
-        })),
-      });
-    }
-  }, [events]);
-
-  useEffect(() => {
-    if (photos) {
-      updateFormData({
-        photos: photos.map((p) => ({ id: p.id, imageUrl: p.imageUrl })),
-      });
-    }
-  }, [photos]);
-
-  useEffect(() => {
-    if (musicList && musicList.length > 0) {
-      const music = musicList[musicList.length - 1];
-      updateFormData({ musicUrl: music.musicUrl, musicAutoPlay: music.autoPlay });
-    }
-  }, [musicList]);
+  const noop = () => {};
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-ivory pt-24 px-4">
-        <div className="max-w-4xl mx-auto">
-          <SkeletonLoader variant="card" count={3} />
+      <div className="min-h-screen bg-charcoal flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-gold animate-spin mx-auto mb-4" />
+          <p className="text-ivory/60">Loading invitation...</p>
         </div>
       </div>
     );
   }
 
   if (!invitation) {
-    navigate({ to: '/dashboard' });
-    return null;
+    return (
+      <div className="min-h-screen bg-charcoal flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-ivory/60 mb-4">Invitation not found</p>
+          <button
+            onClick={() => navigate({ to: '/dashboard' })}
+            className="px-6 py-2 bg-gold text-white rounded-full hover:bg-gold/90 transition-colors"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
   }
 
-  return <EditorContent slug={slug} invitation={invitation} />;
+  return (
+    <div className="min-h-screen bg-charcoal">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-40 bg-charcoal/95 backdrop-blur-md border-b border-gold/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate({ to: '/dashboard' })}
+                className="flex items-center gap-2 text-ivory/60 hover:text-ivory transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="text-sm">Dashboard</span>
+              </button>
+              <div className="h-4 w-px bg-gold/20" />
+              <h1 className="text-ivory font-serif font-semibold">
+                {invitation.brideName} &amp; {invitation.groomName}
+              </h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate({ to: `/invitation/${slug}` })}
+                className="flex items-center gap-2 px-4 py-2 text-ivory/70 hover:text-ivory border border-gold/30 hover:border-gold/60 rounded-full text-sm transition-colors"
+              >
+                <Eye className="w-4 h-4" />
+                Preview
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="flex items-center gap-2 px-5 py-2 bg-gold text-white rounded-full text-sm font-medium hover:bg-gold/90 disabled:opacity-50 transition-colors"
+              >
+                {isSaving ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                {saveSuccess ? 'Saved!' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="bg-charcoal/80 border-b border-gold/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex gap-1 overflow-x-auto">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-5 py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'border-gold text-gold'
+                    : 'border-transparent text-ivory/50 hover:text-ivory/80'
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeTab === 'details' && (
+          <div className="bg-ivory/5 rounded-2xl p-6 border border-gold/10">
+            <CoupleDetailsStep onNext={noop} hideNavigation />
+
+            {/* Separate Photo Upload Section in Editor */}
+            <div className="mt-8 pt-8 border-t border-gold/20">
+              <h3 className="text-lg font-serif font-semibold text-ivory mb-4 flex items-center gap-2">
+                <Camera className="w-5 h-5 text-gold" />
+                Couple Photos
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Bride Photo */}
+                <div className="space-y-2">
+                  <p className="text-sm text-ivory/70 font-medium">Bride Photo</p>
+                  <div
+                    className="relative border-2 border-dashed border-gold/30 rounded-xl overflow-hidden cursor-pointer hover:border-gold/60 transition-colors bg-gold/5"
+                    style={{ minHeight: '180px' }}
+                    onClick={() => bridePhotoRef.current?.click()}
+                  >
+                    {bridePhotoPreview ? (
+                      <div className="relative">
+                        <img
+                          src={bridePhotoPreview}
+                          alt="Bride"
+                          className="w-full h-44 object-cover rounded-xl"
+                        />
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation();
+                            setBridePhotoFile(null);
+                            setBridePhotoPreview(null);
+                            if (bridePhotoRef.current) bridePhotoRef.current.value = '';
+                          }}
+                          className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 shadow-lg hover:bg-red-700 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-44 gap-2 text-ivory/40">
+                        <Upload className="w-8 h-8 text-gold/60" />
+                        <span className="text-sm">Click to upload bride photo</span>
+                        <span className="text-xs">JPG, PNG, WEBP</span>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    ref={bridePhotoRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleBridePhotoChange}
+                  />
+                </div>
+
+                {/* Groom Photo */}
+                <div className="space-y-2">
+                  <p className="text-sm text-ivory/70 font-medium">Groom Photo</p>
+                  <div
+                    className="relative border-2 border-dashed border-gold/30 rounded-xl overflow-hidden cursor-pointer hover:border-gold/60 transition-colors bg-gold/5"
+                    style={{ minHeight: '180px' }}
+                    onClick={() => groomPhotoRef.current?.click()}
+                  >
+                    {groomPhotoPreview ? (
+                      <div className="relative">
+                        <img
+                          src={groomPhotoPreview}
+                          alt="Groom"
+                          className="w-full h-44 object-cover rounded-xl"
+                        />
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation();
+                            setGroomPhotoFile(null);
+                            setGroomPhotoPreview(null);
+                            if (groomPhotoRef.current) groomPhotoRef.current.value = '';
+                          }}
+                          className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 shadow-lg hover:bg-red-700 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-44 gap-2 text-ivory/40">
+                        <Upload className="w-8 h-8 text-gold/60" />
+                        <span className="text-sm">Click to upload groom photo</span>
+                        <span className="text-xs">JPG, PNG, WEBP</span>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    ref={groomPhotoRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleGroomPhotoChange}
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-ivory/40 mt-3">
+                Photos will be saved when you click "Save Changes" above.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'events' && (
+          <div className="bg-ivory/5 rounded-2xl p-6 border border-gold/10">
+            <EventManagementStep
+              invitationId={slug}
+              onNext={noop}
+              onBack={noop}
+              hideNavigation
+            />
+          </div>
+        )}
+
+        {activeTab === 'theme' && (
+          <div className="bg-ivory/5 rounded-2xl p-6 border border-gold/10">
+            <TemplateThemeStep hideNavigation />
+          </div>
+        )}
+
+        {activeTab === 'media' && (
+          <div className="bg-ivory/5 rounded-2xl p-6 border border-gold/10">
+            <MediaManagementStep
+              onNext={noop}
+              onBack={noop}
+              hideNavigation
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function InvitationEditor() {
-  const { slug } = useParams({ from: '/dashboard/$slug' });
+  const { slug } = useParams({ from: '/edit/$slug' });
 
   return (
     <InvitationFormProvider>
-      <EditorLoader slug={slug} />
+      <EditorContent slug={slug} />
     </InvitationFormProvider>
   );
 }

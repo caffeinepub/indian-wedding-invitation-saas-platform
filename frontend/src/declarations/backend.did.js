@@ -8,6 +8,17 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  'method' : IDL.Text,
+  'blob_hash' : IDL.Text,
+});
+export const _CaffeineStorageRefillInformation = IDL.Record({
+  'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const _CaffeineStorageRefillResult = IDL.Record({
+  'success' : IDL.Opt(IDL.Bool),
+  'topped_up_amount' : IDL.Opt(IDL.Nat),
+});
 export const EventType = IDL.Variant({
   'mehndi' : IDL.Null,
   'sangeet' : IDL.Null,
@@ -32,7 +43,14 @@ export const Photo = IDL.Record({
   'imageUrl' : IDL.Text,
   'uploadedAt' : IDL.Int,
 });
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
 export const ThemeConfig = IDL.Record({
+  'name' : IDL.Text,
   'fontChoice' : IDL.Text,
   'backgroundChoice' : IDL.Text,
   'template' : IDL.Text,
@@ -42,6 +60,7 @@ export const Invitation = IDL.Record({
   'id' : IDL.Text,
   'weddingDate' : IDL.Text,
   'invitationMessage' : IDL.Text,
+  'groomPhoto' : IDL.Opt(ExternalBlob),
   'weddingTime' : IDL.Text,
   'isPublished' : IDL.Bool,
   'venueAddress' : IDL.Text,
@@ -56,7 +75,15 @@ export const Invitation = IDL.Record({
   'groomName' : IDL.Text,
   'venueName' : IDL.Text,
   'familyDetails' : IDL.Text,
+  'bridePhoto' : IDL.Opt(ExternalBlob),
   'colorScheme' : IDL.Text,
+});
+export const Time = IDL.Int;
+export const RSVP = IDL.Record({
+  'name' : IDL.Text,
+  'inviteCode' : IDL.Text,
+  'timestamp' : Time,
+  'attending' : IDL.Bool,
 });
 export const BackgroundMusic = IDL.Record({
   'id' : IDL.Text,
@@ -64,6 +91,15 @@ export const BackgroundMusic = IDL.Record({
   'autoPlay' : IDL.Bool,
   'invitationId' : IDL.Text,
   'uploadedAt' : IDL.Int,
+});
+export const UserProfile = IDL.Record({
+  'name' : IDL.Text,
+  'email' : IDL.Text,
+});
+export const InviteCode = IDL.Record({
+  'created' : Time,
+  'code' : IDL.Text,
+  'used' : IDL.Bool,
 });
 export const RSVPEntry = IDL.Record({
   'id' : IDL.Text,
@@ -82,6 +118,33 @@ export const RSVPStats = IDL.Record({
 });
 
 export const idlService = IDL.Service({
+  '_caffeineStorageBlobIsLive' : IDL.Func(
+      [IDL.Vec(IDL.Nat8)],
+      [IDL.Bool],
+      ['query'],
+    ),
+  '_caffeineStorageBlobsToDelete' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      ['query'],
+    ),
+  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [],
+      [],
+    ),
+  '_caffeineStorageCreateCertificate' : IDL.Func(
+      [IDL.Text],
+      [_CaffeineStorageCreateCertificateResult],
+      [],
+    ),
+  '_caffeineStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_CaffeineStorageRefillInformation)],
+      [_CaffeineStorageRefillResult],
+      [],
+    ),
+  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'addEvent' : IDL.Func(
       [
         IDL.Text,
@@ -97,6 +160,12 @@ export const idlService = IDL.Service({
       [],
     ),
   'addPhoto' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [Photo], []),
+  'addPhotos' : IDL.Func(
+      [IDL.Text, IDL.Opt(ExternalBlob), IDL.Opt(ExternalBlob)],
+      [],
+      [],
+    ),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createInvitation' : IDL.Func(
       [
         IDL.Text,
@@ -121,14 +190,19 @@ export const idlService = IDL.Service({
   'deleteInvitation' : IDL.Func([IDL.Text], [], []),
   'deletePhoto' : IDL.Func([IDL.Text], [], []),
   'deleteThemeVariant' : IDL.Func([IDL.Text, IDL.Nat], [], []),
+  'generateInviteCode' : IDL.Func([], [IDL.Text], []),
   'getAllInvitations' : IDL.Func([], [IDL.Vec(Invitation)], ['query']),
+  'getAllRSVPs' : IDL.Func([], [IDL.Vec(RSVP)], ['query']),
   'getBackgroundMusic' : IDL.Func(
       [IDL.Text],
       [IDL.Vec(BackgroundMusic)],
       ['query'],
     ),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getEventsByInvitation' : IDL.Func([IDL.Text], [IDL.Vec(Event)], ['query']),
-  'getInvitationBySlug' : IDL.Func([IDL.Text], [Invitation], []),
+  'getInvitationBySlug' : IDL.Func([IDL.Text], [Invitation], ['query']),
+  'getInviteCodes' : IDL.Func([], [IDL.Vec(InviteCode)], ['query']),
   'getPhotosByInvitation' : IDL.Func([IDL.Text], [IDL.Vec(Photo)], ['query']),
   'getRSVPsByInvitation' : IDL.Func(
       [IDL.Text],
@@ -137,14 +211,22 @@ export const idlService = IDL.Service({
     ),
   'getRSVPsStats' : IDL.Func([IDL.Text], [RSVPStats], ['query']),
   'getThemeVariants' : IDL.Func([IDL.Text], [IDL.Vec(ThemeConfig)], ['query']),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'publishInvitation' : IDL.Func([IDL.Text], [Invitation], []),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'saveThemeVariant' : IDL.Func([IDL.Text, ThemeConfig], [], []),
   'setBackgroundMusic' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Bool],
       [BackgroundMusic],
       [],
     ),
-  'submitRSVP' : IDL.Func(
+  'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
+  'submitWeddingInvitationRSVP' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Bool, IDL.Nat, IDL.Text],
       [RSVPEntry],
       [],
@@ -179,6 +261,17 @@ export const idlService = IDL.Service({
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+    'method' : IDL.Text,
+    'blob_hash' : IDL.Text,
+  });
+  const _CaffeineStorageRefillInformation = IDL.Record({
+    'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const _CaffeineStorageRefillResult = IDL.Record({
+    'success' : IDL.Opt(IDL.Bool),
+    'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
   const EventType = IDL.Variant({
     'mehndi' : IDL.Null,
     'sangeet' : IDL.Null,
@@ -203,7 +296,14 @@ export const idlFactory = ({ IDL }) => {
     'imageUrl' : IDL.Text,
     'uploadedAt' : IDL.Int,
   });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
   const ThemeConfig = IDL.Record({
+    'name' : IDL.Text,
     'fontChoice' : IDL.Text,
     'backgroundChoice' : IDL.Text,
     'template' : IDL.Text,
@@ -213,6 +313,7 @@ export const idlFactory = ({ IDL }) => {
     'id' : IDL.Text,
     'weddingDate' : IDL.Text,
     'invitationMessage' : IDL.Text,
+    'groomPhoto' : IDL.Opt(ExternalBlob),
     'weddingTime' : IDL.Text,
     'isPublished' : IDL.Bool,
     'venueAddress' : IDL.Text,
@@ -227,7 +328,15 @@ export const idlFactory = ({ IDL }) => {
     'groomName' : IDL.Text,
     'venueName' : IDL.Text,
     'familyDetails' : IDL.Text,
+    'bridePhoto' : IDL.Opt(ExternalBlob),
     'colorScheme' : IDL.Text,
+  });
+  const Time = IDL.Int;
+  const RSVP = IDL.Record({
+    'name' : IDL.Text,
+    'inviteCode' : IDL.Text,
+    'timestamp' : Time,
+    'attending' : IDL.Bool,
   });
   const BackgroundMusic = IDL.Record({
     'id' : IDL.Text,
@@ -235,6 +344,12 @@ export const idlFactory = ({ IDL }) => {
     'autoPlay' : IDL.Bool,
     'invitationId' : IDL.Text,
     'uploadedAt' : IDL.Int,
+  });
+  const UserProfile = IDL.Record({ 'name' : IDL.Text, 'email' : IDL.Text });
+  const InviteCode = IDL.Record({
+    'created' : Time,
+    'code' : IDL.Text,
+    'used' : IDL.Bool,
   });
   const RSVPEntry = IDL.Record({
     'id' : IDL.Text,
@@ -253,6 +368,33 @@ export const idlFactory = ({ IDL }) => {
   });
   
   return IDL.Service({
+    '_caffeineStorageBlobIsLive' : IDL.Func(
+        [IDL.Vec(IDL.Nat8)],
+        [IDL.Bool],
+        ['query'],
+      ),
+    '_caffeineStorageBlobsToDelete' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        ['query'],
+      ),
+    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [],
+        [],
+      ),
+    '_caffeineStorageCreateCertificate' : IDL.Func(
+        [IDL.Text],
+        [_CaffeineStorageCreateCertificateResult],
+        [],
+      ),
+    '_caffeineStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_CaffeineStorageRefillInformation)],
+        [_CaffeineStorageRefillResult],
+        [],
+      ),
+    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'addEvent' : IDL.Func(
         [
           IDL.Text,
@@ -268,6 +410,12 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'addPhoto' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [Photo], []),
+    'addPhotos' : IDL.Func(
+        [IDL.Text, IDL.Opt(ExternalBlob), IDL.Opt(ExternalBlob)],
+        [],
+        [],
+      ),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createInvitation' : IDL.Func(
         [
           IDL.Text,
@@ -292,14 +440,19 @@ export const idlFactory = ({ IDL }) => {
     'deleteInvitation' : IDL.Func([IDL.Text], [], []),
     'deletePhoto' : IDL.Func([IDL.Text], [], []),
     'deleteThemeVariant' : IDL.Func([IDL.Text, IDL.Nat], [], []),
+    'generateInviteCode' : IDL.Func([], [IDL.Text], []),
     'getAllInvitations' : IDL.Func([], [IDL.Vec(Invitation)], ['query']),
+    'getAllRSVPs' : IDL.Func([], [IDL.Vec(RSVP)], ['query']),
     'getBackgroundMusic' : IDL.Func(
         [IDL.Text],
         [IDL.Vec(BackgroundMusic)],
         ['query'],
       ),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getEventsByInvitation' : IDL.Func([IDL.Text], [IDL.Vec(Event)], ['query']),
-    'getInvitationBySlug' : IDL.Func([IDL.Text], [Invitation], []),
+    'getInvitationBySlug' : IDL.Func([IDL.Text], [Invitation], ['query']),
+    'getInviteCodes' : IDL.Func([], [IDL.Vec(InviteCode)], ['query']),
     'getPhotosByInvitation' : IDL.Func([IDL.Text], [IDL.Vec(Photo)], ['query']),
     'getRSVPsByInvitation' : IDL.Func(
         [IDL.Text],
@@ -312,14 +465,22 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(ThemeConfig)],
         ['query'],
       ),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'publishInvitation' : IDL.Func([IDL.Text], [Invitation], []),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'saveThemeVariant' : IDL.Func([IDL.Text, ThemeConfig], [], []),
     'setBackgroundMusic' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Bool],
         [BackgroundMusic],
         [],
       ),
-    'submitRSVP' : IDL.Func(
+    'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
+    'submitWeddingInvitationRSVP' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Bool, IDL.Nat, IDL.Text],
         [RSVPEntry],
         [],

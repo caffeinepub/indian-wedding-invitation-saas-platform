@@ -1,20 +1,13 @@
 import React from 'react';
-import { Users, CheckCircle2, XCircle, MessageSquare, Phone, Calendar, Loader2 } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
+import { Users, CheckCircle2, XCircle, MessageSquare, Phone, Calendar, Loader2, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useRSVPsByInvitation, useRSVPsStats } from '@/hooks/useQueries';
+import { useGetRSVPsByInvitation, useGetRSVPsStats } from '@/hooks/useQueries';
 
 interface RSVPResponsesModalProps {
   invitationId: string;
-  invitationTitle: string;
-  isOpen: boolean;
+  invitationTitle?: string;
+  isOpen?: boolean;
   onClose: () => void;
 }
 
@@ -36,33 +29,47 @@ function formatDate(nanoseconds: bigint): string {
 export default function RSVPResponsesModal({
   invitationId,
   invitationTitle,
-  isOpen,
   onClose,
 }: RSVPResponsesModalProps) {
-  const { data: rsvps, isLoading: rsvpsLoading } = useRSVPsByInvitation(invitationId);
-  const { data: stats, isLoading: statsLoading } = useRSVPsStats(invitationId);
+  const { data: rsvps, isLoading: rsvpsLoading } = useGetRSVPsByInvitation(invitationId);
+  const { data: stats, isLoading: statsLoading } = useGetRSVPsStats(invitationId);
 
   const isLoading = rsvpsLoading || statsLoading;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="luxury-card max-w-2xl w-full max-h-[90vh] flex flex-col p-0 overflow-hidden">
-        {/* Modal Header */}
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-gold/20 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold/30 to-crimson/20 flex items-center justify-center flex-shrink-0">
-              <Users className="w-5 h-5 text-gold-dark" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-gold/20">
+        {/* Header */}
+        <div className="px-6 pt-6 pb-4 border-b border-gold/20 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold/30 to-crimson/20 flex items-center justify-center flex-shrink-0">
+                <Users className="w-5 h-5 text-gold-dark" />
+              </div>
+              <div>
+                <h2 className="font-serif text-lg font-bold text-charcoal">
+                  RSVP Responses
+                </h2>
+                {invitationTitle && (
+                  <p className="text-xs text-charcoal/60 mt-0.5">{invitationTitle}</p>
+                )}
+              </div>
             </div>
-            <div>
-              <DialogTitle className="font-cinzel text-lg font-bold text-foreground">
-                RSVP Responses
-              </DialogTitle>
-              <DialogDescription className="font-inter text-xs text-muted-foreground mt-0.5">
-                {invitationTitle}
-              </DialogDescription>
-            </div>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-full hover:bg-charcoal/10 transition-colors text-charcoal/60 hover:text-charcoal"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-        </DialogHeader>
+        </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
@@ -75,22 +82,22 @@ export default function RSVPResponsesModal({
               <div className="px-6 py-4 border-b border-gold/10 flex-shrink-0">
                 <div className="grid grid-cols-3 gap-3">
                   <div className="bg-gold/8 rounded-xl p-3 text-center border border-gold/20">
-                    <p className="font-cinzel text-2xl font-bold text-gold-dark">
+                    <p className="font-serif text-2xl font-bold text-gold-dark">
                       {stats.totalResponses.toString()}
                     </p>
-                    <p className="font-inter text-xs text-muted-foreground mt-0.5">Total Responses</p>
+                    <p className="text-xs text-charcoal/60 mt-0.5">Total Responses</p>
                   </div>
-                  <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-xl p-3 text-center border border-emerald-200 dark:border-emerald-800">
-                    <p className="font-cinzel text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                  <div className="bg-emerald-50 rounded-xl p-3 text-center border border-emerald-200">
+                    <p className="font-serif text-2xl font-bold text-emerald-600">
                       {stats.totalConfirmedGuests.toString()}
                     </p>
-                    <p className="font-inter text-xs text-muted-foreground mt-0.5">Confirmed Guests</p>
+                    <p className="text-xs text-charcoal/60 mt-0.5">Confirmed Guests</p>
                   </div>
                   <div className="bg-crimson/5 rounded-xl p-3 text-center border border-crimson/20">
-                    <p className="font-cinzel text-2xl font-bold text-crimson">
+                    <p className="font-serif text-2xl font-bold text-crimson">
                       {stats.totalDeclined.toString()}
                     </p>
-                    <p className="font-inter text-xs text-muted-foreground mt-0.5">Declined</p>
+                    <p className="text-xs text-charcoal/60 mt-0.5">Declined</p>
                   </div>
                 </div>
               </div>
@@ -100,15 +107,14 @@ export default function RSVPResponsesModal({
             <ScrollArea className="flex-1 min-h-0">
               <div className="px-6 py-4">
                 {!rsvps || rsvps.length === 0 ? (
-                  /* Empty State */
                   <div className="text-center py-12">
                     <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mx-auto mb-4">
                       <MessageSquare className="w-8 h-8 text-gold/50" />
                     </div>
-                    <h3 className="font-cinzel text-base font-semibold text-foreground mb-2">
+                    <h3 className="font-serif text-base font-semibold text-charcoal mb-2">
                       No Responses Yet
                     </h3>
-                    <p className="font-inter text-sm text-muted-foreground max-w-xs mx-auto">
+                    <p className="text-sm text-charcoal/60 max-w-xs mx-auto">
                       Share your invitation with guests and their RSVP responses will appear here.
                     </p>
                   </div>
@@ -119,7 +125,7 @@ export default function RSVPResponsesModal({
                         key={rsvp.id}
                         className={`rounded-xl border p-4 transition-all ${
                           rsvp.attending
-                            ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20'
+                            ? 'border-emerald-200 bg-emerald-50/50'
                             : 'border-crimson/20 bg-crimson/5'
                         }`}
                       >
@@ -128,24 +134,24 @@ export default function RSVPResponsesModal({
                             <div
                               className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                                 rsvp.attending
-                                  ? 'bg-emerald-100 dark:bg-emerald-900'
+                                  ? 'bg-emerald-100'
                                   : 'bg-crimson/10'
                               }`}
                             >
                               {rsvp.attending ? (
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                               ) : (
                                 <XCircle className="w-4 h-4 text-crimson" />
                               )}
                             </div>
                             <div className="min-w-0">
-                              <p className="font-cinzel text-sm font-bold text-foreground truncate">
+                              <p className="font-serif text-sm font-bold text-charcoal truncate">
                                 {rsvp.guestName}
                               </p>
                               {rsvp.guestPhone && (
                                 <div className="flex items-center gap-1 mt-0.5">
-                                  <Phone className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                                  <p className="font-inter text-xs text-muted-foreground">
+                                  <Phone className="w-3 h-3 text-charcoal/40 flex-shrink-0" />
+                                  <p className="text-xs text-charcoal/60">
                                     {rsvp.guestPhone}
                                   </p>
                                 </div>
@@ -154,9 +160,9 @@ export default function RSVPResponsesModal({
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <Badge
-                              className={`text-xs font-cinzel tracking-wider ${
+                              className={`text-xs ${
                                 rsvp.attending
-                                  ? 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-900 dark:text-emerald-300 dark:border-emerald-700'
+                                  ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
                                   : 'bg-crimson/10 text-crimson border-crimson/30'
                               }`}
                               variant="outline"
@@ -166,7 +172,7 @@ export default function RSVPResponsesModal({
                             {rsvp.attending && (
                               <Badge
                                 variant="outline"
-                                className="text-xs font-inter border-gold/30 text-gold-dark bg-gold/5"
+                                className="text-xs border-gold/30 text-gold-dark bg-gold/5"
                               >
                                 {rsvp.guestCount.toString()} guest{Number(rsvp.guestCount) !== 1 ? 's' : ''}
                               </Badge>
@@ -176,15 +182,15 @@ export default function RSVPResponsesModal({
 
                         {rsvp.message && (
                           <div className="mt-2 pl-10">
-                            <p className="font-inter text-xs text-muted-foreground italic">
+                            <p className="text-xs text-charcoal/60 italic">
                               "{rsvp.message}"
                             </p>
                           </div>
                         )}
 
                         <div className="mt-2 pl-10 flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-muted-foreground/60" />
-                          <p className="font-inter text-xs text-muted-foreground/60">
+                          <Calendar className="w-3 h-3 text-charcoal/40" />
+                          <p className="text-xs text-charcoal/40">
                             {formatDate(rsvp.submittedAt)}
                           </p>
                         </div>
@@ -196,7 +202,7 @@ export default function RSVPResponsesModal({
             </ScrollArea>
           </>
         )}
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }

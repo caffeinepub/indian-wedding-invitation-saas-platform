@@ -1,32 +1,45 @@
-import { createRouter, RouterProvider, createRootRoute, createRoute, Outlet } from '@tanstack/react-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
+import { ThemeProvider } from 'next-themes';
+import { Toaster } from '@/components/ui/sonner';
+import Header from './components/layout/Header';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
-import InvitationEditor from './pages/InvitationEditor';
 import CreateInvitationWizard from './pages/CreateInvitationWizard';
+import InvitationEditor from './pages/InvitationEditor';
 import GuestInvitation from './pages/GuestInvitation';
 import NotFound from './pages/NotFound';
-import { Toaster } from '@/components/ui/sonner';
 
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <Toaster richColors position="top-right" />
-    </>
-  ),
-  notFoundComponent: () => <NotFound />,
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30000,
+    },
+  },
 });
 
+// Layout component with Header
+function Layout() {
+  return (
+    <div className="min-h-screen">
+      <Header />
+      <Outlet />
+    </div>
+  );
+}
+
+// Root route
+const rootRoute = createRootRoute({
+  component: Layout,
+  notFoundComponent: NotFound,
+});
+
+// Routes
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: LandingPage,
-});
-
-const createRoute_ = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/create',
-  component: CreateInvitationWizard,
 });
 
 const dashboardRoute = createRoute({
@@ -35,24 +48,30 @@ const dashboardRoute = createRoute({
   component: Dashboard,
 });
 
-const dashboardEditorRoute = createRoute({
+const createRoute_ = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/dashboard/$slug',
+  path: '/create',
+  component: CreateInvitationWizard,
+});
+
+const editRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/edit/$slug',
   component: InvitationEditor,
 });
 
-const guestRoute = createRoute({
+const invitationRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/$slug',
+  path: '/invitation/$slug',
   component: GuestInvitation,
 });
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  createRoute_,
   dashboardRoute,
-  dashboardEditorRoute,
-  guestRoute,
+  createRoute_,
+  editRoute,
+  invitationRoute,
 ]);
 
 const router = createRouter({ routeTree });
@@ -64,5 +83,12 @@ declare module '@tanstack/react-router' {
 }
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        <Toaster richColors position="top-right" />
+      </QueryClientProvider>
+    </ThemeProvider>
+  );
 }

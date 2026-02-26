@@ -1,70 +1,94 @@
 import React, { useState } from 'react';
-import { CheckCircle, Loader2 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import type { Invitation } from '@/backend';
-import { getTemplateById } from '@/utils/templateDefinitions';
-import { useSubmitRSVP } from '@/hooks/useQueries';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { toast } from 'sonner';
+import { useSubmitWeddingRSVP } from '../../hooks/useQueries';
+import { Invitation } from '../../backend';
+import { getTemplateById } from '../../utils/templateDefinitions';
+import { Heart, Users, MessageSquare, Phone, CheckCircle, Loader2 } from 'lucide-react';
 
 interface RSVPFormProps {
   invitation: Invitation;
+  templateData?: ReturnType<typeof getTemplateById>;
 }
 
-export default function RSVPForm({ invitation }: RSVPFormProps) {
-  const template = getTemplateById(invitation.selectedTemplate);
-  const { ref, isVisible } = useScrollAnimation();
-  const submitRSVP = useSubmitRSVP();
+export default function RSVPForm({ invitation, templateData }: RSVPFormProps) {
+  const template = templateData || getTemplateById(invitation.selectedTemplate) || getTemplateById('royal-gold')!;
+  const submitRSVP = useSubmitWeddingRSVP();
+
+  const [formState, setFormState] = useState({
+    guestName: '',
+    guestPhone: '',
+    attending: true,
+    guestCount: 1,
+    message: '',
+  });
   const [submitted, setSubmitted] = useState(false);
 
-  const [guestName, setGuestName] = useState('');
-  const [guestPhone, setGuestPhone] = useState('');
-  const [attending, setAttending] = useState<'yes' | 'no'>('yes');
-  const [guestCount, setGuestCount] = useState(1);
-  const [message, setMessage] = useState('');
+  // Determine if template has a dark background
+  const isDarkTemplate =
+    invitation.backgroundChoice === 'dark-floral' ||
+    invitation.backgroundChoice === 'dark-minimal' ||
+    template.id?.includes('dark') ||
+    template.id?.includes('midnight') ||
+    template.id?.includes('cinematic');
+
+  // Always use high-contrast colors for form readability
+  const sectionBg = isDarkTemplate
+    ? 'rgba(15, 10, 5, 0.85)'
+    : 'rgba(255, 255, 255, 0.92)';
+  const headingColor = isDarkTemplate ? '#f5f0e8' : '#2c1810';
+  const labelColor = isDarkTemplate ? '#d4c4a8' : '#4a3728';
+  const inputBg = isDarkTemplate ? 'rgba(30, 20, 10, 0.8)' : 'rgba(255, 255, 255, 0.95)';
+  const inputBorder = isDarkTemplate ? 'rgba(180, 140, 80, 0.4)' : 'rgba(180, 140, 80, 0.5)';
+  const inputText = isDarkTemplate ? '#f0e8d8' : '#2c1810';
+  const placeholderClass = isDarkTemplate ? 'placeholder-amber-700/60' : 'placeholder-stone-400';
+  const primaryColor = template.primaryColor || '#c9a84c';
+  const mutedText = isDarkTemplate ? '#a09070' : '#7a6050';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!guestName.trim()) { toast.error('Please enter your name'); return; }
-
-    try {
-      await submitRSVP.mutateAsync({
-        invitationId: invitation.id,
-        rsvpId: `rsvp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        guestName,
-        guestPhone,
-        attending: attending === 'yes',
-        guestCount: BigInt(guestCount),
-        message,
-      });
-      setSubmitted(true);
-    } catch {
-      toast.error('Failed to submit RSVP. Please try again.');
-    }
+    const rsvpId = `rsvp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    await submitRSVP.mutateAsync({
+      invitationId: invitation.id,
+      rsvpId,
+      guestName: formState.guestName,
+      guestPhone: formState.guestPhone,
+      attending: formState.attending,
+      guestCount: BigInt(formState.guestCount),
+      message: formState.message,
+    });
+    setSubmitted(true);
   };
 
   if (submitted) {
     return (
-      <section className="py-16 px-4" style={{ background: `${template.primaryColor}08` }}>
-        <div className="max-w-lg mx-auto text-center animate-scale-in">
+      <section
+        className="py-16 px-4"
+        style={{ background: isDarkTemplate ? 'rgba(10, 8, 4, 0.9)' : 'rgba(253, 248, 240, 0.95)' }}
+      >
+        <div className="max-w-md mx-auto text-center">
           <div
             className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
-            style={{ background: `${template.primaryColor}20` }}
+            style={{ background: `${primaryColor}25` }}
           >
-            <CheckCircle className="w-10 h-10" style={{ color: template.primaryColor }} />
+            <CheckCircle className="w-10 h-10" style={{ color: primaryColor }} />
           </div>
           <h2
-            className="font-cinzel text-2xl font-bold mb-3"
-            style={{ fontFamily: template.headingFont, color: template.textColor }}
+            className="text-3xl font-bold mb-4"
+            style={{
+              fontFamily: `'${template.headingFont}', serif`,
+              color: headingColor,
+            }}
           >
-            RSVP Received!
+            {formState.attending ? 'See You There!' : 'Thank You'}
           </h2>
-          <p className="font-inter text-sm" style={{ color: template.textColor, opacity: 0.7 }}>
-            Thank you, {guestName}! We look forward to celebrating with you.
+          <p className="text-lg mb-2" style={{ color: labelColor }}>
+            {formState.attending
+              ? `We're so excited to celebrate with you, ${formState.guestName}!`
+              : `Thank you for letting us know, ${formState.guestName}.`}
+          </p>
+          <p className="text-sm" style={{ color: mutedText }}>
+            {formState.attending
+              ? `We look forward to seeing you at ${invitation.venueName}.`
+              : 'You will be missed on our special day.'}
           </p>
         </div>
       </section>
@@ -72,124 +96,237 @@ export default function RSVPForm({ invitation }: RSVPFormProps) {
   }
 
   return (
-    <section className="py-16 px-4" style={{ background: `${template.primaryColor}08` }}>
-      <div
-        ref={ref}
-        className={`max-w-lg mx-auto transition-all duration-700 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}
-      >
+    <section
+      id="rsvp"
+      className="py-16 px-4"
+      style={{ background: isDarkTemplate ? 'rgba(10, 8, 4, 0.9)' : 'rgba(253, 248, 240, 0.95)' }}
+    >
+      <div className="max-w-lg mx-auto">
+        {/* Header */}
         <div className="text-center mb-10">
-          <p className="font-inter text-sm tracking-[0.3em] uppercase mb-3" style={{ color: template.primaryColor }}>
-            ✦ RSVP ✦
-          </p>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-px w-12" style={{ background: `linear-gradient(90deg, transparent, ${primaryColor})` }} />
+            <Heart className="w-5 h-5" style={{ color: primaryColor }} />
+            <div className="h-px w-12" style={{ background: `linear-gradient(90deg, ${primaryColor}, transparent)` }} />
+          </div>
           <h2
-            className="font-cinzel text-3xl font-bold"
-            style={{ fontFamily: template.headingFont, color: template.textColor }}
-          >
-            Will You Join Us?
-          </h2>
-        </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5 p-6 rounded-2xl border"
-          style={{
-            background: template.category === 'cinematic-dark' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.8)',
-            borderColor: `${template.primaryColor}25`,
-          }}
-        >
-          <div className="space-y-2">
-            <Label className="font-cinzel text-sm font-semibold tracking-wide" style={{ color: template.textColor }}>
-              Your Name *
-            </Label>
-            <Input
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              placeholder="Full name"
-              className="input-luxury font-inter"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label className="font-cinzel text-sm font-semibold tracking-wide" style={{ color: template.textColor }}>
-              Phone Number
-            </Label>
-            <Input
-              value={guestPhone}
-              onChange={(e) => setGuestPhone(e.target.value)}
-              placeholder="+91 98765 43210"
-              className="input-luxury font-inter"
-              type="tel"
-            />
-          </div>
-
-          <div className="space-y-3">
-            <Label className="font-cinzel text-sm font-semibold tracking-wide" style={{ color: template.textColor }}>
-              Will you attend? *
-            </Label>
-            <RadioGroup value={attending} onValueChange={(v) => setAttending(v as 'yes' | 'no')} className="flex gap-6">
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value="yes" id="yes" />
-                <Label htmlFor="yes" className="font-inter cursor-pointer" style={{ color: template.textColor }}>
-                  Joyfully Accept ✓
-                </Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value="no" id="no" />
-                <Label htmlFor="no" className="font-inter cursor-pointer" style={{ color: template.textColor }}>
-                  Regretfully Decline
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {attending === 'yes' && (
-            <div className="space-y-2">
-              <Label className="font-cinzel text-sm font-semibold tracking-wide" style={{ color: template.textColor }}>
-                Number of Guests
-              </Label>
-              <Input
-                type="number"
-                min={1}
-                max={10}
-                value={guestCount}
-                onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
-                className="input-luxury font-inter w-24"
-              />
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label className="font-cinzel text-sm font-semibold tracking-wide" style={{ color: template.textColor }}>
-              Message (Optional)
-            </Label>
-            <Textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Share your wishes with the couple..."
-              rows={3}
-              className="input-luxury font-inter resize-none"
-            />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={submitRSVP.isPending}
-            className="w-full rounded-full font-cinzel tracking-wider py-3"
+            className="text-4xl font-bold mb-3"
             style={{
-              background: `linear-gradient(135deg, ${template.primaryColor}, ${template.accentColor})`,
-              color: template.category === 'cinematic-dark' ? '#0D0820' : '#2C1810',
+              fontFamily: `'${template.headingFont}', serif`,
+              color: headingColor,
             }}
           >
-            {submitRSVP.isPending ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</>
-            ) : (
-              'Send RSVP'
+            RSVP
+          </h2>
+          <p className="text-base" style={{ color: labelColor }}>
+            Kindly respond by{' '}
+            {invitation.weddingDate
+              ? new Date(invitation.weddingDate).toLocaleDateString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric',
+                })
+              : 'the wedding date'}
+          </p>
+        </div>
+
+        {/* Form Card */}
+        <div
+          className="rounded-2xl p-6 sm:p-8 shadow-2xl"
+          style={{
+            background: sectionBg,
+            border: `1px solid ${primaryColor}30`,
+          }}
+        >
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Guest Name */}
+            <div>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: labelColor }}
+              >
+                Your Full Name *
+              </label>
+              <input
+                type="text"
+                required
+                value={formState.guestName}
+                onChange={(e) => setFormState({ ...formState, guestName: e.target.value })}
+                placeholder="Enter your full name"
+                className={`w-full px-4 py-3 rounded-xl text-sm outline-none transition-all ${placeholderClass}`}
+                style={{
+                  background: inputBg,
+                  border: `1.5px solid ${inputBorder}`,
+                  color: inputText,
+                }}
+                onFocus={(e) => (e.target.style.borderColor = primaryColor)}
+                onBlur={(e) => (e.target.style.borderColor = inputBorder)}
+              />
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label
+                className="block text-sm font-semibold mb-2"
+                style={{ color: labelColor }}
+              >
+                <span className="flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5" />
+                  Phone Number
+                </span>
+              </label>
+              <input
+                type="tel"
+                value={formState.guestPhone}
+                onChange={(e) => setFormState({ ...formState, guestPhone: e.target.value })}
+                placeholder="+91 98765 43210"
+                className={`w-full px-4 py-3 rounded-xl text-sm outline-none transition-all ${placeholderClass}`}
+                style={{
+                  background: inputBg,
+                  border: `1.5px solid ${inputBorder}`,
+                  color: inputText,
+                }}
+                onFocus={(e) => (e.target.style.borderColor = primaryColor)}
+                onBlur={(e) => (e.target.style.borderColor = inputBorder)}
+              />
+            </div>
+
+            {/* Attendance */}
+            <div>
+              <label className="block text-sm font-semibold mb-3" style={{ color: labelColor }}>
+                Will you be attending? *
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: true, label: '✓ Joyfully Accept', emoji: '🎉' },
+                  { value: false, label: '✗ Regretfully Decline', emoji: '💌' },
+                ].map(({ value, label, emoji }) => (
+                  <button
+                    key={String(value)}
+                    type="button"
+                    onClick={() => setFormState({ ...formState, attending: value })}
+                    className="py-3 px-4 rounded-xl text-sm font-semibold transition-all"
+                    style={{
+                      background:
+                        formState.attending === value
+                          ? primaryColor
+                          : isDarkTemplate
+                          ? 'rgba(40, 30, 15, 0.8)'
+                          : 'rgba(240, 235, 225, 0.9)',
+                      color:
+                        formState.attending === value
+                          ? '#1a1008'
+                          : isDarkTemplate
+                          ? '#c8b898'
+                          : '#4a3728',
+                      border: `1.5px solid ${formState.attending === value ? primaryColor : inputBorder}`,
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Guest Count */}
+            {formState.attending && (
+              <div>
+                <label className="block text-sm font-semibold mb-2" style={{ color: labelColor }}>
+                  <span className="flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5" />
+                    Number of Guests
+                  </span>
+                </label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormState({ ...formState, guestCount: Math.max(1, formState.guestCount - 1) })}
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all"
+                    style={{
+                      background: isDarkTemplate ? 'rgba(40, 30, 15, 0.8)' : 'rgba(240, 235, 225, 0.9)',
+                      border: `1.5px solid ${inputBorder}`,
+                      color: isDarkTemplate ? '#c8b898' : '#4a3728',
+                    }}
+                  >
+                    −
+                  </button>
+                  <span
+                    className="text-2xl font-bold w-12 text-center"
+                    style={{ color: headingColor }}
+                  >
+                    {formState.guestCount}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setFormState({ ...formState, guestCount: Math.min(20, formState.guestCount + 1) })}
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all"
+                    style={{
+                      background: isDarkTemplate ? 'rgba(40, 30, 15, 0.8)' : 'rgba(240, 235, 225, 0.9)',
+                      border: `1.5px solid ${inputBorder}`,
+                      color: isDarkTemplate ? '#c8b898' : '#4a3728',
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             )}
-          </Button>
-        </form>
+
+            {/* Message */}
+            <div>
+              <label className="block text-sm font-semibold mb-2" style={{ color: labelColor }}>
+                <span className="flex items-center gap-1.5">
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  Message for the Couple (optional)
+                </span>
+              </label>
+              <textarea
+                value={formState.message}
+                onChange={(e) => setFormState({ ...formState, message: e.target.value })}
+                placeholder="Share your wishes or a special message..."
+                rows={3}
+                className={`w-full px-4 py-3 rounded-xl text-sm outline-none transition-all resize-none ${placeholderClass}`}
+                style={{
+                  background: inputBg,
+                  border: `1.5px solid ${inputBorder}`,
+                  color: inputText,
+                }}
+                onFocus={(e) => (e.target.style.borderColor = primaryColor)}
+                onBlur={(e) => (e.target.style.borderColor = inputBorder)}
+              />
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={submitRSVP.isPending || !formState.guestName.trim()}
+              className="w-full py-4 rounded-xl font-bold text-base transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+              style={{
+                background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}cc)`,
+                color: '#1a1008',
+                boxShadow: `0 4px 20px ${primaryColor}40`,
+              }}
+            >
+              {submitRSVP.isPending ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                <>
+                  <Heart className="w-5 h-5" />
+                  <span>{formState.attending ? 'Confirm Attendance' : 'Send Response'}</span>
+                </>
+              )}
+            </button>
+
+            {submitRSVP.isError && (
+              <p className="text-center text-sm" style={{ color: '#e05555' }}>
+                Something went wrong. Please try again.
+              </p>
+            )}
+          </form>
+        </div>
       </div>
     </section>
   );

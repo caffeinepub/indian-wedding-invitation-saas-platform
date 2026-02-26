@@ -1,121 +1,143 @@
-import React, { useEffect, useRef, useState } from 'react';
-import type { Invitation } from '@/backend';
-import { getTemplateById } from '@/utils/templateDefinitions';
+import React, { useEffect, useRef } from 'react';
+import { Invitation } from '../../backend';
 
 interface HeroSectionProps {
   invitation: Invitation;
-  couplePhotoUrl?: string;
 }
 
-export default function HeroSection({ invitation, couplePhotoUrl }: HeroSectionProps) {
-  const template = getTemplateById(invitation.selectedTemplate);
-  const [scrollY, setScrollY] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
+export default function HeroSection({ invitation }: HeroSectionProps) {
+  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('scroll', handleScroll);
+    const handleScroll = () => {
+      if (heroRef.current) {
+        const scrolled = window.scrollY;
+        heroRef.current.style.transform = `translateY(${scrolled * 0.4}px)`;
+      }
     };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return '';
-    try {
-      return new Date(dateStr).toLocaleDateString('en-IN', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-      });
-    } catch { return dateStr; }
-  };
+  const bridePhotoUrl = invitation.bridePhoto?.getDirectURL() ?? null;
+  const groomPhotoUrl = invitation.groomPhoto?.getDirectURL() ?? null;
+  const hasPhotos = bridePhotoUrl || groomPhotoUrl;
+
+  const weddingDate = invitation.weddingDate
+    ? new Date(invitation.weddingDate).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : '';
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `url('/assets/generated/hero-bg.dim_1920x1080.png')`,
-          transform: `translateY(${scrollY * 0.3}px)`,
-        }}
-      />
-      {/* Gradient overlay */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `linear-gradient(to bottom, ${template.secondaryColor}88 0%, ${template.secondaryColor}44 40%, ${template.secondaryColor}99 80%, ${template.bgColor} 100%)`,
-        }}
-      />
+      <div ref={heroRef} className="absolute inset-0 will-change-transform">
+        <img
+          src="/assets/generated/hero-bg.dim_1920x1080.png"
+          alt="Wedding background"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/60" />
+      </div>
 
       {/* Content */}
-      <div
-        className={`relative z-10 text-center px-4 max-w-3xl mx-auto transition-all duration-1000 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}
-      >
-        {/* Ornament */}
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="w-12 h-px" style={{ background: template.primaryColor }} />
-          <span className="text-lg" style={{ color: template.primaryColor }}>✦</span>
-          <div className="w-12 h-px" style={{ background: template.primaryColor }} />
-        </div>
+      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+        {/* Couple Photos */}
+        {hasPhotos && (
+          <div className="flex items-center justify-center gap-6 mb-8">
+            {bridePhotoUrl && (
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden border-4 border-white/40 shadow-2xl">
+                  <img
+                    src={bridePhotoUrl}
+                    alt={invitation.brideName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span
+                  className="text-white/80 text-sm font-medium"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+                >
+                  {invitation.brideName}
+                </span>
+              </div>
+            )}
 
-        {/* Couple Photo */}
-        {couplePhotoUrl && (
-          <div
-            className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden mx-auto mb-6 border-4 shadow-gold-lg"
-            style={{ borderColor: template.primaryColor }}
-          >
-            <img src={couplePhotoUrl} alt="Couple" className="w-full h-full object-cover" />
+            {bridePhotoUrl && groomPhotoUrl && (
+              <div className="text-white/60 text-3xl font-serif">&</div>
+            )}
+
+            {groomPhotoUrl && (
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden border-4 border-white/40 shadow-2xl">
+                  <img
+                    src={groomPhotoUrl}
+                    alt={invitation.groomName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span
+                  className="text-white/80 text-sm font-medium"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+                >
+                  {invitation.groomName}
+                </span>
+              </div>
+            )}
           </div>
         )}
 
         {/* Names */}
-        <div
-          className="mb-4"
-          style={{ fontFamily: template.headingFont, color: template.category === 'cinematic-dark' ? template.textColor : '#FFF8E7' }}
+        <h1
+          className="text-5xl md:text-7xl font-serif text-white mb-4"
+          style={{ fontWeight: 700, textShadow: '0 2px 20px rgba(0,0,0,0.8)' }}
         >
-          <p className="text-sm tracking-[0.4em] uppercase mb-3 opacity-80">
-            Together with their families
-          </p>
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold leading-tight">
-            {invitation.brideName}
-          </h1>
-          <p className="text-2xl sm:text-3xl my-3 opacity-70" style={{ fontFamily: 'Cormorant Garamond' }}>
-            &
-          </p>
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold leading-tight">
-            {invitation.groomName}
-          </h1>
-        </div>
+          {invitation.brideName}
+          <span className="block text-3xl md:text-4xl my-2 font-light opacity-80">&</span>
+          {invitation.groomName}
+        </h1>
 
         {/* Date */}
-        {invitation.weddingDate && (
+        {weddingDate && (
           <p
-            className="text-base sm:text-lg font-inter mt-4 opacity-80"
-            style={{ color: template.category === 'cinematic-dark' ? template.textColor : '#FFF8E7' }}
+            className="text-xl md:text-2xl text-white/90 mb-3 font-light"
+            style={{ textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}
           >
-            {formatDate(invitation.weddingDate)}
+            {weddingDate}
           </p>
         )}
 
         {/* Venue */}
         {invitation.venueName && (
           <p
-            className="text-sm font-inter mt-2 opacity-60"
-            style={{ color: template.category === 'cinematic-dark' ? template.textColor : '#FFF8E7' }}
+            className="text-lg text-white/80 font-light"
+            style={{ textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}
           >
             {invitation.venueName}
           </p>
         )}
 
-        {/* Bottom ornament */}
-        <div className="flex items-center justify-center gap-3 mt-8">
-          <div className="w-12 h-px" style={{ background: template.primaryColor }} />
-          <span className="text-lg" style={{ color: template.primaryColor }}>✦</span>
-          <div className="w-12 h-px" style={{ background: template.primaryColor }} />
+        {/* Invitation Message */}
+        {invitation.invitationMessage && (
+          <div className="mt-8 max-w-2xl mx-auto">
+            <p
+              className="text-white/80 text-base md:text-lg italic leading-relaxed"
+              style={{ textShadow: '0 1px 6px rgba(0,0,0,0.8)' }}
+            >
+              "{invitation.invitationMessage}"
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+        <div className="w-6 h-10 border-2 border-white/40 rounded-full flex items-start justify-center pt-2">
+          <div className="w-1 h-3 bg-white/60 rounded-full" />
         </div>
       </div>
     </section>

@@ -1,33 +1,35 @@
 import React, { useRef, useState } from 'react';
-import { Music, Upload, Play, Pause, X } from 'lucide-react';
+import { useInvitationForm } from '@/context/InvitationFormContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { useInvitationForm } from '@/context/InvitationFormContext';
+import { Music, Upload, X, Play, Pause } from 'lucide-react';
 
 export default function MusicUploader() {
   const { formData, updateFormData } = useInvitationForm();
-  const [isPlaying, setIsPlaying] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFile = (file: File) => {
+    if (!file.type.startsWith('audio/')) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      updateFormData({ musicUrl: ev.target?.result as string });
-      setIsPlaying(false);
+    reader.onload = e => {
+      const dataUrl = e.target?.result as string;
+      if (dataUrl) {
+        updateFormData({ musicUrl: dataUrl });
+      }
     };
     reader.readAsDataURL(file);
   };
 
-  const togglePlay = () => {
+  const handleTogglePlay = () => {
     if (!audioRef.current) return;
     if (isPlaying) {
       audioRef.current.pause();
+      setIsPlaying(false);
     } else {
-      audioRef.current.play().catch(() => {});
+      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleRemove = () => {
@@ -36,40 +38,53 @@ export default function MusicUploader() {
   };
 
   return (
-    <div className="space-y-5">
+    <div>
       {!formData.musicUrl ? (
         <div
-          className="drag-zone p-8 text-center cursor-pointer"
-          onClick={() => document.getElementById('music-input')?.click()}
+          onClick={() => fileInputRef.current?.click()}
+          className="border-2 border-dashed border-gold/40 rounded-xl p-8 text-center cursor-pointer hover:border-gold hover:bg-gold/5 transition-all duration-200"
         >
-          <div className="w-14 h-14 rounded-full bg-gold/10 flex items-center justify-center mx-auto mb-3">
-            <Music className="w-7 h-7 text-gold" />
-          </div>
-          <p className="font-inter font-medium text-foreground">
-            Upload background music
-          </p>
-          <p className="text-sm text-muted-foreground mt-1">MP3, WAV, M4A supported</p>
-          <Upload className="w-5 h-5 text-gold/60 mx-auto mt-3" />
+          <Music className="w-8 h-8 text-gold mx-auto mb-3" />
+          <p className="font-elegant text-charcoal font-medium mb-1">Click to upload music</p>
+          <p className="font-elegant text-charcoal-light text-sm">Supports MP3, WAV, M4A</p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="audio/*"
+            className="hidden"
+            onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])}
+          />
         </div>
       ) : (
-        <div className="luxury-card p-5 space-y-4">
-          <div className="flex items-center gap-4">
+        <div className="bg-ivory-dark rounded-xl p-4">
+          <div className="flex items-center gap-3 mb-4">
             <button
-              onClick={togglePlay}
-              className="w-12 h-12 rounded-full btn-gold flex items-center justify-center flex-shrink-0"
+              onClick={handleTogglePlay}
+              className="w-10 h-10 rounded-full bg-gold flex items-center justify-center text-charcoal hover:bg-gold-dark transition-colors"
             >
-              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
             </button>
-            <div className="flex-1 min-w-0">
-              <p className="font-cinzel text-sm font-bold text-foreground">Background Music</p>
-              <p className="font-inter text-xs text-muted-foreground">Ready to play</p>
+            <div className="flex-1">
+              <p className="font-elegant text-charcoal text-sm font-medium">Music uploaded</p>
+              <p className="font-elegant text-charcoal-light text-xs">Ready to play</p>
             </div>
             <button
               onClick={handleRemove}
-              className="w-8 h-8 rounded-full bg-crimson/10 text-crimson flex items-center justify-center hover:bg-crimson/20 transition-colors"
+              className="w-8 h-8 rounded-full border border-crimson/30 text-crimson hover:bg-crimson/10 flex items-center justify-center transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Switch
+              id="autoplay"
+              checked={formData.musicAutoPlay}
+              onCheckedChange={checked => updateFormData({ musicAutoPlay: checked })}
+            />
+            <Label htmlFor="autoplay" className="font-elegant text-sm text-charcoal cursor-pointer">
+              Auto-play when invitation opens
+            </Label>
           </div>
 
           <audio
@@ -78,30 +93,8 @@ export default function MusicUploader() {
             onEnded={() => setIsPlaying(false)}
             className="hidden"
           />
-
-          {/* Auto-play toggle */}
-          <div className="flex items-center justify-between pt-2 border-t border-border">
-            <div>
-              <Label className="font-cinzel text-sm font-semibold tracking-wide">Auto-play on open</Label>
-              <p className="font-inter text-xs text-muted-foreground mt-0.5">
-                Music starts automatically when guests open the invitation
-              </p>
-            </div>
-            <Switch
-              checked={formData.musicAutoPlay}
-              onCheckedChange={(checked) => updateFormData({ musicAutoPlay: checked })}
-            />
-          </div>
         </div>
       )}
-
-      <input
-        id="music-input"
-        type="file"
-        accept="audio/*"
-        className="hidden"
-        onChange={handleFileInput}
-      />
     </div>
   );
 }

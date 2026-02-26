@@ -1,13 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the Color Scheme, Font Pairing, and Background Style selectors in the invitation editor so they correctly update the live preview and persist on save.
+**Goal:** Fix three issues in the Wedding Invitation Builder: separate bride/groom photo uploads, fix hidden action buttons on the Dashboard, and prevent "Create Invitation" CTA from appearing on wrong pages.
 
 **Planned changes:**
-- Fix `ColorSchemePicker` to call `updateFormData` with the correct field name so the selected color scheme is immediately reflected in `InvitationFormContext` and the live `TemplatePreview`.
-- Fix `FontSelector` to call `updateFormData` with the correct field name so the selected font pairing is immediately reflected in `InvitationFormContext` and the live `TemplatePreview`.
-- Fix the Background Style selector to call `updateFormData` with the correct field name so the selected background style is immediately reflected in `InvitationFormContext` and the live `TemplatePreview`.
-- Audit `TemplatePreview` to ensure it reads `colorScheme`, `fontPairing`, and `backgroundStyle` reactively from `InvitationFormContext` rather than stale local state or props.
-- Ensure that when an existing invitation is loaded, the saved `colorScheme`, `fontPairing`, and `backgroundStyle` values are correctly hydrated into `InvitationFormContext` so selectors and preview reflect the previously saved state on load.
+- Replace the single couple photo field with two separate file upload inputs ("Bride Photo" and "Groom Photo") in CoupleDetailsStep and InvitationEditor, including preview thumbnails and independent storage
+- Update InvitationFormContext to store `bridePhoto` and `groomPhoto` as separate fields, and update the backend Invitation type in main.mo accordingly
+- Render both bride and groom photos side by side on the guest-facing invitation pages (HeroSection, CoupleIntroduction)
+- Fix Dashboard layout so the Publish button and all invitation action controls remain visible and accessible regardless of editing state
+- Hide the "Create Invitation" CTA from the Header on editor and wizard routes, and ensure it does not appear on the InvitationEditor, CreateInvitationWizard, or GuestInvitation pages
 
-**User-visible outcome:** Selecting a color scheme, font pairing, or background style in the invitation editor immediately updates the live preview, and those choices are correctly saved and restored when re-opening an existing invitation.
+**User-visible outcome:** Users can upload separate photos for the bride and groom; the Dashboard always shows action buttons like Publish; and the "Create Invitation" button no longer appears or overlaps content on editor, wizard, or guest invitation pages.

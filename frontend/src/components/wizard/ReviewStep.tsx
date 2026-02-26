@@ -1,136 +1,140 @@
 import React, { useState } from 'react';
-import { Check, Calendar, MapPin, Music, Image as ImageIcon, Palette } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useInvitationForm } from '@/context/InvitationFormContext';
-import { getEventConfig } from '@/utils/eventIcons';
 import { getTemplateById } from '@/utils/templateDefinitions';
+import { Loader2, ChevronLeft } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface ReviewStepProps {
-  slug: string;
-  onSlugChange: (slug: string) => void;
-  slugError: string;
+  onBack: () => void;
+  onSubmit: (slug: string) => Promise<void>;
+  isSubmitting: boolean;
 }
 
-export default function ReviewStep({ slug, onSlugChange, slugError }: ReviewStepProps) {
+export default function ReviewStep({ onBack, onSubmit, isSubmitting }: ReviewStepProps) {
   const { formData } = useInvitationForm();
+  const [slug, setSlug] = useState('');
+  const [slugError, setSlugError] = useState('');
+
   const template = getTemplateById(formData.selectedTemplate);
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return 'Not set';
-    try {
-      return new Date(dateStr).toLocaleDateString('en-IN', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-      });
-    } catch { return dateStr; }
+  const validateSlug = (value: string) => {
+    if (!value) {
+      setSlugError('URL slug is required');
+      return false;
+    }
+    if (!/^[a-z0-9-]+$/.test(value)) {
+      setSlugError('Only lowercase letters, numbers, and hyphens allowed');
+      return false;
+    }
+    if (value.length < 3) {
+      setSlugError('Slug must be at least 3 characters');
+      return false;
+    }
+    setSlugError('');
+    return true;
+  };
+
+  const handleSlugChange = (value: string) => {
+    const cleaned = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    setSlug(cleaned);
+    if (cleaned) validateSlug(cleaned);
+  };
+
+  const handleSubmit = () => {
+    if (!validateSlug(slug)) return;
+    onSubmit(slug);
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="text-center mb-8">
-        <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-gold-dark mb-2">
-          Review & Publish
-        </h2>
-        <p className="font-inter text-muted-foreground">
-          Review your invitation details and choose a unique URL
+    <div className="luxury-card rounded-2xl p-8">
+      <h2 className="font-display text-2xl text-charcoal mb-6">Review & Create</h2>
+
+      {/* Summary */}
+      <div className="space-y-4 mb-8">
+        <div className="bg-ivory-dark rounded-xl p-4">
+          <h3 className="font-elegant font-semibold text-charcoal mb-3">Couple Details</h3>
+          <div className="space-y-1 font-serif text-charcoal-light text-sm">
+            <p><span className="text-charcoal font-medium">Names:</span> {formData.brideName} & {formData.groomName}</p>
+            <p><span className="text-charcoal font-medium">Date:</span> {formData.weddingDate}</p>
+            <p><span className="text-charcoal font-medium">Venue:</span> {formData.venueName}</p>
+          </div>
+        </div>
+
+        <div className="bg-ivory-dark rounded-xl p-4">
+          <h3 className="font-elegant font-semibold text-charcoal mb-3">Events</h3>
+          {formData.events.length === 0 ? (
+            <p className="font-serif text-charcoal-light text-sm">No events added</p>
+          ) : (
+            <div className="space-y-1">
+              {formData.events.map(event => (
+                <p key={event.id} className="font-serif text-charcoal-light text-sm">
+                  • {event.title} — {event.date}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-ivory-dark rounded-xl p-4">
+          <h3 className="font-elegant font-semibold text-charcoal mb-3">Template & Theme</h3>
+          <div className="space-y-1 font-serif text-charcoal-light text-sm">
+            <p><span className="text-charcoal font-medium">Template:</span> <strong>{template?.name ?? formData.selectedTemplate}</strong></p>
+            <p><span className="text-charcoal font-medium">Color Scheme:</span> {formData.colorScheme}</p>
+            <p><span className="text-charcoal font-medium">Font:</span> {formData.fontChoice}</p>
+          </div>
+        </div>
+
+        <div className="bg-ivory-dark rounded-xl p-4">
+          <h3 className="font-elegant font-semibold text-charcoal mb-3">Media</h3>
+          <div className="space-y-1 font-serif text-charcoal-light text-sm">
+            <p><span className="text-charcoal font-medium">Photos:</span> {formData.photos.length} uploaded</p>
+            <p><span className="text-charcoal font-medium">Music:</span> {formData.musicUrl ? 'Added' : 'None'}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Slug Input */}
+      <div className="mb-8">
+        <Label className="font-elegant text-charcoal mb-2 block">
+          Invitation URL Slug *
+        </Label>
+        <div className="flex items-center gap-2">
+          <span className="font-elegant text-charcoal-light text-sm whitespace-nowrap">
+            {window.location.origin}/invitation/
+          </span>
+          <Input
+            value={slug}
+            onChange={e => handleSlugChange(e.target.value)}
+            placeholder="your-unique-slug"
+            className="border-gold/30 focus:border-gold"
+          />
+        </div>
+        {slugError && (
+          <p className="text-crimson text-sm mt-1 font-elegant">{slugError}</p>
+        )}
+        <p className="text-charcoal-light text-xs mt-1 font-elegant">
+          This will be the unique URL for your invitation. Use only lowercase letters, numbers, and hyphens.
         </p>
       </div>
 
-      {/* Unique URL */}
-      <div className="luxury-card p-6 border-2 border-gold/30">
-        <h3 className="font-cinzel text-lg font-bold text-gold-dark mb-4">
-          ✦ Choose Your Invitation URL
-        </h3>
-        <div className="space-y-2">
-          <Label className="font-cinzel text-sm font-semibold tracking-wide">
-            Unique Slug *
-          </Label>
-          <div className="flex items-center gap-2">
-            <span className="font-inter text-sm text-muted-foreground bg-muted px-3 py-2 rounded-l-lg border border-r-0 border-border whitespace-nowrap">
-              yoursite.com/
-            </span>
-            <Input
-              value={slug}
-              onChange={(e) => onSlugChange(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/--+/g, '-'))}
-              placeholder="priya-arjun-2026"
-              className={`input-luxury font-inter rounded-l-none ${slugError ? 'border-crimson' : ''}`}
-            />
-          </div>
-          {slugError && (
-            <p className="text-xs text-crimson font-inter">{slugError}</p>
-          )}
-          <p className="text-xs text-muted-foreground font-inter">
-            Only lowercase letters, numbers, and hyphens. This will be your public invitation URL.
-          </p>
-        </div>
-      </div>
-
-      {/* Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Couple Details */}
-        <div className="luxury-card p-5">
-          <h4 className="font-cinzel text-sm font-bold text-gold-dark mb-3 flex items-center gap-2">
-            <Check className="w-4 h-4" /> Couple Details
-          </h4>
-          <div className="space-y-2 font-inter text-sm">
-            <p><span className="text-muted-foreground">Bride:</span> <strong>{formData.brideName || '—'}</strong></p>
-            <p><span className="text-muted-foreground">Groom:</span> <strong>{formData.groomName || '—'}</strong></p>
-            <p><span className="text-muted-foreground">Date:</span> {formatDate(formData.weddingDate)}</p>
-            <p><span className="text-muted-foreground">Venue:</span> {formData.venueName || '—'}</p>
-          </div>
-        </div>
-
-        {/* Events */}
-        <div className="luxury-card p-5">
-          <h4 className="font-cinzel text-sm font-bold text-gold-dark mb-3 flex items-center gap-2">
-            <Calendar className="w-4 h-4" /> Events ({formData.events.length})
-          </h4>
-          {formData.events.length > 0 ? (
-            <div className="space-y-2">
-              {formData.events.map((event) => {
-                const config = getEventConfig(event.eventType);
-                return (
-                  <div key={event.id} className="flex items-center gap-2 text-sm font-inter">
-                    <span>{config.icon}</span>
-                    <span className="font-medium">{event.title}</span>
-                    <span className="text-muted-foreground">— {event.date}</span>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="font-inter text-sm text-muted-foreground">No events added</p>
-          )}
-        </div>
-
-        {/* Template */}
-        <div className="luxury-card p-5">
-          <h4 className="font-cinzel text-sm font-bold text-gold-dark mb-3 flex items-center gap-2">
-            <Palette className="w-4 h-4" /> Template & Theme
-          </h4>
-          <div className="space-y-2 font-inter text-sm">
-            <p><span className="text-muted-foreground">Template:</span> <strong>{template.name}</strong></p>
-            <p><span className="text-muted-foreground">Color Scheme:</span> {formData.colorScheme}</p>
-            <p><span className="text-muted-foreground">Font:</span> {formData.fontChoice}</p>
-          </div>
-        </div>
-
-        {/* Media */}
-        <div className="luxury-card p-5">
-          <h4 className="font-cinzel text-sm font-bold text-gold-dark mb-3 flex items-center gap-2">
-            <ImageIcon className="w-4 h-4" /> Media
-          </h4>
-          <div className="space-y-2 font-inter text-sm">
-            <p>
-              <span className="text-muted-foreground">Photos:</span>{' '}
-              <strong>{formData.photos.length} uploaded</strong>
-            </p>
-            <p>
-              <span className="text-muted-foreground">Music:</span>{' '}
-              <strong>{formData.musicUrl ? `Yes (Auto-play: ${formData.musicAutoPlay ? 'On' : 'Off'})` : 'None'}</strong>
-            </p>
-          </div>
-        </div>
+      <div className="flex justify-between">
+        <button
+          onClick={onBack}
+          disabled={isSubmitting}
+          className="flex items-center gap-2 border border-charcoal text-charcoal hover:bg-charcoal hover:text-ivory font-elegant font-semibold px-6 py-3 rounded-full transition-all duration-300 disabled:opacity-50"
+        >
+          <ChevronLeft className="w-5 h-5" />
+          Back
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting || !slug}
+          className="flex items-center gap-2 bg-gold hover:bg-gold-dark text-charcoal font-elegant font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-luxury disabled:opacity-50"
+        >
+          {isSubmitting && <Loader2 className="w-5 h-5 animate-spin" />}
+          {isSubmitting ? 'Creating...' : 'Create Invitation'}
+        </button>
       </div>
     </div>
   );

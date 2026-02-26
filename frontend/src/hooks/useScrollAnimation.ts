@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-export function useScrollAnimation(threshold = 0.15) {
+export function useScrollAnimation(threshold = 0.1) {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -19,7 +19,10 @@ export function useScrollAnimation(threshold = 0.15) {
     );
 
     observer.observe(element);
-    return () => observer.disconnect();
+
+    return () => {
+      observer.disconnect();
+    };
   }, [threshold]);
 
   return { ref, isVisible };
@@ -28,6 +31,7 @@ export function useScrollAnimation(threshold = 0.15) {
 export function useLazyLoad() {
   const ref = useRef<HTMLImageElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(false);
 
   useEffect(() => {
     const element = ref.current;
@@ -36,20 +40,19 @@ export function useLazyLoad() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          const img = entry.target as HTMLImageElement;
-          if (img.dataset.src) {
-            img.src = img.dataset.src;
-            img.onload = () => setIsLoaded(true);
-          }
-          observer.unobserve(img);
+          setIsInView(true);
+          observer.unobserve(element);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.01, rootMargin: '200px' }
     );
 
     observer.observe(element);
-    return () => observer.disconnect();
+
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
-  return { ref, isLoaded };
+  return { ref, isLoaded, setIsLoaded, isInView };
 }

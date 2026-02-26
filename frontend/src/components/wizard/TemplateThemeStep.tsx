@@ -1,69 +1,87 @@
-import React from 'react';
-import { useInvitationForm } from '@/context/InvitationFormContext';
-import TemplateSelector from '@/components/templates/TemplateSelector';
-import ColorSchemePicker from '@/components/templates/ColorSchemePicker';
-import FontSelector from '@/components/templates/FontSelector';
-import TemplatePreview from '@/components/templates/TemplatePreview';
-import { BACKGROUND_CHOICES, TEMPLATES, getTemplateById } from '@/utils/templateDefinitions';
-import {
-  useGetThemeVariants,
-  useSaveThemeVariant,
-  useDeleteThemeVariant,
-} from '@/hooks/useQueries';
-import { Button } from '@/components/ui/button';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Slider } from '@/components/ui/slider';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Badge } from '@/components/ui/badge';
-import {
-  Check,
-  Loader2,
-  Trash2,
-  BookmarkPlus,
-  Bookmark,
-  Layers,
-} from 'lucide-react';
-import { toast } from 'sonner';
-import type { ThemeConfig } from '@/backend';
+import React, { useState } from 'react';
+import { useInvitationForm } from '../../context/InvitationFormContext';
+import TemplateSelector from '../templates/TemplateSelector';
+import ColorSchemePicker from '../templates/ColorSchemePicker';
+import FontSelector from '../templates/FontSelector';
+import TemplatePreview from '../templates/TemplatePreview';
+import { useGetThemeVariants, useSaveThemeVariant, useDeleteThemeVariant } from '../../hooks/useQueries';
+import { ThemeConfig } from '../../backend';
+import { Palette, Type, Image, Sliders, Save, Eye, Trash2, Check } from 'lucide-react';
 
-interface TemplateThemeStepProps {
+const BACKGROUND_STYLES = [
+  { id: 'minimal', label: 'Minimal', description: 'Clean white background' },
+  { id: 'floral', label: 'Floral', description: 'Subtle floral patterns' },
+  { id: 'paisley', label: 'Paisley', description: 'Traditional paisley motifs' },
+  { id: 'watercolor', label: 'Watercolor', description: 'Soft watercolor washes' },
+  { id: 'dark-floral', label: 'Dark Floral', description: 'Dramatic dark with florals' },
+  { id: 'dark-minimal', label: 'Dark Minimal', description: 'Sleek dark background' },
+];
+
+interface ThemeVariantCardProps {
+  variant: ThemeConfig;
+  index: number;
+  onApply: () => void;
+  onDelete: () => void;
+}
+
+function ThemeVariantCard({ variant, index, onApply, onDelete }: ThemeVariantCardProps) {
+  return (
+    <div className="flex items-center justify-between p-3 rounded-lg bg-charcoal-800 border border-charcoal-700 hover:border-gold-500/50 transition-colors">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-ivory-100 truncate">{variant.name || `Theme ${index + 1}`}</p>
+        <p className="text-xs text-charcoal-400 truncate">{variant.template} · {variant.colorScheme}</p>
+      </div>
+      <div className="flex gap-2 ml-3 flex-shrink-0">
+        <button
+          onClick={onApply}
+          className="text-xs px-2 py-1 rounded bg-gold-500/20 text-gold-400 hover:bg-gold-500/30 transition-colors"
+        >
+          Apply
+        </button>
+        <button
+          onClick={onDelete}
+          className="text-xs px-2 py-1 rounded bg-crimson-500/20 text-crimson-400 hover:bg-crimson-500/30 transition-colors"
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export interface TemplateThemeStepProps {
   invitationId?: string;
+  // Legacy wizard props — kept for backward compatibility but unused in this component
+  onNext?: () => void;
+  onBack?: () => void;
+  hideNavigation?: boolean;
 }
 
 export default function TemplateThemeStep({ invitationId }: TemplateThemeStepProps) {
   const { formData, updateFormData } = useInvitationForm();
+  const [activeSection, setActiveSection] = useState<'template' | 'color' | 'font' | 'background' | 'saved'>('template');
+  const [saveThemeName, setSaveThemeName] = useState('');
+  const [showSaveInput, setShowSaveInput] = useState(false);
+  const [savedSuccess, setSavedSuccess] = useState(false);
 
-  const { data: themeVariants = [], isLoading: variantsLoading } = useGetThemeVariants(
-    invitationId ?? ''
-  );
-  const saveVariant = useSaveThemeVariant();
-  const deleteVariant = useDeleteThemeVariant();
+  const { data: themeVariants = [] } = useGetThemeVariants(invitationId || '');
+  const saveThemeMutation = useSaveThemeVariant();
+  const deleteThemeMutation = useDeleteThemeVariant();
 
-  const currentThemeConfig: ThemeConfig = {
-    template: formData.selectedTemplate,
-    colorScheme: formData.colorScheme,
-    fontChoice: formData.fontChoice,
-    backgroundChoice: formData.backgroundChoice,
-  };
-
-  const handleSaveAsSingle = () => {
-    toast.success('Theme saved as your active template!');
-  };
-
-  const handleSaveAsVariant = async () => {
-    if (!invitationId) {
-      toast.info('Save your invitation first to store theme variants.');
-      return;
-    }
-    try {
-      await saveVariant.mutateAsync({
-        invitationId,
-        themeConfig: currentThemeConfig,
-      });
-      toast.success('Theme variant saved!');
-    } catch {
-      toast.error('Failed to save theme variant');
-    }
+  const handleSaveTheme = async () => {
+    if (!invitationId || !saveThemeName.trim()) return;
+    const themeConfig: ThemeConfig = {
+      name: saveThemeName.trim(),
+      template: formData.selectedTemplate,
+      colorScheme: formData.colorScheme,
+      fontChoice: formData.fontChoice,
+      backgroundChoice: formData.backgroundChoice || 'minimal',
+    };
+    await saveThemeMutation.mutateAsync({ invitationId, themeConfig });
+    setSaveThemeName('');
+    setShowSaveInput(false);
+    setSavedSuccess(true);
+    setTimeout(() => setSavedSuccess(false), 2000);
   };
 
   const handleApplyVariant = (variant: ThemeConfig) => {
@@ -73,389 +91,172 @@ export default function TemplateThemeStep({ invitationId }: TemplateThemeStepPro
       fontChoice: variant.fontChoice,
       backgroundChoice: variant.backgroundChoice,
     });
-    toast.success('Theme variant applied!');
   };
 
   const handleDeleteVariant = async (index: number) => {
     if (!invitationId) return;
-    try {
-      await deleteVariant.mutateAsync({
-        invitationId,
-        themeIndex: BigInt(index),
-      });
-      toast.success('Theme variant deleted');
-    } catch {
-      toast.error('Failed to delete theme variant');
-    }
+    await deleteThemeMutation.mutateAsync({ invitationId, themeIndex: BigInt(index) });
   };
 
+  const sections = [
+    { id: 'template' as const, label: 'Template', icon: Image },
+    { id: 'color' as const, label: 'Colors', icon: Palette },
+    { id: 'font' as const, label: 'Fonts', icon: Type },
+    { id: 'background' as const, label: 'Background', icon: Sliders },
+    { id: 'saved' as const, label: 'Saved', icon: Save },
+  ];
+
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="text-center mb-8">
-        <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-gold-dark mb-2">
-          Template &amp; Theme
-        </h2>
-        <p className="font-inter text-muted-foreground">
-          Choose your perfect wedding aesthetic
-        </p>
+    <div className="space-y-6">
+      {/* Live Preview */}
+      <div className="rounded-xl overflow-hidden border border-charcoal-700 bg-charcoal-900/50">
+        <div className="flex items-center gap-2 px-4 py-2 border-b border-charcoal-700 bg-charcoal-800/50">
+          <Eye className="w-4 h-4 text-gold-400" />
+          <span className="text-sm font-medium text-ivory-200">Live Preview</span>
+          <span className="text-xs text-charcoal-400 ml-1">— updates instantly as you make changes</span>
+        </div>
+        <div className="p-4">
+          <TemplatePreview />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left: Customization Options */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Template Selection */}
-          <div className="luxury-card p-6">
-            <h3 className="font-cinzel text-lg font-bold text-gold-dark mb-4">Choose Template</h3>
-            <TemplateSelector
-              selected={formData.selectedTemplate}
-              onChange={(id) => updateFormData({ selectedTemplate: id })}
-            />
-          </div>
+      {/* Section Navigation */}
+      <div className="flex gap-1 bg-charcoal-800 rounded-lg p-1 overflow-x-auto">
+        {sections.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            onClick={() => setActiveSection(id)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap flex-1 justify-center ${
+              activeSection === id
+                ? 'bg-gold-500 text-charcoal-900'
+                : 'text-charcoal-300 hover:text-ivory-100 hover:bg-charcoal-700'
+            }`}
+          >
+            <Icon className="w-3.5 h-3.5" />
+            {label}
+          </button>
+        ))}
+      </div>
 
-          {/* Color Scheme */}
-          <div className="luxury-card p-6">
-            <ColorSchemePicker
-              selected={formData.colorScheme}
-              onChange={(scheme) => updateFormData({ colorScheme: scheme })}
-            />
-          </div>
+      {/* Template Selection — TemplateSelector reads/writes context internally */}
+      {activeSection === 'template' && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-ivory-100">Choose Template</h3>
+          <TemplateSelector />
+        </div>
+      )}
 
-          {/* Font Selection */}
-          <div className="luxury-card p-6">
-            <FontSelector
-              selected={formData.fontChoice}
-              onChange={(font) => updateFormData({ fontChoice: font })}
-            />
-          </div>
+      {/* Color Scheme — ColorSchemePicker reads/writes context internally */}
+      {activeSection === 'color' && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-ivory-100">Color Scheme</h3>
+          <ColorSchemePicker />
+        </div>
+      )}
 
-          {/* Background */}
-          <div className="luxury-card p-6">
-            <h4 className="font-cinzel text-sm font-semibold tracking-wide text-foreground mb-3">
-              Background Style
-            </h4>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {BACKGROUND_CHOICES.map((bg) => (
+      {/* Font Pairing */}
+      {activeSection === 'font' && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-ivory-100">Font Pairing</h3>
+          <FontSelector
+            value={formData.fontChoice}
+            onChange={(fontId) => updateFormData({ fontChoice: fontId })}
+          />
+        </div>
+      )}
+
+      {/* Background Style */}
+      {activeSection === 'background' && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-ivory-100">Background Style</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {BACKGROUND_STYLES.map((style) => {
+              const isSelected = (formData.backgroundChoice || 'minimal') === style.id;
+              return (
                 <button
-                  key={bg.id}
-                  onClick={() => updateFormData({ backgroundChoice: bg.id })}
-                  className={`relative p-3 rounded-xl border-2 transition-all duration-200 text-left ${
-                    formData.backgroundChoice === bg.id
-                      ? 'border-gold shadow-gold bg-gold/5'
-                      : 'border-border hover:border-gold/40'
+                  key={style.id}
+                  onClick={() => updateFormData({ backgroundChoice: style.id })}
+                  className={`p-3 rounded-lg border-2 text-left transition-all ${
+                    isSelected
+                      ? 'border-gold-500 bg-gold-500/10'
+                      : 'border-charcoal-700 bg-charcoal-800/50 hover:border-gold-400/50'
                   }`}
                 >
-                  <p className="font-cinzel text-sm font-bold text-foreground">{bg.name}</p>
-                  <p className="font-inter text-xs text-muted-foreground mt-0.5">{bg.description}</p>
-                  {formData.backgroundChoice === bg.id && (
-                    <div className="absolute top-2 right-2 w-5 h-5 bg-gold rounded-full flex items-center justify-center">
-                      <Check className="w-3 h-3 text-foreground" />
-                    </div>
-                  )}
+                  <p className={`text-sm font-medium ${isSelected ? 'text-gold-400' : 'text-ivory-200'}`}>
+                    {style.label}
+                  </p>
+                  <p className="text-xs text-charcoal-400 mt-0.5">{style.description}</p>
                 </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Saved Themes */}
+      {activeSection === 'saved' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-ivory-100">Saved Themes</h3>
+            {invitationId && (
+              <button
+                onClick={() => setShowSaveInput(!showSaveInput)}
+                className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-gold-500/20 text-gold-400 hover:bg-gold-500/30 transition-colors"
+              >
+                <Save className="w-3.5 h-3.5" />
+                Save Current
+              </button>
+            )}
+          </div>
+
+          {showSaveInput && (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={saveThemeName}
+                onChange={(e) => setSaveThemeName(e.target.value)}
+                placeholder="Theme name (e.g. Royal Gold)"
+                className="flex-1 px-3 py-2 rounded-lg bg-charcoal-800 border border-charcoal-600 text-ivory-100 placeholder-charcoal-400 text-sm focus:outline-none focus:border-gold-500"
+                onKeyDown={(e) => e.key === 'Enter' && handleSaveTheme()}
+              />
+              <button
+                onClick={handleSaveTheme}
+                disabled={!saveThemeName.trim() || saveThemeMutation.isPending}
+                className="px-3 py-2 rounded-lg bg-gold-500 text-charcoal-900 font-medium text-sm hover:bg-gold-400 disabled:opacity-50 transition-colors"
+              >
+                {saveThemeMutation.isPending ? '...' : 'Save'}
+              </button>
+            </div>
+          )}
+
+          {savedSuccess && (
+            <div className="flex items-center gap-2 text-sm text-green-400 bg-green-400/10 px-3 py-2 rounded-lg">
+              <Check className="w-4 h-4" />
+              Theme saved successfully!
+            </div>
+          )}
+
+          {themeVariants.length === 0 ? (
+            <div className="text-center py-8 text-charcoal-400">
+              <Save className="w-8 h-8 mx-auto mb-2 opacity-40" />
+              <p className="text-sm">No saved themes yet.</p>
+              <p className="text-xs mt-1">Save your current theme to reuse it later.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {themeVariants.map((variant, index) => (
+                <ThemeVariantCard
+                  key={index}
+                  variant={variant}
+                  index={index}
+                  onApply={() => handleApplyVariant(variant)}
+                  onDelete={() => handleDeleteVariant(index)}
+                />
               ))}
             </div>
-          </div>
-
-          {/* ── Advanced Customization ── */}
-          <div className="luxury-card p-6 space-y-6">
-            <div className="flex items-center gap-2 mb-1">
-              <Layers className="w-4 h-4 text-gold" />
-              <h4 className="font-cinzel text-sm font-bold tracking-wide text-gold-dark">
-                Advanced Customization
-              </h4>
-              <Badge variant="outline" className="text-[10px] font-cinzel border-gold/40 text-gold-dark px-1.5 py-0">
-                NEW
-              </Badge>
-            </div>
-
-            {/* Background Style Picker */}
-            <div>
-              <p className="font-cinzel text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-2">
-                Preview Background
-              </p>
-              <ToggleGroup
-                type="single"
-                value={formData.backgroundStyle}
-                onValueChange={(val) => val && updateFormData({ backgroundStyle: val })}
-                className="flex flex-wrap gap-2"
-              >
-                {[
-                  { value: 'solid', label: 'Solid' },
-                  { value: 'gradient', label: 'Gradient' },
-                  { value: 'pattern', label: 'Pattern' },
-                  { value: 'texture', label: 'Texture' },
-                ].map((opt) => (
-                  <ToggleGroupItem
-                    key={opt.value}
-                    value={opt.value}
-                    className="font-cinzel text-xs tracking-wider rounded-full px-4 h-8 border border-border data-[state=on]:bg-gold data-[state=on]:text-foreground data-[state=on]:border-gold data-[state=on]:shadow-gold"
-                  >
-                    {opt.label}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </div>
-
-            {/* Accent Intensity Slider */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="font-cinzel text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                  Accent Intensity
-                </p>
-                <span className="font-cinzel text-xs font-bold text-gold-dark">
-                  {formData.accentIntensity}%
-                </span>
-              </div>
-              <Slider
-                min={50}
-                max={150}
-                step={5}
-                value={[formData.accentIntensity]}
-                onValueChange={([val]) => updateFormData({ accentIntensity: val })}
-                className="w-full"
-              />
-              <div className="flex justify-between mt-1">
-                <span className="font-inter text-[10px] text-muted-foreground">Subtle</span>
-                <span className="font-inter text-[10px] text-muted-foreground">Vivid</span>
-              </div>
-            </div>
-
-            {/* Border / Frame Style */}
-            <div>
-              <p className="font-cinzel text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-2">
-                Frame Style
-              </p>
-              <ToggleGroup
-                type="single"
-                value={formData.borderStyle}
-                onValueChange={(val) => val && updateFormData({ borderStyle: val })}
-                className="flex flex-wrap gap-2"
-              >
-                {[
-                  { value: 'none', label: 'None' },
-                  { value: 'classic', label: 'Classic' },
-                  { value: 'ornate', label: 'Ornate' },
-                ].map((opt) => (
-                  <ToggleGroupItem
-                    key={opt.value}
-                    value={opt.value}
-                    className="font-cinzel text-xs tracking-wider rounded-full px-4 h-8 border border-border data-[state=on]:bg-gold data-[state=on]:text-foreground data-[state=on]:border-gold data-[state=on]:shadow-gold"
-                  >
-                    {opt.label}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </div>
-
-            {/* Layout Density */}
-            <div>
-              <p className="font-cinzel text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-2">
-                Layout Density
-              </p>
-              <ToggleGroup
-                type="single"
-                value={formData.layoutDensity}
-                onValueChange={(val) => val && updateFormData({ layoutDensity: val })}
-                className="flex gap-2"
-              >
-                {[
-                  { value: 'compact', label: 'Compact' },
-                  { value: 'spacious', label: 'Spacious' },
-                ].map((opt) => (
-                  <ToggleGroupItem
-                    key={opt.value}
-                    value={opt.value}
-                    className="font-cinzel text-xs tracking-wider rounded-full px-5 h-8 border border-border data-[state=on]:bg-gold data-[state=on]:text-foreground data-[state=on]:border-gold data-[state=on]:shadow-gold"
-                  >
-                    {opt.label}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </div>
-          </div>
-
-          {/* ── Save Theme Section ── */}
-          <div className="luxury-card p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Bookmark className="w-4 h-4 text-gold" />
-              <h4 className="font-cinzel text-sm font-bold tracking-wide text-gold-dark">
-                Save Theme
-              </h4>
-            </div>
-
-            <p className="font-inter text-xs text-muted-foreground mb-4">
-              Save your current theme configuration as the active theme, or store it as a variant to switch between later.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
-              <Button
-                onClick={handleSaveAsSingle}
-                className="btn-gold rounded-full font-cinzel text-xs tracking-wider flex-1"
-              >
-                <Bookmark className="w-3.5 h-3.5 mr-2" />
-                Save as Single Theme
-              </Button>
-              <Button
-                onClick={handleSaveAsVariant}
-                disabled={saveVariant.isPending || !invitationId}
-                variant="outline"
-                className="rounded-full font-cinzel text-xs tracking-wider border-gold/40 text-gold-dark hover:bg-gold/5 flex-1"
-              >
-                {saveVariant.isPending ? (
-                  <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />
-                ) : (
-                  <BookmarkPlus className="w-3.5 h-3.5 mr-2" />
-                )}
-                Save as Variant
-              </Button>
-            </div>
-
-            {!invitationId && (
-              <p className="font-inter text-xs text-muted-foreground/70 italic text-center mb-4">
-                💡 Theme variants are available after creating your invitation
-              </p>
-            )}
-
-            {/* Saved Variants */}
-            {invitationId && (
-              <div>
-                <p className="font-cinzel text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-3">
-                  Saved Variants ({themeVariants.length})
-                </p>
-
-                {variantsLoading ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="font-inter text-xs">Loading variants...</span>
-                  </div>
-                ) : themeVariants.length === 0 ? (
-                  <div className="text-center py-6 border-2 border-dashed border-border rounded-xl">
-                    <BookmarkPlus className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
-                    <p className="font-inter text-xs text-muted-foreground">
-                      No saved variants yet. Save your current theme as a variant to compare later.
-                    </p>
-                  </div>
-                ) : (
-                  <ScrollArea className="w-full">
-                    <div className="flex gap-3 pb-3">
-                      {themeVariants.map((variant, index) => (
-                        <ThemeVariantCard
-                          key={index}
-                          variant={variant}
-                          index={index}
-                          onApply={() => handleApplyVariant(variant)}
-                          onDelete={() => handleDeleteVariant(index)}
-                          isDeleting={deleteVariant.isPending}
-                        />
-                      ))}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
-                )}
-              </div>
-            )}
-          </div>
+          )}
         </div>
-
-        {/* Right: Live Preview */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-24">
-            <h3 className="font-cinzel text-sm font-semibold tracking-widest text-muted-foreground uppercase mb-4 text-center">
-              Live Preview
-            </h3>
-            <TemplatePreview formData={formData} />
-
-            {/* Preview meta info */}
-            <div className="mt-4 p-3 rounded-xl bg-secondary/40 border border-border">
-              <p className="font-cinzel text-xs font-bold text-gold-dark mb-1">
-                {getTemplateById(formData.selectedTemplate).name}
-              </p>
-              <div className="flex flex-wrap gap-1">
-                <Badge variant="outline" className="text-[9px] font-inter border-gold/30 text-muted-foreground px-1.5 py-0">
-                  {formData.backgroundStyle}
-                </Badge>
-                <Badge variant="outline" className="text-[9px] font-inter border-gold/30 text-muted-foreground px-1.5 py-0">
-                  {formData.borderStyle} frame
-                </Badge>
-                <Badge variant="outline" className="text-[9px] font-inter border-gold/30 text-muted-foreground px-1.5 py-0">
-                  {formData.layoutDensity}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ThemeVariantCard({
-  variant,
-  index,
-  onApply,
-  onDelete,
-  isDeleting,
-}: {
-  variant: ThemeConfig;
-  index: number;
-  onApply: () => void;
-  onDelete: () => void;
-  isDeleting: boolean;
-}) {
-  const template = TEMPLATES.find((t) => t.id === variant.template) ?? TEMPLATES[0];
-
-  return (
-    <div className="shrink-0 w-36 rounded-xl overflow-hidden border-2 border-border hover:border-gold/50 transition-all duration-200 bg-card">
-      {/* Mini preview */}
-      <div
-        className="h-20 relative"
-        style={{ background: template.previewGradient }}
-      >
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div
-            className="text-[9px] font-bold tracking-wide"
-            style={{
-              fontFamily: template.headingFont,
-              color: template.category === 'cinematic-dark' ? template.textColor : '#FFFFFF',
-            }}
-          >
-            Variant {index + 1}
-          </div>
-          <div
-            className="text-[8px] opacity-70 mt-0.5"
-            style={{ color: template.category === 'cinematic-dark' ? template.textColor : '#FFFFFF' }}
-          >
-            {template.name}
-          </div>
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="p-2 space-y-1.5">
-        <p className="font-cinzel text-[9px] font-bold text-foreground truncate">{template.name}</p>
-        <div className="flex gap-1">
-          <Button
-            size="sm"
-            onClick={onApply}
-            className="flex-1 h-6 text-[9px] font-cinzel tracking-wider rounded-full btn-gold px-2"
-          >
-            Apply
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={onDelete}
-            disabled={isDeleting}
-            className="h-6 w-6 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-          >
-            {isDeleting ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            ) : (
-              <Trash2 className="w-3 h-3" />
-            )}
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

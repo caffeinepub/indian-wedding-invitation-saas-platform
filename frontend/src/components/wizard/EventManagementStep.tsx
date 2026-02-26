@@ -1,43 +1,44 @@
 import React, { useState } from 'react';
-import { Plus, Calendar } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import EventCard from '@/components/events/EventCard';
-import EventForm from '@/components/events/EventForm';
 import { useInvitationForm, LocalEvent } from '@/context/InvitationFormContext';
+import EventCard from '../events/EventCard';
+import EventForm from '../events/EventForm';
+import { Plus, ChevronRight, ChevronLeft } from 'lucide-react';
 import { EventType } from '@/backend';
 
-export default function EventManagementStep() {
-  const { formData, updateFormData } = useInvitationForm();
+interface EventManagementStepProps {
+  onNext: () => void;
+  onBack: () => void;
+  hideNavigation?: boolean;
+  invitationId?: string;
+}
+
+export default function EventManagementStep({ onNext, onBack, hideNavigation }: EventManagementStepProps) {
+  const { formData, addEvent, updateEvent, deleteEvent } = useInvitationForm();
   const [showForm, setShowForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<LocalEvent | null>(null);
 
-  const handleAddEvent = (eventData: Omit<LocalEvent, 'id'>) => {
-    const newEvent: LocalEvent = {
-      ...eventData,
-      id: `event-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    };
-    updateFormData({ events: [...formData.events, newEvent] });
+  const handleAddEvent = (event: LocalEvent) => {
+    if (editingEvent) {
+      updateEvent(event);
+    } else {
+      addEvent(event);
+    }
     setShowForm(false);
-  };
-
-  const handleEditEvent = (eventData: Omit<LocalEvent, 'id'>) => {
-    if (!editingEvent) return;
-    const updated = formData.events.map(e =>
-      e.id === editingEvent.id ? { ...eventData, id: e.id } : e
-    );
-    updateFormData({ events: updated });
     setEditingEvent(null);
   };
 
-  const handleDeleteEvent = (eventId: string) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
-      updateFormData({ events: formData.events.filter(e => e.id !== eventId) });
-    }
+  const handleEdit = (event: LocalEvent) => {
+    setEditingEvent(event);
+    setShowForm(true);
   };
 
-  const handleStartEdit = (event: LocalEvent) => {
-    setEditingEvent(event);
+  const handleDelete = (id: string) => {
+    deleteEvent(id);
+  };
+
+  const handleCancel = () => {
     setShowForm(false);
+    setEditingEvent(null);
   };
 
   const sortedEvents = [...formData.events].sort((a, b) => {
@@ -46,67 +47,68 @@ export default function EventManagementStep() {
   });
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="text-center mb-8">
-        <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-gold-dark mb-2">
-          Wedding Events
-        </h2>
-        <p className="font-inter text-muted-foreground">
-          Add all your wedding celebrations
-        </p>
+    <div className="luxury-card rounded-2xl p-8">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-display text-2xl text-charcoal">Wedding Events</h2>
+        {!showForm && (
+          <button
+            onClick={() => { setEditingEvent(null); setShowForm(true); }}
+            className="flex items-center gap-2 bg-gold hover:bg-gold-dark text-charcoal font-elegant text-sm font-semibold px-4 py-2 rounded-full transition-all duration-300 shadow-luxury"
+          >
+            <Plus className="w-4 h-4" />
+            Add Event
+          </button>
+        )}
       </div>
 
-      {/* Add Event Button */}
-      {!showForm && !editingEvent && (
-        <Button
-          onClick={() => setShowForm(true)}
-          className="btn-gold w-full rounded-2xl py-6 font-cinzel text-base tracking-wider"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add Wedding Event
-        </Button>
-      )}
-
-      {/* Add Event Form */}
       {showForm && (
-        <EventForm
-          onSave={handleAddEvent}
-          onCancel={() => setShowForm(false)}
-        />
+        <div className="mb-6">
+          <EventForm
+            initialEvent={editingEvent}
+            onSave={handleAddEvent}
+            onCancel={handleCancel}
+          />
+        </div>
       )}
 
-      {/* Edit Event Form */}
-      {editingEvent && (
-        <EventForm
-          initialData={editingEvent}
-          onSave={handleEditEvent}
-          onCancel={() => setEditingEvent(null)}
-        />
-      )}
-
-      {/* Events Grid */}
-      {sortedEvents.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {sortedEvents.map((event, index) => (
+      {sortedEvents.length === 0 && !showForm ? (
+        <div className="text-center py-12">
+          <div className="text-5xl mb-4">🎊</div>
+          <p className="font-serif text-charcoal-light text-lg mb-2">No events added yet</p>
+          <p className="font-elegant text-charcoal-light text-sm">
+            Add your wedding events like Haldi, Mehndi, Sangeet, Wedding, and Reception.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {sortedEvents.map(event => (
             <EventCard
               key={event.id}
               event={event}
-              onEdit={handleStartEdit}
-              onDelete={handleDeleteEvent}
-              animationDelay={index * 0.1}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
           ))}
         </div>
-      ) : (
-        !showForm && (
-          <div className="text-center py-16 border-2 border-dashed border-gold/20 rounded-2xl">
-            <Calendar className="w-12 h-12 text-gold/40 mx-auto mb-4" />
-            <p className="font-cinzel text-lg text-muted-foreground">No events added yet</p>
-            <p className="font-inter text-sm text-muted-foreground mt-1">
-              Add Haldi, Mehndi, Sangeet, and more
-            </p>
-          </div>
-        )
+      )}
+
+      {!hideNavigation && (
+        <div className="flex justify-between mt-6">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 border border-charcoal text-charcoal hover:bg-charcoal hover:text-ivory font-elegant font-semibold px-6 py-3 rounded-full transition-all duration-300"
+          >
+            <ChevronLeft className="w-5 h-5" />
+            Back
+          </button>
+          <button
+            onClick={onNext}
+            className="flex items-center gap-2 bg-gold hover:bg-gold-dark text-charcoal font-elegant font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-luxury"
+          >
+            Next
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
       )}
     </div>
   );

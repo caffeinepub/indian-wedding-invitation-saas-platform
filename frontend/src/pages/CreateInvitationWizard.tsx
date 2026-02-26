@@ -1,87 +1,57 @@
 import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, ArrowRight, Loader2, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { InvitationFormProvider, useInvitationForm } from '@/context/InvitationFormContext';
-import ProgressBar from '@/components/wizard/ProgressBar';
-import CoupleDetailsStep from '@/components/wizard/CoupleDetailsStep';
-import EventManagementStep from '@/components/wizard/EventManagementStep';
-import TemplateThemeStep from '@/components/wizard/TemplateThemeStep';
-import MediaManagementStep from '@/components/wizard/MediaManagementStep';
-import ReviewStep from '@/components/wizard/ReviewStep';
+import { InvitationFormProvider, useInvitationForm } from '../context/InvitationFormContext';
+import CoupleDetailsStep from '../components/wizard/CoupleDetailsStep';
+import EventManagementStep from '../components/wizard/EventManagementStep';
+import TemplateThemeStep from '../components/wizard/TemplateThemeStep';
+import MediaManagementStep from '../components/wizard/MediaManagementStep';
+import ReviewStep from '../components/wizard/ReviewStep';
 import {
   useCreateInvitation,
+  useAddPhotos,
   useAddEvent,
-  useAddPhoto,
   useSetBackgroundMusic,
-} from '@/hooks/useQueries';
+} from '../hooks/useQueries';
+import { ExternalBlob, EventType } from '../backend';
 import { toast } from 'sonner';
-import { Link } from '@tanstack/react-router';
+import { Loader2 } from 'lucide-react';
 
 const STEPS = [
-  { label: 'Couple Details' },
-  { label: 'Events' },
-  { label: 'Template' },
-  { label: 'Media' },
-  { label: 'Review' },
+  { id: 0, label: 'Couple Details' },
+  { id: 1, label: 'Events' },
+  { id: 2, label: 'Theme' },
+  { id: 3, label: 'Media' },
+  { id: 4, label: 'Review' },
 ];
-
-function validateStep(step: number, formData: ReturnType<typeof useInvitationForm>['formData']): string | null {
-  if (step === 1) {
-    if (!formData.brideName.trim()) return 'Please enter the bride\'s name';
-    if (!formData.groomName.trim()) return 'Please enter the groom\'s name';
-    if (!formData.weddingDate) return 'Please select the wedding date';
-    if (!formData.weddingTime) return 'Please select the wedding time';
-    if (!formData.venueName.trim()) return 'Please enter the venue name';
-    if (!formData.venueAddress.trim()) return 'Please enter the venue address';
-    if (!formData.invitationMessage.trim()) return 'Please write an invitation message';
-  }
-  return null;
-}
 
 function WizardContent() {
   const navigate = useNavigate();
-  const { formData, currentStep, setCurrentStep, totalSteps } = useInvitationForm();
-  const [slug, setSlug] = useState('');
-  const [slugError, setSlugError] = useState('');
+  const { formData, currentStep, setCurrentStep, resetForm } = useInvitationForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const createInvitation = useCreateInvitation();
+  const addPhotos = useAddPhotos();
   const addEvent = useAddEvent();
-  const addPhoto = useAddPhoto();
   const setBackgroundMusic = useSetBackgroundMusic();
 
   const handleNext = () => {
-    const error = validateStep(currentStep, formData);
-    if (error) {
-      toast.error(error);
-      return;
+    if (currentStep < STEPS.length - 1) {
+      setCurrentStep(currentStep + 1);
     }
-    setCurrentStep(Math.min(currentStep + 1, totalSteps));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBack = () => {
-    setCurrentStep(Math.max(currentStep - 1, 1));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
   };
 
-  const handleSubmit = async () => {
-    if (!slug.trim()) {
-      setSlugError('Please enter a unique URL slug');
-      return;
-    }
-    if (!/^[a-z0-9-]+$/.test(slug)) {
-      setSlugError('Slug can only contain lowercase letters, numbers, and hyphens');
-      return;
-    }
-    setSlugError('');
+  const handleSubmit = async (finalSlug: string) => {
     setIsSubmitting(true);
-
     try {
-      // 1. Create invitation
-      await createInvitation.mutateAsync({
-        slug,
+      // Create invitation
+      const invitation = await createInvitation.mutateAsync({
+        slug: finalSlug,
         brideName: formData.brideName,
         groomName: formData.groomName,
         weddingDate: formData.weddingDate,
@@ -97,126 +67,139 @@ function WizardContent() {
         backgroundChoice: formData.backgroundChoice,
       });
 
-      // 2. Add events
+      // Upload bride/groom photos if provided
+      if (formData.bridePhoto || formData.groomPhoto) {
+        let brideBlob: ExternalBlob | null = null;
+        let groomBlob: ExternalBlob | null = null;
+
+        if (formData.bridePhoto) {
+          const bytes = new Uint8Array(await formData.bridePhoto.arrayBuffer());
+          brideBlob = ExternalBlob.fromBytes(bytes);
+        }
+        if (formData.groomPhoto) {
+          const bytes = new Uint8Array(await formData.groomPhoto.arrayBuffer());
+          groomBlob = ExternalBlob.fromBytes(bytes);
+        }
+
+        await addPhotos.mutateAsync({
+          invitationId: invitation.id,
+          bridePhoto: brideBlob,
+          groomPhoto: groomBlob,
+        });
+      }
+
+      // Add events
       for (const event of formData.events) {
         await addEvent.mutateAsync({
-          invitationId: slug,
+          invitationId: finalSlug,
           eventId: event.id,
           title: event.title,
           date: event.date,
           time: event.time,
           venue: event.venue,
           description: event.description,
-          eventType: event.eventType,
+          eventType: event.eventType as EventType,
         });
       }
 
-      // 3. Add photos
-      for (const photo of formData.photos) {
-        await addPhoto.mutateAsync({
-          invitationId: slug,
-          photoId: photo.id,
-          imageUrl: photo.imageUrl,
-        });
-      }
-
-      // 4. Add music
+      // Set background music
       if (formData.musicUrl) {
+        const musicId = `music-${Date.now()}`;
         await setBackgroundMusic.mutateAsync({
-          invitationId: slug,
-          musicId: `music-${Date.now()}`,
+          invitationId: finalSlug,
+          musicId,
           musicUrl: formData.musicUrl,
           autoPlay: formData.musicAutoPlay,
         });
       }
 
-      toast.success('Invitation created successfully! 🎉');
-      navigate({ to: '/dashboard/$slug', params: { slug } });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to create invitation';
-      if (message.includes('already taken')) {
-        setSlugError('This URL is already taken. Please choose a different one.');
-      } else {
-        toast.error(message);
-      }
+      toast.success('Invitation created successfully!');
+      resetForm();
+      navigate({ to: '/dashboard' });
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to create invitation');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-ivory">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-ivory/95 backdrop-blur-md border-b border-gold/20 shadow-xs">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <Heart className="w-5 h-5 text-gold" />
-            <span className="font-cinzel text-lg font-bold text-gold-dark">VIVAH</span>
-          </Link>
-          <span className="font-inter text-sm text-muted-foreground">
-            Step {currentStep} of {totalSteps}
-          </span>
-        </div>
-        <div className="max-w-4xl mx-auto px-4">
-          <ProgressBar currentStep={currentStep} totalSteps={totalSteps} steps={STEPS} />
-        </div>
-      </header>
-
-      {/* Content */}
-      <main className="max-w-4xl mx-auto px-4 py-10">
-        {currentStep === 1 && <CoupleDetailsStep />}
-        {currentStep === 2 && <EventManagementStep />}
-        {currentStep === 3 && <TemplateThemeStep />}
-        {currentStep === 4 && <MediaManagementStep />}
-        {currentStep === 5 && (
+  const renderStep = () => {
+    switch (currentStep) {
+      case 0:
+        return <CoupleDetailsStep onNext={handleNext} />;
+      case 1:
+        return <EventManagementStep onNext={handleNext} onBack={handleBack} />;
+      case 2:
+        return (
+          <div className="space-y-4">
+            <TemplateThemeStep />
+            <div className="flex justify-between pt-2">
+              <button
+                onClick={handleBack}
+                className="flex items-center gap-2 border border-charcoal text-charcoal hover:bg-charcoal hover:text-ivory font-elegant font-semibold px-6 py-3 rounded-full transition-all duration-300"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleNext}
+                className="flex items-center gap-2 bg-gold hover:bg-gold-dark text-charcoal font-elegant font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-luxury"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        );
+      case 3:
+        return <MediaManagementStep onNext={handleNext} onBack={handleBack} />;
+      case 4:
+        return (
           <ReviewStep
-            slug={slug}
-            onSlugChange={(val) => { setSlug(val); setSlugError(''); }}
-            slugError={slugError}
+            onBack={handleBack}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
           />
-        )}
+        );
+      default:
+        return null;
+    }
+  };
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between mt-10 pt-6 border-t border-border">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 1}
-            className="rounded-full font-cinzel tracking-wider border-gold/30 text-gold-dark hover:bg-gold/5 disabled:opacity-40"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-
-          {currentStep < totalSteps ? (
-            <Button
-              onClick={handleNext}
-              className="btn-gold rounded-full font-cinzel tracking-wider px-8"
-            >
-              Continue
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          ) : (
-            <Button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="btn-gold rounded-full font-cinzel tracking-wider px-8"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  Create Invitation
-                  <Heart className="w-4 h-4 ml-2" />
-                </>
-              )}
-            </Button>
-          )}
+  return (
+    <div className="min-h-screen bg-ivory pt-20">
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="text-center mb-10">
+          <p className="font-script text-gold text-2xl mb-2">Create Your</p>
+          <h1 className="font-display text-4xl text-charcoal">Wedding Invitation</h1>
         </div>
-      </main>
+
+        {/* Step Progress */}
+        <div className="flex items-center justify-center gap-2 mb-10">
+          {STEPS.map((step, index) => (
+            <React.Fragment key={step.id}>
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-colors ${
+                  currentStep >= step.id
+                    ? 'bg-gold text-charcoal'
+                    : 'bg-gold/20 text-charcoal/40'
+                }`}
+              >
+                {step.id + 1}
+              </div>
+              {index < STEPS.length - 1 && (
+                <div
+                  className={`h-0.5 w-8 transition-colors ${
+                    currentStep > step.id ? 'bg-gold' : 'bg-gold/20'
+                  }`}
+                />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div className="mt-4">
+          {renderStep()}
+        </div>
+      </div>
     </div>
   );
 }

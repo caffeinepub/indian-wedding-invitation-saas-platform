@@ -1,160 +1,129 @@
 import React from 'react';
 import { useParams } from '@tanstack/react-router';
-import { Heart } from 'lucide-react';
 import {
   useGetInvitationBySlug,
-  useGetEvents,
-  useGetPhotos,
+  useGetEventsByInvitation,
+  useGetPhotosByInvitation,
   useGetBackgroundMusic,
-} from '@/hooks/useQueries';
-import { getTemplateById } from '@/utils/templateDefinitions';
-import HeroSection from '@/components/guest/HeroSection';
-import CountdownTimer from '@/components/guest/CountdownTimer';
-import CoupleIntroduction from '@/components/guest/CoupleIntroduction';
-import EventTimeline from '@/components/guest/EventTimeline';
-import PhotoGalleryLightbox from '@/components/guest/PhotoGalleryLightbox';
-import VenueSection from '@/components/guest/VenueSection';
-import RSVPForm from '@/components/guest/RSVPForm';
-import WhatsAppShareButton from '@/components/guest/WhatsAppShareButton';
-import MusicController from '@/components/media/MusicController';
-import DecorativeDivider from '@/components/layout/DecorativeDivider';
-import NotFound from './NotFound';
+} from '../hooks/useQueries';
+import HeroSection from '../components/guest/HeroSection';
+import CountdownTimer from '../components/guest/CountdownTimer';
+import CoupleIntroduction from '../components/guest/CoupleIntroduction';
+import EventTimeline from '../components/guest/EventTimeline';
+import PhotoGalleryLightbox from '../components/guest/PhotoGalleryLightbox';
+import VenueSection from '../components/guest/VenueSection';
+import RSVPForm from '../components/guest/RSVPForm';
+import WhatsAppShareButton from '../components/guest/WhatsAppShareButton';
+import MusicController from '../components/media/MusicController';
+import DecorativeDivider from '../components/layout/DecorativeDivider';
+import { Loader2 } from 'lucide-react';
 
 export default function GuestInvitation() {
-  const { slug } = useParams({ from: '/$slug' });
-  const { data: invitation, isLoading: invLoading } = useGetInvitationBySlug(slug);
-  const { data: events = [], isLoading: eventsLoading } = useGetEvents(slug);
-  const { data: photos = [], isLoading: photosLoading } = useGetPhotos(slug);
-  const { data: musicList = [] } = useGetBackgroundMusic(slug);
+  const params = useParams({ from: '/invitation/$slug' });
+  const slug = params.slug;
 
-  const isLoading = invLoading || eventsLoading || photosLoading;
+  const { data: invitation, isLoading, error } = useGetInvitationBySlug(slug);
+  const { data: events } = useGetEventsByInvitation(slug);
+  const { data: photos } = useGetPhotosByInvitation(slug);
+  const { data: musicList } = useGetBackgroundMusic(slug);
+
+  const music = musicList && musicList.length > 0 ? musicList[musicList.length - 1] : null;
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-ivory flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mx-auto animate-float">
-            <Heart className="w-8 h-8 text-gold" />
-          </div>
-          <p className="font-cinzel text-lg text-gold-dark">Loading Invitation...</p>
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-gold animate-spin mx-auto mb-4" />
+          <p className="font-serif text-charcoal-light text-lg">Loading your invitation...</p>
         </div>
       </div>
     );
   }
 
-  if (!invitation) {
-    return <NotFound />;
-  }
-
-  if (!invitation.isPublished) {
-    const template = getTemplateById(invitation.selectedTemplate);
+  if (error || !invitation) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center px-4 text-center"
-        style={{ background: template.bgColor }}
-      >
-        <div>
-          <div
-            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 animate-float"
-            style={{ background: `${template.primaryColor}20` }}
-          >
-            <Heart className="w-10 h-10" style={{ color: template.primaryColor }} />
-          </div>
-          <h1
-            className="font-cinzel text-3xl font-bold mb-3"
-            style={{ fontFamily: template.headingFont, color: template.textColor }}
-          >
-            Coming Soon
-          </h1>
-          <p className="font-inter text-sm" style={{ color: template.textColor, opacity: 0.6 }}>
-            This invitation hasn't been published yet. Check back soon!
+      <div className="min-h-screen bg-ivory flex items-center justify-center px-6">
+        <div className="text-center max-w-md">
+          <div className="text-6xl mb-6">💍</div>
+          <h2 className="font-display text-3xl text-charcoal mb-4">Invitation Not Found</h2>
+          <p className="font-serif text-charcoal-light text-lg">
+            This invitation doesn't exist or may have been removed.
           </p>
         </div>
       </div>
     );
   }
 
-  const template = getTemplateById(invitation.selectedTemplate);
-  const latestMusic = musicList.length > 0 ? musicList[musicList.length - 1] : null;
-  const couplePhoto = photos.find((p) => p.id.startsWith('couple-')) || null;
+  if (!invitation.isPublished) {
+    return (
+      <div className="min-h-screen bg-ivory flex items-center justify-center px-6">
+        <div className="text-center max-w-md">
+          <div className="text-6xl mb-6">🔒</div>
+          <h2 className="font-display text-3xl text-charcoal mb-4">Not Yet Published</h2>
+          <p className="font-serif text-charcoal-light text-lg">
+            This invitation hasn't been published yet. Please check back later.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ background: template.bgColor, minHeight: '100vh' }}>
+    <div className="min-h-screen">
       {/* Hero */}
-      <HeroSection invitation={invitation} couplePhotoUrl={couplePhoto?.imageUrl} />
-
-      {/* Mandala Divider */}
-      <div style={{ background: template.bgColor }}>
-        <DecorativeDivider variant="mandala" />
-      </div>
+      <HeroSection invitation={invitation} />
 
       {/* Countdown */}
-      {invitation.weddingDate && <CountdownTimer invitation={invitation} />}
+      <CountdownTimer invitation={invitation} />
+
+      <DecorativeDivider variant="mandala" />
 
       {/* Couple Introduction */}
       <CoupleIntroduction invitation={invitation} />
 
-      {/* Mandala Divider */}
-      <div style={{ background: template.bgColor }}>
-        <DecorativeDivider variant="mandala" />
-      </div>
+      <DecorativeDivider variant="line" />
 
       {/* Events */}
-      {events.length > 0 && <EventTimeline events={events} invitation={invitation} />}
+      {events && events.length > 0 && (
+        <>
+          <EventTimeline events={events} invitation={invitation} />
+          <DecorativeDivider variant="flourish" />
+        </>
+      )}
 
-      {/* Gallery */}
-      {photos.length > 0 && <PhotoGalleryLightbox photos={photos} invitation={invitation} />}
-
-      {/* Mandala Divider */}
-      <div style={{ background: template.bgColor }}>
-        <DecorativeDivider variant="mandala" />
-      </div>
+      {/* Photo Gallery */}
+      {photos && photos.length > 0 && (
+        <>
+          <PhotoGalleryLightbox photos={photos} templateData={{
+            selectedTemplate: invitation.selectedTemplate,
+            colorScheme: invitation.colorScheme,
+            fontChoice: invitation.fontChoice,
+            backgroundChoice: invitation.backgroundChoice,
+          }} />
+          <DecorativeDivider variant="line" />
+        </>
+      )}
 
       {/* Venue */}
       <VenueSection invitation={invitation} />
 
+      <DecorativeDivider variant="mandala" />
+
       {/* RSVP */}
       <RSVPForm invitation={invitation} />
 
-      {/* Footer */}
-      <footer
-        className="py-10 px-4 text-center border-t"
-        style={{ background: template.bgColor, borderColor: `${template.primaryColor}20` }}
-      >
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="w-12 h-px" style={{ background: `${template.primaryColor}40` }} />
-          <span style={{ color: template.primaryColor }}>✦</span>
-          <div className="w-12 h-px" style={{ background: `${template.primaryColor}40` }} />
-        </div>
-        <p
-          className="font-cinzel text-lg font-bold mb-1"
-          style={{ fontFamily: template.headingFont, color: template.primaryColor }}
-        >
-          {invitation.brideName} & {invitation.groomName}
-        </p>
-        <p className="font-inter text-xs mt-4" style={{ color: template.textColor, opacity: 0.4 }}>
-          Built with <Heart className="w-3 h-3 inline text-crimson fill-crimson" /> using{' '}
-          <a
-            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(
-              typeof window !== 'undefined' ? window.location.hostname : 'vivah-wedding'
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline"
-          >
-            caffeine.ai
-          </a>
-        </p>
-      </footer>
-
-      {/* Floating buttons */}
+      {/* Floating elements */}
       <WhatsAppShareButton
-        slug={slug}
         brideName={invitation.brideName}
         groomName={invitation.groomName}
+        slug={slug}
       />
-      {latestMusic && (
-        <MusicController musicUrl={latestMusic.musicUrl} autoPlay={latestMusic.autoPlay} />
+
+      {music && (
+        <MusicController
+          musicUrl={music.musicUrl}
+          autoPlay={music.autoPlay}
+        />
       )}
     </div>
   );

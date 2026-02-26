@@ -1,20 +1,26 @@
 import React, { useState } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { Photo, Invitation } from '@/backend';
+import { Photo } from '@/backend';
 import { getTemplateById } from '@/utils/templateDefinitions';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface PhotoGalleryLightboxProps {
-  photos: Photo[];
-  invitation: Invitation;
+interface TemplateData {
+  selectedTemplate: string;
+  colorScheme: string;
+  fontChoice: string;
+  backgroundChoice: string;
 }
 
-export default function PhotoGalleryLightbox({ photos, invitation }: PhotoGalleryLightboxProps) {
-  const template = getTemplateById(invitation.selectedTemplate);
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const { ref, isVisible } = useScrollAnimation();
+export interface PhotoGalleryLightboxProps {
+  photos: Photo[];
+  templateData: TemplateData;
+}
 
-  if (photos.length === 0) return null;
+export default function PhotoGalleryLightbox({ photos, templateData }: PhotoGalleryLightboxProps) {
+  const { ref, isVisible } = useScrollAnimation();
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const template = getTemplateById(templateData.selectedTemplate) ?? getTemplateById('royal-gold')!;
 
   const openLightbox = (index: number) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
@@ -26,38 +32,36 @@ export default function PhotoGalleryLightbox({ photos, invitation }: PhotoGaller
       <div className="max-w-5xl mx-auto">
         <div
           ref={ref}
-          className={`text-center mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+          className="text-center mb-10"
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
+          }}
         >
-          <p className="font-inter text-sm tracking-[0.3em] uppercase mb-3" style={{ color: template.primaryColor }}>
-            ✦ Memories ✦
+          <p className="font-elegant text-sm tracking-[0.3em] uppercase mb-3" style={{ color: template.primaryColor }}>
+            Our Memories
           </p>
           <h2
-            className="font-cinzel text-3xl md:text-4xl font-bold"
+            className="text-3xl md:text-4xl font-bold"
             style={{ fontFamily: template.headingFont, color: template.textColor }}
           >
-            Our Gallery
+            Photo Gallery
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {photos.map((photo, index) => (
             <div
               key={photo.id}
-              className="relative group aspect-square rounded-xl overflow-hidden cursor-pointer shadow-luxury"
-              style={{
-                transition: `all 0.5s ease ${index * 0.05}s`,
-                opacity: isVisible ? 1 : 0,
-                transform: isVisible ? 'scale(1)' : 'scale(0.9)',
-              }}
+              className="aspect-square overflow-hidden rounded-xl cursor-pointer group"
               onClick={() => openLightbox(index)}
             >
               <img
                 src={photo.imageUrl}
-                alt={`Gallery ${index + 1}`}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                loading="lazy"
+                alt={`Photo ${index + 1}`}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
             </div>
           ))}
         </div>
@@ -65,35 +69,32 @@ export default function PhotoGalleryLightbox({ photos, invitation }: PhotoGaller
 
       {/* Lightbox */}
       {lightboxIndex !== null && (
-        <div
-          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
-          onClick={closeLightbox}
-        >
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
           <button
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
             onClick={closeLightbox}
+            className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
           <button
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-            onClick={(e) => { e.stopPropagation(); prevPhoto(); }}
+            onClick={prevPhoto}
+            className="absolute left-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <img
             src={photos[lightboxIndex].imageUrl}
-            alt={`Gallery ${lightboxIndex + 1}`}
-            className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            alt={`Photo ${lightboxIndex + 1}`}
+            className="max-w-full max-h-full object-contain rounded-xl"
+            style={{ maxHeight: '85vh', maxWidth: '90vw' }}
           />
           <button
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-            onClick={(e) => { e.stopPropagation(); nextPhoto(); }}
+            onClick={nextPhoto}
+            className="absolute right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 font-inter text-sm">
+          <div className="absolute bottom-4 text-white/60 font-elegant text-sm">
             {lightboxIndex + 1} / {photos.length}
           </div>
         </div>

@@ -1,47 +1,63 @@
 import React from 'react';
-import { Image, Music } from 'lucide-react';
-import PhotoGalleryUpload from '@/components/media/PhotoGalleryUpload';
-import MusicUploader from '@/components/media/MusicUploader';
+import PhotoGalleryUpload from '../media/PhotoGalleryUpload';
+import MusicUploader from '../media/MusicUploader';
+import { ChevronRight, ChevronLeft, Camera, Music } from 'lucide-react';
 
-export default function MediaManagementStep() {
+interface MediaManagementStepProps {
+  onNext: () => void;
+  onBack: () => void;
+  hideNavigation?: boolean;
+}
+
+export default function MediaManagementStep({ onNext, onBack, hideNavigation }: MediaManagementStepProps) {
   return (
-    <div className="space-y-10 animate-fade-in">
-      <div className="text-center mb-8">
-        <h2 className="font-cinzel text-2xl md:text-3xl font-bold text-gold-dark mb-2">
-          Media & Gallery
-        </h2>
-        <p className="font-inter text-muted-foreground">
-          Add photos and music to make your invitation come alive
-        </p>
-      </div>
-
+    <div className="space-y-6">
       {/* Photo Gallery */}
-      <div className="luxury-card p-6">
+      <div className="luxury-card rounded-2xl p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
-            <Image className="w-5 h-5 text-gold" />
+          <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
+            <Camera className="w-5 h-5 text-gold" />
           </div>
           <div>
-            <h3 className="font-cinzel text-lg font-bold text-foreground">Photo Gallery</h3>
-            <p className="font-inter text-xs text-muted-foreground">Upload your favorite couple photos</p>
+            <h2 className="font-display text-xl text-charcoal">Photo Gallery</h2>
+            <p className="font-elegant text-charcoal-light text-sm">Upload photos to share with your guests</p>
           </div>
         </div>
         <PhotoGalleryUpload />
       </div>
 
       {/* Background Music */}
-      <div className="luxury-card p-6">
+      <div className="luxury-card rounded-2xl p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center">
             <Music className="w-5 h-5 text-gold" />
           </div>
           <div>
-            <h3 className="font-cinzel text-lg font-bold text-foreground">Background Music</h3>
-            <p className="font-inter text-xs text-muted-foreground">Add a song to play on your invitation</p>
+            <h2 className="font-display text-xl text-charcoal">Background Music</h2>
+            <p className="font-elegant text-charcoal-light text-sm">Add a song to play on your invitation</p>
           </div>
         </div>
         <MusicUploader />
       </div>
+
+      {!hideNavigation && (
+        <div className="flex justify-between">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 border border-charcoal text-charcoal hover:bg-charcoal hover:text-ivory font-elegant font-semibold px-6 py-3 rounded-full transition-all duration-300"
+          >
+            <ChevronLeft className="w-5 h-5" />
+            Back
+          </button>
+          <button
+            onClick={onNext}
+            className="flex items-center gap-2 bg-gold hover:bg-gold-dark text-charcoal font-elegant font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-luxury"
+          >
+            Next
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

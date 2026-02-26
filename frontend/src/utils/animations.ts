@@ -1,53 +1,53 @@
 export const ANIMATION_DURATION = {
-  fast: 200,
-  normal: 400,
-  slow: 600,
-  verySlow: 1000,
+  fast: 300,
+  normal: 600,
+  slow: 900,
+  verySlow: 1200,
 };
 
-export const EASING = {
-  easeOut: 'cubic-bezier(0.16, 1, 0.3, 1)',
+export const ANIMATION_EASING = {
+  easeOut: 'cubic-bezier(0.0, 0, 0.2, 1)',
   easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
   easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
-  spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+  spring: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
 };
 
-export const fadeIn = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  transition: { duration: 0.6, ease: 'easeOut' },
-};
-
-export const slideUp = {
-  initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: 'easeOut' },
-};
-
-export const scaleIn = {
-  initial: { opacity: 0, scale: 0.92 },
-  animate: { opacity: 1, scale: 1 },
-  transition: { duration: 0.4, ease: 'easeOut' },
-};
-
-export const staggeredChildren = (staggerDelay = 0.1) => ({
-  animate: {
-    transition: {
-      staggerChildren: staggerDelay,
+export const ANIMATION_PRESETS = {
+  fadeIn: {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: { duration: 0.6, ease: 'easeOut' },
+  },
+  slideUp: {
+    initial: { opacity: 0, y: 40 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.8, ease: 'easeOut' },
+  },
+  scaleIn: {
+    initial: { opacity: 0, scale: 0.9 },
+    animate: { opacity: 1, scale: 1 },
+    transition: { duration: 0.6, ease: 'easeOut' },
+  },
+  staggeredChildren: {
+    animate: {
+      transition: {
+        staggerChildren: 0.1,
+      },
     },
   },
-});
+};
 
 export function getStaggerDelay(index: number, baseDelay = 0.1): string {
   return `${index * baseDelay}s`;
 }
 
-export function getAnimationStyle(index: number): React.CSSProperties {
+export function getScrollAnimationStyle(isVisible: boolean, delay = 0): React.CSSProperties {
   return {
-    animationDelay: `${index * 0.1}s`,
-    animationFillMode: 'both',
+    opacity: isVisible ? 1 : 0,
+    transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
+    transition: `opacity 0.8s ease-out ${delay}s, transform 0.8s ease-out ${delay}s`,
   };
 }
 
-// Re-export for use in components
+// Need to import React for CSSProperties
 import React from 'react';

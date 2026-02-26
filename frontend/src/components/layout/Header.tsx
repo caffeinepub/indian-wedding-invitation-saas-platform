@@ -1,133 +1,108 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from '@tanstack/react-router';
-import { Menu, X, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useNavigate, useLocation } from '@tanstack/react-router';
+import { Heart, Menu, X } from 'lucide-react';
 
 export default function Header() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const pathname = location.pathname;
+
+  // Hide "Create Invitation" CTA on editor, wizard, and guest invitation pages
+  const hideCreateCTA =
+    pathname.startsWith('/edit/') ||
+    pathname.startsWith('/invitation/') ||
+    pathname === '/create';
+
+  // Use transparent header on landing page hero, solid on other pages
+  const isLanding = pathname === '/';
+  const headerBg = isScrolled || !isLanding
+    ? 'bg-ivory/95 dark:bg-charcoal/95 backdrop-blur-md shadow-sm border-b border-gold/20'
+    : 'bg-transparent';
+
+  const textColor = isScrolled || !isLanding
+    ? 'text-charcoal dark:text-ivory'
+    : 'text-white';
+
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-ivory/95 backdrop-blur-md shadow-luxury border-b border-gold/20'
-          : 'bg-black/30 backdrop-blur-sm'
-      }`}
-    >
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${headerBg}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10 flex items-center justify-center">
-              <img
-                src="/assets/generated/logo-mark.dim_256x256.png"
-                alt="Vivah Logo"
-                className="w-10 h-10 object-contain"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                }}
-              />
-              <Heart className="w-8 h-8 text-gold absolute" style={{ display: 'none' }} />
-            </div>
-            <div>
-              <span
-                className={`font-cinzel text-xl font-bold tracking-wider transition-colors duration-300 ${
-                  isScrolled ? 'text-gold-dark' : 'text-white drop-shadow-md'
-                }`}
-              >
-                VIVAH
-              </span>
-              <p
-                className={`text-xs font-inter tracking-widest uppercase hidden sm:block transition-colors duration-300 ${
-                  isScrolled ? 'text-muted-foreground' : 'text-white/80 drop-shadow-sm'
-                }`}
-              >
-                Wedding Invitations
-              </p>
-            </div>
-          </Link>
+          <button
+            onClick={() => navigate({ to: '/' })}
+            className={`flex items-center gap-2 font-serif font-bold text-xl transition-colors ${textColor}`}
+          >
+            <img src="/assets/generated/logo-mark.dim_256x256.png" alt="Logo" className="w-8 h-8 object-contain" />
+            <span>WeddingInvite</span>
+          </button>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link
-              to="/"
-              className={`font-inter text-sm font-semibold transition-colors tracking-wide ${
-                isScrolled
-                  ? 'text-foreground/80 hover:text-gold-dark'
-                  : 'text-white hover:text-gold-light drop-shadow-sm'
-              }`}
+          <nav className="hidden md:flex items-center gap-6">
+            <button
+              onClick={() => navigate({ to: '/' })}
+              className={`text-sm font-medium transition-colors hover:text-gold ${textColor}`}
             >
               Home
-            </Link>
-            <Link
-              to="/dashboard"
-              className={`font-inter text-sm font-semibold transition-colors tracking-wide ${
-                isScrolled
-                  ? 'text-foreground/80 hover:text-gold-dark'
-                  : 'text-white hover:text-gold-light drop-shadow-sm'
-              }`}
+            </button>
+            <button
+              onClick={() => navigate({ to: '/dashboard' })}
+              className={`text-sm font-medium transition-colors hover:text-gold ${textColor}`}
             >
               Dashboard
-            </Link>
-            <Link to="/create">
-              <Button
-                className={`px-6 py-2 rounded-full text-sm font-cinzel tracking-wider transition-all duration-300 ${
-                  isScrolled
-                    ? 'btn-gold'
-                    : 'bg-white/15 border border-white/40 text-white hover:bg-white/25 hover:border-white/60 backdrop-blur-sm'
-                }`}
+            </button>
+            {!hideCreateCTA && (
+              <button
+                onClick={() => navigate({ to: '/create' })}
+                className="px-5 py-2 bg-gold text-white rounded-full text-sm font-medium hover:bg-gold/90 transition-colors shadow-md"
               >
                 Create Invitation
-              </Button>
-            </Link>
+              </button>
+            )}
           </nav>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile menu button */}
           <button
-            className={`md:hidden p-2 transition-colors rounded-lg ${
-              isScrolled
-                ? 'text-foreground/80 hover:text-gold-dark'
-                : 'text-white hover:text-gold-light'
-            }`}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            style={{ touchAction: 'manipulation' }}
+            className={`md:hidden p-2 rounded-lg transition-colors ${textColor}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
         {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden bg-ivory/98 backdrop-blur-md border-t border-gold/20 py-4 animate-slide-down">
-            <nav className="flex flex-col gap-4 px-4">
-              <Link
-                to="/"
-                className="font-inter text-sm font-semibold text-foreground/80 hover:text-gold-dark transition-colors py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link
-                to="/dashboard"
-                className="font-inter text-sm font-semibold text-foreground/80 hover:text-gold-dark transition-colors py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-              <Link to="/create" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button className="btn-gold w-full rounded-full text-sm font-cinzel tracking-wider">
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-ivory dark:bg-charcoal border-t border-gold/20 py-4 space-y-2">
+            <button
+              onClick={() => { navigate({ to: '/' }); setMobileMenuOpen(false); }}
+              className="block w-full text-left px-4 py-2 text-charcoal dark:text-ivory hover:text-gold transition-colors text-sm font-medium"
+            >
+              Home
+            </button>
+            <button
+              onClick={() => { navigate({ to: '/dashboard' }); setMobileMenuOpen(false); }}
+              className="block w-full text-left px-4 py-2 text-charcoal dark:text-ivory hover:text-gold transition-colors text-sm font-medium"
+            >
+              Dashboard
+            </button>
+            {!hideCreateCTA && (
+              <div className="px-4 pt-2">
+                <button
+                  onClick={() => { navigate({ to: '/create' }); setMobileMenuOpen(false); }}
+                  className="w-full px-5 py-2 bg-gold text-white rounded-full text-sm font-medium hover:bg-gold/90 transition-colors"
+                >
                   Create Invitation
-                </Button>
-              </Link>
-            </nav>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

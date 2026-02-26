@@ -1,67 +1,88 @@
 import React from 'react';
-import { Sun, Leaf, Music, Heart, Star, Sparkles } from 'lucide-react';
 import { EventType } from '../backend';
 
 export interface EventConfig {
-  label: string;
   icon: React.ReactNode;
   color: string;
+  bgColor: string;
   bgClass: string;
   textColor: string;
-  borderColor: string;
+  gradient: string;
+  label: string;
 }
-
-export const EVENT_CONFIGS: Record<EventType, EventConfig> = {
-  [EventType.haldi]: {
-    label: 'Haldi',
-    icon: <Sun className="w-5 h-5" />,
-    color: '#D4A017',
-    bgClass: 'event-haldi',
-    textColor: 'text-amber-900',
-    borderColor: 'border-amber-400',
-  },
-  [EventType.mehndi]: {
-    label: 'Mehndi',
-    icon: <Leaf className="w-5 h-5" />,
-    color: '#2D6A4F',
-    bgClass: 'event-mehndi',
-    textColor: 'text-green-900',
-    borderColor: 'border-green-500',
-  },
-  [EventType.sangeet]: {
-    label: 'Sangeet',
-    icon: <Music className="w-5 h-5" />,
-    color: '#7B2D8B',
-    bgClass: 'event-sangeet',
-    textColor: 'text-purple-100',
-    borderColor: 'border-purple-400',
-  },
-  [EventType.wedding]: {
-    label: 'Wedding Ceremony',
-    icon: <Heart className="w-5 h-5" />,
-    color: '#B8860B',
-    bgClass: 'event-wedding',
-    textColor: 'text-amber-100',
-    borderColor: 'border-yellow-500',
-  },
-  [EventType.reception]: {
-    label: 'Reception',
-    icon: <Sparkles className="w-5 h-5" />,
-    color: '#C2185B',
-    bgClass: 'event-reception',
-    textColor: 'text-pink-100',
-    borderColor: 'border-pink-400',
-  },
-  [EventType.custom]: {
-    label: 'Custom Event',
-    icon: <Star className="w-5 h-5" />,
-    color: '#546E7A',
-    bgClass: 'event-custom',
-    textColor: 'text-slate-100',
-    borderColor: 'border-slate-400',
-  },
-};
 
 export function getEventConfig(eventType: EventType): EventConfig {
-  return EVENT_CONFIGS[eventType] || EVENT_CONFIGS[EventType.custom];
+  switch (eventType) {
+    case EventType.haldi:
+      return {
+        icon: <span className="text-2xl">🌼</span>,
+        color: '#F59E0B',
+        bgColor: 'rgba(245, 158, 11, 0.1)',
+        bgClass: 'bg-amber-100',
+        textColor: 'text-amber-800',
+        gradient: 'linear-gradient(135deg, #FEF3C7, #FDE68A)',
+        label: 'Haldi',
+      };
+    case EventType.mehndi:
+      return {
+        icon: <span className="text-2xl">🌿</span>,
+        color: '#10B981',
+        bgColor: 'rgba(16, 185, 129, 0.1)',
+        bgClass: 'bg-emerald-100',
+        textColor: 'text-emerald-800',
+        gradient: 'linear-gradient(135deg, #D1FAE5, #A7F3D0)',
+        label: 'Mehndi',
+      };
+    case EventType.sangeet:
+      return {
+        icon: <span className="text-2xl">🎵</span>,
+        color: '#8B5CF6',
+        bgColor: 'rgba(139, 92, 246, 0.1)',
+        bgClass: 'bg-violet-100',
+        textColor: 'text-violet-800',
+        gradient: 'linear-gradient(135deg, #EDE9FE, #DDD6FE)',
+        label: 'Sangeet',
+      };
+    case EventType.wedding:
+      return {
+        icon: <span className="text-2xl">💍</span>,
+        color: '#D4AF37',
+        bgColor: 'rgba(212, 175, 55, 0.1)',
+        bgClass: 'bg-yellow-50',
+        textColor: 'text-yellow-900',
+        gradient: 'linear-gradient(135deg, #FDF9E7, #FAF0C0)',
+        label: 'Wedding',
+      };
+    case EventType.reception:
+      return {
+        icon: <span className="text-2xl">🥂</span>,
+        color: '#EC4899',
+        bgColor: 'rgba(236, 72, 153, 0.1)',
+        bgClass: 'bg-pink-100',
+        textColor: 'text-pink-800',
+        gradient: 'linear-gradient(135deg, #FCE7F3, #FBCFE8)',
+        label: 'Reception',
+      };
+    case EventType.custom:
+    default:
+      return {
+        icon: <span className="text-2xl">✨</span>,
+        color: '#6B7280',
+        bgColor: 'rgba(107, 114, 128, 0.1)',
+        bgClass: 'bg-gray-100',
+        textColor: 'text-gray-700',
+        gradient: 'linear-gradient(135deg, #F3F4F6, #E5E7EB)',
+        label: 'Event',
+      };
+  }
 }
+
+// Named export for backward compatibility
+export const EVENT_CONFIGS: Record<string, EventConfig> = {
+  [EventType.haldi]: getEventConfig(EventType.haldi),
+  [EventType.mehndi]: getEventConfig(EventType.mehndi),
+  [EventType.sangeet]: getEventConfig(EventType.sangeet),
+  [EventType.wedding]: getEventConfig(EventType.wedding),
+  [EventType.reception]: getEventConfig(EventType.reception),
+  [EventType.custom]: getEventConfig(EventType.custom),
+};

@@ -5,12 +5,28 @@ import Text "mo:core/Text";
 import Time "mo:core/Time";
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
-import Nat "mo:core/Nat";
+import InviteLinksModule "invite-links/invite-links-module";
+import Random "mo:core/Random";
+import AccessControl "authorization/access-control";
+import Principal "mo:core/Principal";
+import MixinAuthorization "authorization/MixinAuthorization";
+import Storage "blob-storage/Storage";
+import MixinStorage "blob-storage/Mixin";
 import Migration "migration";
 
 (with migration = Migration.run)
 actor {
+  let accessControlState = AccessControl.initState();
+  include MixinAuthorization(accessControlState);
+  include MixinStorage();
+
+  type UserProfile = {
+    name : Text;
+    email : Text;
+  };
+
   type ThemeConfig = {
+    name : Text;
     template : Text;
     colorScheme : Text;
     fontChoice : Text;
@@ -32,6 +48,8 @@ actor {
     colorScheme : Text;
     fontChoice : Text;
     backgroundChoice : Text;
+    bridePhoto : ?Storage.ExternalBlob;
+    groomPhoto : ?Storage.ExternalBlob;
     isPublished : Bool;
     createdAt : Int;
     updatedAt : Int;
@@ -90,11 +108,14 @@ actor {
     totalDeclined : Nat;
   };
 
+  let userProfiles = Map.empty<Principal, UserProfile>();
   let invitationStore = Map.empty<Text, Invitation>();
   let eventStore = Map.empty<Text, Event>();
   let rsvpStore = Map.empty<Text, RSVPEntry>();
   let photoStore = Map.empty<Text, Photo>();
   let musicStore = Map.empty<Text, BackgroundMusic>();
+
+  let inviteState = InviteLinksModule.initState();
 
   func now() : Int {
     Time.now();
@@ -104,6 +125,27 @@ actor {
     if (invitationStore.containsKey(slug)) {
       Runtime.trap("This slug is already taken. Please choose a unique slug.");
     };
+  };
+
+  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can get their profile");
+    };
+    userProfiles.get(caller);
+  };
+
+  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own profile");
+    };
+    userProfiles.get(user);
+  };
+
+  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save profiles");
+    };
+    userProfiles.add(caller, profile);
   };
 
   public shared ({ caller }) func createInvitation(
@@ -122,6 +164,9 @@ actor {
     fontChoice : Text,
     backgroundChoice : Text,
   ) : async Invitation {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can create invitations");
+    };
     validateSlug(slug);
 
     let invitation : Invitation = {
@@ -139,6 +184,8 @@ actor {
       colorScheme;
       fontChoice;
       backgroundChoice;
+      bridePhoto = null;
+      groomPhoto = null;
       isPublished = false;
       createdAt = now();
       updatedAt = now();
@@ -164,6 +211,9 @@ actor {
     fontChoice : Text,
     backgroundChoice : Text,
   ) : async Invitation {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update invitations");
+    };
     switch (invitationStore.get(slug)) {
       case (null) { Runtime.trap("Invitation not found") };
       case (?existing) {
@@ -182,6 +232,8 @@ actor {
           colorScheme;
           fontChoice;
           backgroundChoice;
+          bridePhoto = existing.bridePhoto;
+          groomPhoto = existing.groomPhoto;
           isPublished = existing.isPublished;
           createdAt = existing.createdAt;
           updatedAt = now();
@@ -193,18 +245,44 @@ actor {
     };
   };
 
-  public shared ({ caller }) func getInvitationBySlug(slug : Text) : async Invitation {
+  public query func getInvitationBySlug(slug : Text) : async Invitation {
     switch (invitationStore.get(slug)) {
       case (null) { Runtime.trap("Invitation not found") };
       case (?invitation) { invitation };
     };
   };
 
+  public shared ({ caller }) func addPhotos(
+    invitationId : Text,
+    bridePhoto : ?Storage.ExternalBlob,
+    groomPhoto : ?Storage.ExternalBlob,
+  ) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add photos");
+    };
+    switch (invitationStore.get(invitationId)) {
+      case (null) { Runtime.trap("Invitation not found") };
+      case (?invitation) {
+        let updated : Invitation = {
+          invitation with bridePhoto;
+          groomPhoto;
+        };
+        invitationStore.add(invitationId, updated);
+      };
+    };
+  };
+
   public query ({ caller }) func getAllInvitations() : async [Invitation] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can list invitations");
+    };
     invitationStore.values().toArray();
   };
 
   public shared ({ caller }) func publishInvitation(slug : Text) : async Invitation {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can publish invitations");
+    };
     switch (invitationStore.get(slug)) {
       case (null) { Runtime.trap("Invitation not found") };
       case (?existing) {
@@ -216,6 +294,9 @@ actor {
   };
 
   public shared ({ caller }) func deleteInvitation(slug : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete invitations");
+    };
     if (not invitationStore.containsKey(slug)) {
       Runtime.trap("Invitation not found");
     };
@@ -232,6 +313,9 @@ actor {
     description : Text,
     eventType : EventType,
   ) : async Event {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add events");
+    };
     switch (invitationStore.get(invitationId)) {
       case (null) { Runtime.trap("Associated invitation not found") };
       case (?_) {
@@ -260,6 +344,9 @@ actor {
     description : Text,
     eventType : EventType,
   ) : async Event {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can update events");
+    };
     switch (eventStore.get(eventId)) {
       case (null) { Runtime.trap("Event not found") };
       case (?existing) {
@@ -280,13 +367,16 @@ actor {
   };
 
   public shared ({ caller }) func deleteEvent(eventId : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete events");
+    };
     if (not eventStore.containsKey(eventId)) {
       Runtime.trap("Event not found");
     };
     eventStore.remove(eventId);
   };
 
-  public query ({ caller }) func getEventsByInvitation(invitationId : Text) : async [Event] {
+  public query func getEventsByInvitation(invitationId : Text) : async [Event] {
     let list = List.empty<Event>();
     for (event in eventStore.values()) {
       if (event.invitationId == invitationId) {
@@ -296,7 +386,7 @@ actor {
     list.toArray();
   };
 
-  public shared ({ caller }) func submitRSVP(
+  public shared func submitWeddingInvitationRSVP(
     invitationId : Text,
     rsvpId : Text,
     guestName : Text,
@@ -325,6 +415,9 @@ actor {
   };
 
   public query ({ caller }) func getRSVPsByInvitation(invitationId : Text) : async [RSVPEntry] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view RSVPs");
+    };
     let list = List.empty<RSVPEntry>();
     for (rsvp in rsvpStore.values()) {
       if (rsvp.invitationId == invitationId) {
@@ -335,6 +428,9 @@ actor {
   };
 
   public query ({ caller }) func getRSVPsStats(invitationId : Text) : async RSVPStats {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view RSVP stats");
+    };
     var totalResponses = 0;
     var totalConfirmedGuests = 0;
     var totalDeclined = 0;
@@ -358,6 +454,9 @@ actor {
   };
 
   public shared ({ caller }) func addPhoto(invitationId : Text, photoId : Text, imageUrl : Text) : async Photo {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add photos");
+    };
     switch (invitationStore.get(invitationId)) {
       case (null) { Runtime.trap("Associated invitation not found") };
       case (?_) {
@@ -374,13 +473,16 @@ actor {
   };
 
   public shared ({ caller }) func deletePhoto(photoId : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete photos");
+    };
     if (not photoStore.containsKey(photoId)) {
       Runtime.trap("Photo not found");
     };
     photoStore.remove(photoId);
   };
 
-  public query ({ caller }) func getPhotosByInvitation(invitationId : Text) : async [Photo] {
+  public query func getPhotosByInvitation(invitationId : Text) : async [Photo] {
     let list = List.empty<Photo>();
     for (photo in photoStore.values()) {
       if (photo.invitationId == invitationId) {
@@ -391,6 +493,9 @@ actor {
   };
 
   public shared ({ caller }) func setBackgroundMusic(invitationId : Text, musicId : Text, musicUrl : Text, autoPlay : Bool) : async BackgroundMusic {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can set background music");
+    };
     switch (invitationStore.get(invitationId)) {
       case (null) { Runtime.trap("Associated invitation not found") };
       case (?_) {
@@ -407,7 +512,7 @@ actor {
     };
   };
 
-  public query ({ caller }) func getBackgroundMusic(invitationId : Text) : async [BackgroundMusic] {
+  public query func getBackgroundMusic(invitationId : Text) : async [BackgroundMusic] {
     let list = List.empty<BackgroundMusic>();
     for (music in musicStore.values()) {
       if (music.invitationId == invitationId) {
@@ -417,8 +522,10 @@ actor {
     list.toArray();
   };
 
-  // Theme variant functions
   public shared ({ caller }) func saveThemeVariant(invitationId : Text, themeConfig : ThemeConfig) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save theme variants");
+    };
     switch (invitationStore.get(invitationId)) {
       case (null) { Runtime.trap("Invitation not found") };
       case (?invitation) {
@@ -431,7 +538,7 @@ actor {
     };
   };
 
-  public query ({ caller }) func getThemeVariants(invitationId : Text) : async [ThemeConfig] {
+  public query func getThemeVariants(invitationId : Text) : async [ThemeConfig] {
     switch (invitationStore.get(invitationId)) {
       case (null) { Runtime.trap("Invitation not found") };
       case (?invitation) { invitation.savedThemes };
@@ -439,6 +546,9 @@ actor {
   };
 
   public shared ({ caller }) func deleteThemeVariant(invitationId : Text, themeIndex : Nat) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can delete theme variants");
+    };
     switch (invitationStore.get(invitationId)) {
       case (null) { Runtime.trap("Invitation not found") };
       case (?invitation) {
@@ -454,7 +564,6 @@ actor {
         );
         mutableThemes[themeIndex] := null;
 
-        // Convert mutable array back to immutable before using filterMap
         let filteredThemes = mutableThemes.toArray().filterMap(
           func(theme) {
             switch (theme) {
@@ -470,5 +579,33 @@ actor {
         invitationStore.add(invitationId, updatedInvitation);
       };
     };
+  };
+
+  public shared ({ caller }) func generateInviteCode() : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can generate invite codes");
+    };
+    let blob = await Random.blob();
+    let code = InviteLinksModule.generateUUID(blob);
+    InviteLinksModule.generateInviteCode(inviteState, code);
+    code;
+  };
+
+  public shared func submitRSVP(name : Text, attending : Bool, inviteCode : Text) : async () {
+    InviteLinksModule.submitRSVP(inviteState, name, attending, inviteCode);
+  };
+
+  public query ({ caller }) func getAllRSVPs() : async [InviteLinksModule.RSVP] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view RSVPs");
+    };
+    InviteLinksModule.getAllRSVPs(inviteState);
+  };
+
+  public query ({ caller }) func getInviteCodes() : async [InviteLinksModule.InviteCode] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view invite codes");
+    };
+    InviteLinksModule.getInviteCodes(inviteState);
   };
 };

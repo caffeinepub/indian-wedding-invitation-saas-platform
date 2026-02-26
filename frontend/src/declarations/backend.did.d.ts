@@ -33,10 +33,12 @@ export type EventType = { 'mehndi' : null } |
   { 'custom' : null } |
   { 'wedding' : null } |
   { 'reception' : null };
+export type ExternalBlob = Uint8Array;
 export interface Invitation {
   'id' : string,
   'weddingDate' : string,
   'invitationMessage' : string,
+  'groomPhoto' : [] | [ExternalBlob],
   'weddingTime' : string,
   'isPublished' : boolean,
   'venueAddress' : string,
@@ -51,13 +53,25 @@ export interface Invitation {
   'groomName' : string,
   'venueName' : string,
   'familyDetails' : string,
+  'bridePhoto' : [] | [ExternalBlob],
   'colorScheme' : string,
+}
+export interface InviteCode {
+  'created' : Time,
+  'code' : string,
+  'used' : boolean,
 }
 export interface Photo {
   'id' : string,
   'invitationId' : string,
   'imageUrl' : string,
   'uploadedAt' : bigint,
+}
+export interface RSVP {
+  'name' : string,
+  'inviteCode' : string,
+  'timestamp' : Time,
+  'attending' : boolean,
 }
 export interface RSVPEntry {
   'id' : string,
@@ -75,17 +89,55 @@ export interface RSVPStats {
   'totalDeclined' : bigint,
 }
 export interface ThemeConfig {
+  'name' : string,
   'fontChoice' : string,
   'backgroundChoice' : string,
   'template' : string,
   'colorScheme' : string,
 }
+export type Time = bigint;
+export interface UserProfile { 'name' : string, 'email' : string }
+export type UserRole = { 'admin' : null } |
+  { 'user' : null } |
+  { 'guest' : null };
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
 export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
+  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'addEvent' : ActorMethod<
     [string, string, string, string, string, string, string, EventType],
     Event
   >,
   'addPhoto' : ActorMethod<[string, string, string], Photo>,
+  'addPhotos' : ActorMethod<
+    [string, [] | [ExternalBlob], [] | [ExternalBlob]],
+    undefined
+  >,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createInvitation' : ActorMethod<
     [
       string,
@@ -109,21 +161,30 @@ export interface _SERVICE {
   'deleteInvitation' : ActorMethod<[string], undefined>,
   'deletePhoto' : ActorMethod<[string], undefined>,
   'deleteThemeVariant' : ActorMethod<[string, bigint], undefined>,
+  'generateInviteCode' : ActorMethod<[], string>,
   'getAllInvitations' : ActorMethod<[], Array<Invitation>>,
+  'getAllRSVPs' : ActorMethod<[], Array<RSVP>>,
   'getBackgroundMusic' : ActorMethod<[string], Array<BackgroundMusic>>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getEventsByInvitation' : ActorMethod<[string], Array<Event>>,
   'getInvitationBySlug' : ActorMethod<[string], Invitation>,
+  'getInviteCodes' : ActorMethod<[], Array<InviteCode>>,
   'getPhotosByInvitation' : ActorMethod<[string], Array<Photo>>,
   'getRSVPsByInvitation' : ActorMethod<[string], Array<RSVPEntry>>,
   'getRSVPsStats' : ActorMethod<[string], RSVPStats>,
   'getThemeVariants' : ActorMethod<[string], Array<ThemeConfig>>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
   'publishInvitation' : ActorMethod<[string], Invitation>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'saveThemeVariant' : ActorMethod<[string, ThemeConfig], undefined>,
   'setBackgroundMusic' : ActorMethod<
     [string, string, string, boolean],
     BackgroundMusic
   >,
-  'submitRSVP' : ActorMethod<
+  'submitRSVP' : ActorMethod<[string, boolean, string], undefined>,
+  'submitWeddingInvitationRSVP' : ActorMethod<
     [string, string, string, string, boolean, bigint, string],
     RSVPEntry
   >,

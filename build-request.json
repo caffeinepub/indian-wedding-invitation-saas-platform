@@ -1,107 +1,77 @@
 {
   "kind": "build_request",
-  "title": "Fix Color Scheme, Font Pairing, and Background Style selectors not updating preview or persisting on save",
-  "priority": "high",
+  "title": "Separate Bride/Groom Photo Uploads & Fix Home Tab Layout Issues",
+  "projectName": "Wedding Invitation Builder",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the Color Scheme selector in TemplateThemeStep so that selecting a color scheme immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component without requiring a page reload.",
-      "target": "frontend",
+      "text": "In the Couple Details step (CoupleDetailsStep.tsx) and the Invitation Editor's couple details tab (InvitationEditor.tsx), replace the single 'couple photo URL' input field with two separate file upload inputs — one labeled 'Bride Photo' and one labeled 'Groom Photo'. Each upload should allow the user to select an image file, show a preview thumbnail, and store the uploaded photo independently. The InvitationFormContext must be updated to hold separate bridePhoto and groomPhoto fields instead of a single couplePhoto field. The backend Invitation type in main.mo must be updated to store bridePhoto and groomPhoto as separate optional Text fields. The guest-facing invitation pages (HeroSection, CoupleIntroduction) must render both photos side by side where a couple photo is currently displayed.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-latest"
         ],
         "quotes": [
-          "the Color Scheme, Font Pairing, and Background Style selectors are not reflecting any changes in the live preview or after saving"
+          "replace the single couple photo URL field with separate upload options for Bride and Groom photos"
         ]
       },
       "acceptanceCriteria": [
-        "Clicking a color scheme swatch in ColorSchemePicker updates the form context's color scheme field immediately.",
-        "The TemplatePreview component re-renders to reflect the newly selected color scheme without a page reload.",
-        "The selected color scheme is persisted when the invitation is saved."
+        "CoupleDetailsStep shows two distinct upload controls: 'Bride Photo' and 'Groom Photo', with no single 'couple photo URL' field present",
+        "Each upload control accepts an image file, displays a preview thumbnail after selection, and allows removal",
+        "InvitationFormContext stores bridePhoto and groomPhoto as separate fields",
+        "Backend Invitation record stores bridePhoto and groomPhoto as separate optional Text fields",
+        "Guest invitation page renders both the bride and groom photos side by side where applicable",
+        "Existing invitations with a legacy single couple photo field do not crash"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Fix the Font Pairing selector in TemplateThemeStep so that selecting a font pairing immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
+      "text": "On the Dashboard page (Dashboard.tsx), fix the layout so that invitation management controls — including the Publish button and any similar action buttons — remain fully visible and accessible at all times, including while an invitation is in an editing state. No action button should be hidden, clipped, or obscured based on editing state.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-latest"
         ],
         "quotes": [
-          "the Color Scheme, Font Pairing, and Background Style selectors are not reflecting any changes in the live preview or after saving"
+          "options like Publish (or similar controls) are getting hidden while editing"
         ]
       },
       "acceptanceCriteria": [
-        "Clicking a font pairing option in FontSelector updates the form context's font pairing field immediately.",
-        "The TemplatePreview component re-renders using the selected font pairing's heading and body fonts.",
-        "The selected font pairing is persisted when the invitation is saved."
+        "The Publish button and all other invitation action controls on the Dashboard (Home tab) are always visible regardless of whether the user is currently editing an invitation",
+        "No invitation card action is clipped or hidden by z-index, overflow, or conditional rendering tied to edit state"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Fix the Background Style selector in TemplateThemeStep so that selecting a background style immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
+      "text": "Remove or conditionally hide the 'Create Invitation' call-to-action text/button from pages where it does not belong. It should only appear on the Landing page and Dashboard page. It must NOT appear inside the invitation editor, the create wizard steps, or the guest-facing invitation page. Also fix the Header component (Header.tsx) so its 'Create Invitation' CTA does not render on editor or wizard routes, preventing it from overlapping other page sections.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-latest"
         ],
         "quotes": [
-          "the Color Scheme, Font Pairing, and Background Style selectors are not reflecting any changes in the live preview or after saving"
+          "the text 'Create Invitation' is appearing on every page and overlapping other sections"
         ]
       },
       "acceptanceCriteria": [
-        "Selecting a background style option updates the form context's background style field immediately.",
-        "The TemplatePreview component re-renders to show the selected background style (e.g., watercolor texture, ornate border).",
-        "The selected background style is persisted when the invitation is saved."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Audit and fix the data flow between TemplateThemeStep, ColorSchemePicker, FontSelector, and TemplatePreview to ensure all three selector values (colorScheme, fontPairing, backgroundStyle) are correctly read from and written to InvitationFormContext via the updateFormData callback, and that TemplatePreview consumes these values reactively from context.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "the Color Scheme, Font Pairing, and Background Style selectors are not reflecting any changes in the live preview or after saving"
-        ]
-      },
-      "acceptanceCriteria": [
-        "ColorSchemePicker, FontSelector, and the Background Style selector all call updateFormData with the correct field names matching those consumed by TemplatePreview.",
-        "TemplatePreview reads colorScheme, fontPairing, and backgroundStyle directly from InvitationFormContext (not from stale local state or props).",
-        "No selector selection is silently lost or overwritten during re-renders or step navigation."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Ensure that when an existing invitation is loaded in InvitationEditor, the colorScheme, fontPairing, and backgroundStyle values saved in the backend are correctly hydrated into InvitationFormContext so that the selectors and preview reflect the previously saved values on load.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "not reflecting any changes in the live preview or after saving"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Opening an existing invitation in the editor pre-selects the saved color scheme, font pairing, and background style in their respective selectors.",
-        "The TemplatePreview shows the previously saved customization immediately on load.",
-        "Saving the invitation persists the current selector values to the backend without resetting them."
+        "'Create Invitation' text/button does not appear on the InvitationEditor page",
+        "'Create Invitation' text/button does not appear on CreateInvitationWizard pages",
+        "'Create Invitation' text/button does not appear on the GuestInvitation page",
+        "No visual overlap or layout displacement caused by the 'Create Invitation' element on any page other than Landing and Dashboard",
+        "The Header CTA is hidden on editor and wizard routes"
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-    "All fix changes must be confined to frontend components and context; do not alter the backend data schema unless strictly required to persist missing fields."
+    "Do not modify files listed in frontend.immutablePaths: useInternetIdentity.ts, useActor.ts, main.tsx, and frontend/src/components/ui",
+    "All Motoko logic must remain in the single backend/main.mo actor file",
+    "Preserve all existing invitation data and CRUD functionality; do not break existing queries or mutations"
   ],
   "nonGoals": [
-    "Adding new template options or design variants beyond fixing existing ones.",
-    "Redesigning the TemplateThemeStep UI layout.",
-    "Fixing unrelated invitation editor bugs not mentioned in this request."
+    "Redesigning theme templates to look more premium (deferred to a separate request)",
+    "Resizing or refining the RSVP section layout (deferred to a separate request)",
+    "Fixing the existing invitation event-loading bug ('No event created' while editing) — not included in this request scope"
   ],
   "imageRequirements": {
     "required": [],

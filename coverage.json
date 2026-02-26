@@ -1,72 +1,88 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T03:56:14.605Z",
+  "generatedAt": "2026-02-26T07:53:21.350Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 1,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the Color Scheme selector in TemplateThemeStep so that selecting a color scheme immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component without requiring a page reload.",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/components/templates/ColorSchemePicker.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Fix the Font Pairing selector in TemplateThemeStep so that selecting a font pairing immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/components/templates/FontSelector.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Fix the Background Style selector in TemplateThemeStep so that selecting a background style immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/components/wizard/TemplateThemeStep.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Audit and fix the data flow between TemplateThemeStep, ColorSchemePicker, FontSelector, and TemplatePreview to ensure all three selector values (colorScheme, fontPairing, backgroundStyle) are correctly read from and written to InvitationFormContext via the updateFormData callback, and that TemplatePreview consumes these values reactively from context.",
+        "summary": "In the Couple Details step (CoupleDetailsStep.tsx) and the Invitation Editor's couple details tab (InvitationEditor.tsx), replace the single 'couple photo URL' input field with two separate file upload inputs — one labeled 'Bride Photo' and one labeled 'Groom Photo'. Each upload should allow the user to select an image file, show a preview thumbnail, and store the uploaded photo independently. The InvitationFormContext must be updated to hold separate bridePhoto and groomPhoto fields instead of a single couplePhoto field. The backend Invitation type in main.mo must be updated to store bridePhoto and groomPhoto as separate optional Text fields. The guest-facing invitation pages (HeroSection, CoupleIntroduction) must render both photos side by side where a couple photo is currently displayed.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/templates/TemplatePreview.tsx"
+          "frontend/src/context/InvitationFormContext.tsx",
+          "frontend/src/components/wizard/CoupleDetailsStep.tsx",
+          "frontend/src/pages/InvitationEditor.tsx",
+          "frontend/src/components/guest/HeroSection.tsx",
+          "frontend/src/components/guest/CoupleIntroduction.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/templates/TemplatePreview.tsx"
+          "frontend/src/context/InvitationFormContext.tsx",
+          "frontend/src/components/wizard/CoupleDetailsStep.tsx",
+          "frontend/src/pages/InvitationEditor.tsx",
+          "frontend/src/components/guest/HeroSection.tsx",
+          "frontend/src/components/guest/CoupleIntroduction.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
-        "id": "REQ-5",
-        "summary": "Ensure that when an existing invitation is loaded in InvitationEditor, the colorScheme, fontPairing, and backgroundStyle values saved in the backend are correctly hydrated into InvitationFormContext so that the selectors and preview reflect the previously saved values on load.",
-        "status": "missing",
+        "id": "REQ-2",
+        "summary": "On the Dashboard page (Dashboard.tsx), fix the layout so that invitation management controls — including the Publish button and any similar action buttons — remain fully visible and accessible at all times, including while an invitation is in an editing state. No action button should be hidden, clipped, or obscured based on editing state.",
+        "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/InvitationEditor.tsx"
+          "frontend/src/pages/Dashboard.tsx"
         ],
-        "matchedFiles": []
+        "matchedFiles": [
+          "frontend/src/pages/Dashboard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Remove or conditionally hide the 'Create Invitation' call-to-action text/button from pages where it does not belong. It should only appear on the Landing page and Dashboard page. It must NOT appear inside the invitation editor, the create wizard steps, or the guest-facing invitation page. Also fix the Header component (Header.tsx) so its 'Create Invitation' CTA does not render on editor or wizard routes, preventing it from overlapping other page sections.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/layout/Header.tsx",
+          "frontend/src/pages/InvitationEditor.tsx",
+          "frontend/src/pages/CreateInvitationWizard.tsx",
+          "frontend/src/pages/GuestInvitation.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/layout/Header.tsx",
+          "frontend/src/pages/InvitationEditor.tsx",
+          "frontend/src/pages/CreateInvitationWizard.tsx"
+        ]
       }
     ]
   },
   "changedFiles": [
+    "backend/blob-storage/Mixin.mo",
+    "backend/blob-storage/Storage.mo",
     "backend/main.mo",
     "backend/migration.mo",
     "build-request.json",
+    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/templates/TemplatePreview.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/guest/CoupleIntroduction.tsx",
+    "frontend/src/components/guest/HeroSection.tsx",
+    "frontend/src/components/layout/Header.tsx",
+    "frontend/src/components/wizard/CoupleDetailsStep.tsx",
+    "frontend/src/context/InvitationFormContext.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/CreateInvitationWizard.tsx",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/InvitationEditor.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

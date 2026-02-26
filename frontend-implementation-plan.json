@@ -1,85 +1,97 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Color Scheme, Font Pairing, and Background Style selectors not updating preview or persisting on save",
+  "title": "Separate Bride/Groom Photo Uploads & Fix Home Tab Layout Issues",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Fix ColorSchemePicker to update InvitationFormContext and reflect changes in live preview",
+      "summary": "Replace single couple photo field with separate bride and groom photo upload inputs throughout the application",
       "acceptanceCriteria": [
-        "Clicking a color scheme swatch in ColorSchemePicker updates the form context's color scheme field immediately.",
-        "The TemplatePreview component re-renders to reflect the newly selected color scheme without a page reload.",
-        "The selected color scheme is persisted when the invitation is saved."
+        "CoupleDetailsStep shows two distinct upload controls: 'Bride Photo' and 'Groom Photo', with no single 'couple photo URL' field present",
+        "Each upload control accepts an image file, displays a preview thumbnail after selection, and allows removal",
+        "InvitationFormContext stores bridePhoto and groomPhoto as separate fields",
+        "Backend Invitation record stores bridePhoto and groomPhoto as separate optional Text fields",
+        "Guest invitation page renders both the bride and groom photos side by side where applicable",
+        "Existing invitations with a legacy single couple photo field do not crash"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/templates/ColorSchemePicker.tsx",
+          "path": "frontend/src/context/InvitationFormContext.tsx",
           "operation": "modify",
-          "description": "Replace local selectedScheme state with controlled behavior using the value prop and onChange callback. When a color scheme card is clicked, call onChange(scheme.id) to propagate the selection to the parent component (TemplateThemeStep). Remove the internal useState hook and make the component fully controlled by its parent."
+          "description": "Replace the single couplePhoto field (currently likely stored as a string or similar) with two separate fields: bridePhoto and groomPhoto, both typed as ExternalBlob | null. Update the initial state, the form state type, and any setter functions to handle these two fields independently. Remove all references to couplePhoto."
+        },
+        {
+          "path": "frontend/src/components/wizard/CoupleDetailsStep.tsx",
+          "operation": "modify",
+          "description": "Remove the single couple photo URL text input. Add two separate file upload input controls labeled 'Bride Photo' and 'Groom Photo'. Each should allow the user to select an image file from their device. After selection, display a preview thumbnail for each photo. Include a remove/clear button for each uploaded photo. Wire both inputs to the InvitationFormContext's bridePhoto and groomPhoto fields using ExternalBlob.fromBytes for file conversion. Verify the blob-storage component's usage instructions before implementing file handling."
+        },
+        {
+          "path": "frontend/src/pages/InvitationEditor.tsx",
+          "operation": "modify",
+          "description": "In the couple details tab section of the editor, replace any single couple photo input with two separate file upload controls for bridePhoto and groomPhoto, mirroring the pattern used in CoupleDetailsStep. Ensure the editor loads existing bridePhoto and groomPhoto values from the backend into the form context and displays their previews. Verify the blob-storage component's usage instructions before implementing file handling."
+        },
+        {
+          "path": "frontend/src/components/guest/HeroSection.tsx",
+          "operation": "modify",
+          "description": "Update the hero section to render both bridePhoto and groomPhoto side by side if they are present. Use the ExternalBlob.getDirectURL() method to get cacheable image URLs for each photo. Ensure the layout gracefully handles cases where one or both photos are missing (e.g., show placeholder or omit the missing photo). Maintain existing template theming and overlay styling. Verify the blob-storage component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/guest/CoupleIntroduction.tsx",
+          "operation": "modify",
+          "description": "If this component currently displays a single couple photo, update it to render both bridePhoto and groomPhoto side by side using ExternalBlob.getDirectURL(). Ensure the layout adapts if one or both photos are absent. Maintain scroll-triggered animations and template styling. Verify the blob-storage component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Update any invitation-related query hooks (e.g., getInvitationBySlug, getAllInvitations) and mutation hooks (e.g., createInvitation, updateInvitation) to handle bridePhoto and groomPhoto as separate ExternalBlob | null fields instead of a single couplePhoto field. Ensure proper serialization/deserialization when sending to and receiving from the backend. If the backend returns legacy invitations with a single couple photo field, handle gracefully (e.g., assign to bridePhoto and leave groomPhoto null)."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Fix FontSelector to update InvitationFormContext and reflect changes in live preview",
+      "summary": "Fix Dashboard layout to keep all invitation action controls (including Publish button) always visible regardless of editing state",
       "acceptanceCriteria": [
-        "Clicking a font pairing option in FontSelector updates the form context's font pairing field immediately.",
-        "The TemplatePreview component re-renders using the selected font pairing's heading and body fonts.",
-        "The selected font pairing is persisted when the invitation is saved."
+        "The Publish button and all other invitation action controls on the Dashboard (Home tab) are always visible regardless of whether the user is currently editing an invitation",
+        "No invitation card action is clipped or hidden by z-index, overflow, or conditional rendering tied to edit state"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/templates/FontSelector.tsx",
+          "path": "frontend/src/pages/Dashboard.tsx",
           "operation": "modify",
-          "description": "Replace local selectedFont state with controlled behavior using the value prop and onChange callback. When a font card is clicked, call onChange(font) to propagate the selection to the parent component (TemplateThemeStep). Remove the internal useState hook and make the component fully controlled by its parent."
+          "description": "Review the invitation card rendering and action button layout. If the Publish button or other action controls are conditionally hidden, clipped by overflow styles, or obscured by z-index issues when an invitation is in an editing state, refactor the layout to ensure all action buttons remain fully visible and clickable at all times. This may involve adjusting flexbox/grid layouts, removing conditional visibility logic, or fixing CSS overflow/z-index properties. Ensure action buttons are not dependent on hover or focus states to become visible."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Fix Background Style selector to update InvitationFormContext and reflect changes in live preview",
+      "summary": "Remove or conditionally hide 'Create Invitation' CTA from pages where it does not belong (editor, wizard, guest invitation) and fix Header overlap",
       "acceptanceCriteria": [
-        "Selecting a background style option updates the form context's background style field immediately.",
-        "The TemplatePreview component re-renders to show the selected background style (e.g., watercolor texture, ornate border).",
-        "The selected background style is persisted when the invitation is saved."
+        "'Create Invitation' text/button does not appear on the InvitationEditor page",
+        "'Create Invitation' text/button does not appear on CreateInvitationWizard pages",
+        "'Create Invitation' text/button does not appear on the GuestInvitation page",
+        "No visual overlap or layout displacement caused by the 'Create Invitation' element on any page other than Landing and Dashboard",
+        "The Header CTA is hidden on editor and wizard routes"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/wizard/TemplateThemeStep.tsx",
+          "path": "frontend/src/components/layout/Header.tsx",
           "operation": "modify",
-          "description": "Wire the Background Style radio group to call updateFormData with the correct field name matching what TemplatePreview expects (backgroundChoice). Pass controlled value and onChange handlers to ColorSchemePicker and FontSelector so they update the form context via updateFormData. Ensure the onColorSchemeChange callback updates formData.colorScheme, onFontChange updates formData.fontChoice, and the background style RadioGroup onChange updates formData.backgroundChoice."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Audit and fix data flow between selectors and TemplatePreview to ensure reactive state updates",
-      "acceptanceCriteria": [
-        "ColorSchemePicker, FontSelector, and the Background Style selector all call updateFormData with the correct field names matching those consumed by TemplatePreview.",
-        "TemplatePreview reads colorScheme, fontPairing, and backgroundStyle directly from InvitationFormContext (not from stale local state or props).",
-        "No selector selection is silently lost or overwritten during re-renders or step navigation."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/templates/TemplatePreview.tsx",
-          "operation": "modify",
-          "description": "Replace prop-based data access with useInvitationForm hook to read colorScheme (formData.colorScheme), fontChoice (formData.fontChoice), and backgroundChoice (formData.backgroundChoice) directly from InvitationFormContext. Remove any local state that duplicates context values. Ensure the component re-renders reactively whenever these context values change."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Ensure existing invitation data is hydrated into InvitationFormContext on editor load",
-      "acceptanceCriteria": [
-        "Opening an existing invitation in the editor pre-selects the saved color scheme, font pairing, and background style in their respective selectors.",
-        "The TemplatePreview shows the previously saved customization immediately on load.",
-        "Saving the invitation persists the current selector values to the backend without resetting them."
-      ],
-      "file_operations": [
+          "description": "Add logic to conditionally hide the 'Create Invitation' CTA button in the Header when the current route is the InvitationEditor, CreateInvitationWizard, or GuestInvitation page. Use the router's current location or a route-matching utility to determine the active page. Ensure the CTA only renders on the LandingPage and Dashboard routes. This will prevent the CTA from overlapping other page sections on routes where it should not appear."
+        },
         {
           "path": "frontend/src/pages/InvitationEditor.tsx",
           "operation": "modify",
-          "description": "Ensure the useEffect that hydrates invitation data into formData includes colorScheme, fontChoice, and backgroundChoice fields from the loaded invitation object. Verify that updateFormData is called with all theme-related fields when the invitation query succeeds, so TemplateThemeStep selectors and TemplatePreview display the saved values correctly on mount."
+          "description": "If there is a standalone 'Create Invitation' button or CTA text rendered within this page component (outside the Header), remove it entirely. Ensure no 'Create Invitation' text or button is present in the editor UI."
+        },
+        {
+          "path": "frontend/src/pages/CreateInvitationWizard.tsx",
+          "operation": "modify",
+          "description": "If there is a standalone 'Create Invitation' button or CTA text rendered within this wizard page (outside the Header), remove it entirely. Ensure no 'Create Invitation' text or button is present in the wizard steps."
+        },
+        {
+          "path": "frontend/src/pages/GuestInvitation.tsx",
+          "operation": "modify",
+          "description": "If there is a standalone 'Create Invitation' button or CTA text rendered within this guest-facing page (outside the Header), remove it entirely. Ensure no 'Create Invitation' text or button is present on the public invitation view."
         }
       ]
     }

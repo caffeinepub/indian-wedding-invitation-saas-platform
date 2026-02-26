@@ -1,57 +1,34 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T03:56:14.602Z",
-  "summary": "The diff shows backend schema changes (adding colorScheme, fontChoice, backgroundChoice fields to the Invitation type and CRUD methods) and updates to TemplatePreview.tsx to consume colorScheme, fontChoice, and backgroundChoice from formData. However, the critical frontend components responsible for the selector-to-context data flow (TemplateThemeStep, ColorSchemePicker, FontSelector, InvitationFormContext, InvitationEditor) are not shown as modified. The diff does not demonstrate fixes to the selector components themselves, the context update callbacks, or the hydration logic on load.",
+  "generatedAt": "2026-02-26T07:53:21.346Z",
+  "summary": "The diff implements most of the three requirements. REQ-1 (separate bride/groom photo uploads) is broadly implemented across CoupleDetailsStep, InvitationEditor, InvitationFormContext, backend main.mo, HeroSection, and CoupleIntroduction. REQ-2 (Dashboard layout fix) is addressed. REQ-3 (Header CTA hiding) is addressed in Header.tsx. One notable gap exists: the backend stores bridePhoto/groomPhoto as Storage.ExternalBlob rather than optional Text fields as specified. The migration.mo file is a hallucinated addition not requested.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Fix the Color Scheme selector in TemplateThemeStep so that selecting a color scheme immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
-      "reason": "Neither TemplateThemeStep nor ColorSchemePicker appear in the modified files. There is no evidence that the selector's onChange handler was wired to call updateFormData on the context.",
-      "evidence": []
-    },
-    {
-      "id": "REQ-2",
-      "requirement": "Fix the Font Pairing selector in TemplateThemeStep so that selecting a font pairing immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
-      "reason": "FontSelector and TemplateThemeStep are not in the modified files list. No changes to the font pairing selector's event handler or context binding are visible.",
-      "evidence": []
-    },
-    {
-      "id": "REQ-3",
-      "requirement": "Fix the Background Style selector in TemplateThemeStep so that selecting a background style immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
-      "reason": "The background style selector component and TemplateThemeStep are not shown as modified. No fix to the selector's updateFormData wiring is evident.",
-      "evidence": []
-    },
-    {
-      "id": "REQ-4",
-      "requirement": "Audit and fix the data flow between TemplateThemeStep, ColorSchemePicker, FontSelector, and TemplatePreview to ensure all three selector values are correctly read from and written to InvitationFormContext via updateFormData, and that TemplatePreview consumes these values reactively from context.",
-      "reason": "TemplateThemeStep, ColorSchemePicker, FontSelector, and InvitationFormContext are not in the modified files. Only TemplatePreview.tsx was modified to read from formData, but without the selector components being fixed, the full data flow audit and fix is incomplete.",
+      "requirement": "Backend Invitation record stores bridePhoto and groomPhoto as separate optional Text fields",
+      "reason": "The backend main.mo and migration.mo store bridePhoto and groomPhoto as '?Storage.ExternalBlob' (ExternalBlob type), not as '?Text' as specified in the requirement and acceptance criteria.",
       "evidence": [
-        "frontend/src/components/templates/TemplatePreview.tsx"
+        "backend/main.mo",
+        "backend/migration.mo"
       ]
     },
     {
-      "id": "REQ-5",
-      "requirement": "Ensure that when an existing invitation is loaded in InvitationEditor, the colorScheme, fontPairing, and backgroundStyle values saved in the backend are correctly hydrated into InvitationFormContext so that selectors and preview reflect the previously saved values on load.",
-      "reason": "InvitationEditor.tsx and InvitationFormContext are not shown as modified files. The frontend-file-summaries.txt entry for InvitationEditor only mentions passing slug as invitationId prop, with no mention of hydrating colorScheme, fontChoice, or backgroundChoice into context on load.",
+      "id": "REQ-1",
+      "requirement": "Existing invitations with a legacy single couple photo field do not crash",
+      "reason": "The diff does not show evidence of handling a legacy 'couplePhoto' field on existing invitations. The migration sets bridePhoto/groomPhoto to null for old records but there is no evidence that old records with a 'couplePhoto' field are handled gracefully in the frontend or backend without crashing.",
       "evidence": [
-        "frontend-file-summaries.txt"
+        "backend/migration.mo",
+        "frontend/src/context/InvitationFormContext.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Backend migration module (migration.mo) added as a no-op stub",
-      "reason": "The build request states constraints against altering the backend data schema unless strictly required, and adding a migration.mo file was not requested in any requirement. The migration module is a no-op and appears to be unrequested scaffolding.",
+      "description": "A separate migration module file (backend/migration.mo) was added with OldActor/NewActor types and a migration run function.",
+      "reason": "The build request does not mention creating a standalone migration.mo file. The requirement only asks for the backend Invitation type in main.mo to be updated with bridePhoto and groomPhoto fields. A dedicated migration module was not requested.",
       "evidence": [
         "backend/migration.mo"
-      ]
-    },
-    {
-      "description": "Backend Invitation schema extended with ThemeConfig type and savedThemes array field",
-      "reason": "While adding colorScheme/fontChoice/backgroundChoice to the backend schema could be justified for REQ-5 persistence, the addition of the ThemeConfig record type and savedThemes array field was not requested in any requirement.",
-      "evidence": [
-        "backend/main.mo"
       ]
     }
   ],
@@ -60,7 +37,15 @@
     "backend/main.mo",
     "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/templates/TemplatePreview.tsx",
+    "frontend/src/components/guest/CoupleIntroduction.tsx",
+    "frontend/src/components/guest/HeroSection.tsx",
+    "frontend/src/components/layout/Header.tsx",
+    "frontend/src/components/wizard/CoupleDetailsStep.tsx",
+    "frontend/src/context/InvitationFormContext.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/CreateInvitationWizard.tsx",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/InvitationEditor.tsx",
     "project_state.json"
   ]
 }
