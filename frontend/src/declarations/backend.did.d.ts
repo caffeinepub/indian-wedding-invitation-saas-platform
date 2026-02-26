@@ -45,6 +45,7 @@ export interface Invitation {
   'fontChoice' : string,
   'updatedAt' : bigint,
   'selectedTemplate' : string,
+  'savedThemes' : Array<ThemeConfig>,
   'backgroundChoice' : string,
   'brideName' : string,
   'groomName' : string,
@@ -72,6 +73,12 @@ export interface RSVPStats {
   'totalConfirmedGuests' : bigint,
   'totalResponses' : bigint,
   'totalDeclined' : bigint,
+}
+export interface ThemeConfig {
+  'fontChoice' : string,
+  'backgroundChoice' : string,
+  'template' : string,
+  'colorScheme' : string,
 }
 export interface _SERVICE {
   'addEvent' : ActorMethod<
@@ -101,6 +108,7 @@ export interface _SERVICE {
   'deleteEvent' : ActorMethod<[string], undefined>,
   'deleteInvitation' : ActorMethod<[string], undefined>,
   'deletePhoto' : ActorMethod<[string], undefined>,
+  'deleteThemeVariant' : ActorMethod<[string, bigint], undefined>,
   'getAllInvitations' : ActorMethod<[], Array<Invitation>>,
   'getBackgroundMusic' : ActorMethod<[string], Array<BackgroundMusic>>,
   'getEventsByInvitation' : ActorMethod<[string], Array<Event>>,
@@ -108,7 +116,9 @@ export interface _SERVICE {
   'getPhotosByInvitation' : ActorMethod<[string], Array<Photo>>,
   'getRSVPsByInvitation' : ActorMethod<[string], Array<RSVPEntry>>,
   'getRSVPsStats' : ActorMethod<[string], RSVPStats>,
+  'getThemeVariants' : ActorMethod<[string], Array<ThemeConfig>>,
   'publishInvitation' : ActorMethod<[string], Invitation>,
+  'saveThemeVariant' : ActorMethod<[string, ThemeConfig], undefined>,
   'setBackgroundMusic' : ActorMethod<
     [string, string, string, boolean],
     BackgroundMusic

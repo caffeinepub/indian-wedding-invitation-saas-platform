@@ -1,80 +1,109 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "RSVP Responses Button, Nav Text Contrast Fix & Mobile Music Controller Fix",
+  "title": "Add Advanced Templates with Design Variations and Multi-Theme Save Option",
   "requirements": [
     {
-      "id": "REQ-14",
-      "summary": "Add a prominent 'View RSVP Responses' button on invitation cards in /dashboard and /dashboard/:slug that opens a modal displaying all RSVP submissions with guest details, attendance status, and summary statistics",
+      "id": "REQ-1",
+      "summary": "Expand template library with 6 new distinct advanced templates (Floral Boho, Regal Emerald, Dusty Rose Romantic, Midnight Luxe, Rustic Parchment, Pastel Garden) in templateDefinitions.ts",
       "acceptanceCriteria": [
-        "A visually distinct 'View RSVP Responses' button appears on each invitation card on the /dashboard page",
-        "The same button appears inside the invitation editor at /dashboard/:slug",
-        "Clicking the button opens a modal or expandable panel showing all RSVP submissions",
-        "The panel displays Guest Name, Phone, Attending badge (Yes=green/No=red), Guest Count, Message, and Submitted At",
-        "A summary row shows total responses, total confirmed guests, and total declined",
-        "An elegant empty state is shown when no RSVPs have been submitted",
-        "The button uses a premium gold/crimson accent color distinct from Edit, Preview, Publish, and Delete buttons",
-        "Data is fetched using the existing getRSVPsByInvitation React Query hook pattern"
+        "At least 6 new templates are added to templateDefinitions.ts with unique IDs, names, and full style configurations.",
+        "Each new template has a distinct color palette, font pairing, and gradient/background style not duplicated by another template.",
+        "All new templates render correctly in TemplateSelector, TemplatePreview, and TemplateThemeStep components."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/dashboard/RSVPResponsesModal.tsx",
-          "operation": "create",
-          "description": "Create a new modal component that displays RSVP responses for a selected invitation. Use Shadcn Dialog component as the base. Fetch data using useRSVPsByInvitation and useRSVPsStats hooks from useQueries.ts. Display responses in a table or card list showing Guest Name, Phone, Attending status (Yes badge in green, No badge in red), Guest Count, Message, and formatted Submitted At date. Include a summary section at the top showing total responses, total confirmed guests, and total declined from RSVPStats. Show an empty state with decorative icon when no responses exist. Style with luxury gold/ivory theme matching the app aesthetic."
+          "path": "frontend/src/utils/templateDefinitions.ts",
+          "operation": "modify",
+          "description": "Add 6 new template definitions (Floral Boho, Regal Emerald, Dusty Rose Romantic, Midnight Luxe, Rustic Parchment, Pastel Garden) to the TEMPLATES array. Each template must include unique id, name, category, fonts (heading and body), colors (primary, secondary, accent, text, textSecondary, background), gradient (type, from, to), and backgroundStyle properties. Ensure no duplicate IDs or names. Use diverse font pairings (e.g., Cormorant+Lato, Cinzel+Open Sans, Playfair+Raleway) and visually distinct color schemes (emerald greens, dusty rose pinks, midnight blues/blacks, rustic earth tones, soft pastels)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Enhance TemplateSelector to display expanded template library with improved previews, category grouping, and 'New' badges on newly added templates",
+      "acceptanceCriteria": [
+        "TemplateSelector displays all new and existing templates grouped by updated categories.",
+        "Each card shows a styled preview using the template's own colors and fonts.",
+        "New templates are visually distinguished with a badge."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/templates/TemplateSelector.tsx",
+          "operation": "modify",
+          "description": "Update the template grouping logic to include new categories: 'Royal Indian', 'Modern Minimal', 'Romantic', 'Dark Luxe', 'Boho & Floral', 'Vintage & Rustic'. Enhance each template card to render a richer simulated preview reflecting the template's unique gradient, color palette, and font styles. Add a conditional 'New' or 'Premium' badge component (using shadcn/ui Badge) positioned at the top-right of cards for templates added in REQ-1. Ensure the preview uses the template's actual colors and fonts for heading and body text samples."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Enhance TemplateThemeStep customization panel with advanced options: background style picker (4 options), accent color intensity slider, border/frame style selector (3 options), and layout density toggle",
+      "acceptanceCriteria": [
+        "Background style picker renders at least 4 options and the preview updates immediately on selection.",
+        "Accent color intensity slider is functional and visually reflected in the preview.",
+        "Border/frame style selector shows at least 3 options that affect the preview card's border.",
+        "Layout density toggle changes spacing in the live preview."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/wizard/TemplateThemeStep.tsx",
+          "operation": "modify",
+          "description": "Add four new customization controls to the template customization panel: (1) A background style picker using shadcn/ui RadioGroup or ToggleGroup with options 'solid', 'gradient', 'pattern', 'texture'; (2) An accent color intensity slider using shadcn/ui Slider (range 50-150%, default 100%); (3) A border/frame style selector with options 'none', 'classic', 'ornate'; (4) A layout density toggle ('compact' / 'spacious'). Store these settings in the InvitationFormContext and ensure the live TemplatePreview updates in real time when any control changes. Use state management to propagate changes immediately to the preview component."
         },
         {
-          "path": "frontend/src/pages/Dashboard.tsx",
+          "path": "frontend/src/context/InvitationFormContext.tsx",
           "operation": "modify",
-          "description": "Add a 'View RSVP Responses' button to each invitation card. Style it prominently with gold/crimson accent (bg-gradient-to-r from-gold-400 to-crimson-600) to distinguish it from Edit, Preview, Publish, and Delete buttons. Position it in the card actions area. Add state to track which invitation's RSVPs are being viewed and render the RSVPResponsesModal component, passing the selected invitationId. Use existing invitation data structure to pass invitation.id to the modal."
+          "description": "Extend the InvitationFormData type to include new optional fields: backgroundStyle (string), accentIntensity (number), borderStyle (string), layoutDensity (string). Add corresponding update functions to the context value. Initialize these fields with sensible defaults in the initial state."
+        },
+        {
+          "path": "frontend/src/components/templates/TemplatePreview.tsx",
+          "operation": "modify",
+          "description": "Update the preview rendering logic to consume and apply the new customization fields from InvitationFormContext: backgroundStyle (apply solid color, gradient, pattern overlay, or texture background), accentIntensity (scale accent color opacity or brightness), borderStyle (apply CSS border or frame overlay styles), and layoutDensity (adjust padding and spacing classes). Ensure all styles are applied inline or via dynamic Tailwind classes so the preview updates in real time."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Add 'Save Theme' section to TemplateThemeStep with 'Save as Single Theme' and 'Save as Theme Variant' buttons, and display saved theme variant thumbnails with apply/delete actions",
+      "acceptanceCriteria": [
+        "'Save as Single Theme' button saves the active template config and replaces any previously active theme.",
+        "'Save as Theme Variant' button appends the current config to the saved variants list without changing the active theme.",
+        "Saved theme variant thumbnails are displayed in a scrollable row below the template selector.",
+        "Each variant thumbnail has an 'Apply' button and a 'Delete' button.",
+        "Applying a variant sets it as the active template and updates the live preview.",
+        "Deleting a variant removes it from the list and calls the backend deleteThemeVariant function."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/wizard/TemplateThemeStep.tsx",
+          "operation": "modify",
+          "description": "Add a 'Save Theme' section below the customization panel containing two buttons: 'Save as Single Theme' (primary button) and 'Save as Theme Variant' (secondary button). 'Save as Single Theme' updates the invitation's active template fields (selectedTemplate, colorScheme, fontChoice, backgroundChoice) in the form context. 'Save as Theme Variant' calls the useSaveThemeVariant mutation to append the current theme configuration to the savedThemes array without changing the active theme. Below the buttons, render a horizontal scrollable container displaying all saved theme variants as small thumbnail cards (fetched via useGetThemeVariants). Each thumbnail shows a mini preview using the variant's colors/fonts and includes an 'Apply' button that loads the variant into the form context and an icon 'Delete' button that calls useDeleteThemeVariant. Use shadcn/ui Button, Card, and ScrollArea components."
         },
         {
           "path": "frontend/src/pages/InvitationEditor.tsx",
           "operation": "modify",
-          "description": "Add a 'View RSVP Responses' button in a prominent location within the editor interface (e.g., in the header area or as a new tab/section). Style consistently with the dashboard button using gold/crimson gradient. Add state management to control the RSVPResponsesModal visibility. Import and render RSVPResponsesModal, passing the current invitation's ID from the route params. Ensure the button is visible regardless of which tab (Couple Details, Events, Template & Theme, Media) is active."
+          "description": "Ensure the TemplateThemeStep tab renders the updated TemplateThemeStep component with the new 'Save Theme' section. Verify that saved theme variants are fetched and displayed when the user navigates to the template tab. No additional wiring changes needed if the step component handles state internally via hooks."
         },
+        {
+          "path": "frontend/src/pages/CreateInvitationWizard.tsx",
+          "operation": "modify",
+          "description": "Ensure the TemplateThemeStep in the creation wizard renders the updated TemplateThemeStep component with the new 'Save Theme' section. Since the invitation may not exist yet during creation, conditionally render the saved variants section only if an invitation ID is available (e.g., after the invitation has been created). Add a note in the UI or disable variant features until the invitation is saved."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Add React Query hooks for theme variant operations: useSaveThemeVariant, useGetThemeVariants, useDeleteThemeVariant in useQueries.ts",
+      "acceptanceCriteria": [
+        "useSaveThemeVariant mutation hook calls the backend saveThemeVariant function and invalidates relevant queries on success.",
+        "useGetThemeVariants query hook fetches all theme variants for a given invitation ID.",
+        "useDeleteThemeVariant mutation hook calls deleteThemeVariant and invalidates relevant queries on success."
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Verify that useRSVPsByInvitation and useRSVPsStats hooks are properly exported and functional. If they don't exist, add React Query hooks that call getRSVPsByInvitation(invitationId) and getRSVPsStats(invitationId) backend methods. Use the existing query pattern with proper query keys (e.g., ['rsvps', invitationId] and ['rsvp-stats', invitationId]). Ensure hooks return loading, error, and data states appropriately."
-        }
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "summary": "Fix navigation link text visibility in the Header component by applying light text colors (ivory/white/gold) in the transparent header state and ensuring readability across all backgrounds with proper contrast treatments",
-      "acceptanceCriteria": [
-        "'Home' and 'Dashboard' nav link text is clearly legible against the landing page hero background in both transparent and scrolled header states",
-        "Navigation links use a light color (ivory/white or gold) in the transparent header state",
-        "Text remains readable after the header gains a background on scroll",
-        "If a backdrop or boundary treatment is used, it is consistent with the luxury aesthetic",
-        "Hover states are visible and use appropriate gold/blush accent colors",
-        "Fix applies on both desktop and mobile navigation"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/layout/Header.tsx",
-          "operation": "modify",
-          "description": "Fix navigation link text visibility by applying proper text colors based on scroll state. When isScrolled is false (transparent header at top), apply text-ivory-100 or text-gold-200 to all nav links ('Home', 'Dashboard', 'Create Invitation' button text) to ensure visibility against dark/image backgrounds. When isScrolled is true (header with background), ensure text uses sufficient contrast (text-slate-800 or similar). Update hover states to use gold/blush accent colors (hover:text-gold-400) that remain visible in both states. For mobile menu, ensure the same color treatment applies to the hamburger icon and menu items. Consider adding a subtle text-shadow or semi-transparent backdrop (backdrop-blur-sm with bg-black/20) to nav items in transparent state for guaranteed readability across all background images."
-        }
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "summary": "Fix the MusicController component to work on mobile devices by ensuring proper touch event handling, sufficient touch target size, and correct audio playback after user gesture to respect mobile autoplay restrictions",
-      "acceptanceCriteria": [
-        "The floating music controller button is tappable on mobile browsers (iOS Safari, Android Chrome)",
-        "Tapping the floating button opens/closes the music controller panel on mobile",
-        "The touch target for the button is at least 44x44px",
-        "Audio plays after the user taps the play button on mobile (respects mobile autoplay restrictions by requiring user gesture)",
-        "Play/pause state toggles correctly on repeated taps",
-        "The controller remains functional and visible on small screens without layout overflow",
-        "Music controller continues to work on desktop/laptop as before"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/media/MusicController.tsx",
-          "operation": "modify",
-          "description": "Fix mobile functionality by ensuring all interactive elements use onClick handlers (which work for both touch and mouse events) instead of any mouse-specific events. Verify the floating button has a minimum size of 44x44px (w-11 h-11 or larger, and add p-3 for comfortable tap target). Ensure the audio element respects mobile autoplay restrictions by only calling audio.play() in response to direct user interaction (inside onClick handlers). Add explicit touch-action: manipulation CSS to prevent double-tap zoom. Test that isPlaying state updates correctly on tap and that the play() promise is handled with proper error catching for mobile browsers. Ensure the expanded controller panel doesn't overflow on small screens and remains accessible. Consider adding user-select-none to prevent text selection on repeated taps. Verify volume controls work with touch events."
+          "description": "Add three new hooks following the existing pattern: (1) useGetThemeVariants: a useQuery hook that calls actor.getThemeVariants(invitationId) with query key ['themeVariants', invitationId]. (2) useSaveThemeVariant: a useMutation hook that calls actor.saveThemeVariant(invitationId, themeConfig) and invalidates ['themeVariants', invitationId] and ['invitation', invitationId] on success. (3) useDeleteThemeVariant: a useMutation hook that calls actor.deleteThemeVariant(invitationId, themeIndex) and invalidates the same queries on success. Ensure proper error handling and loading states."
         }
       ]
     }

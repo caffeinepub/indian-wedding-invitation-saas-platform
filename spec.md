@@ -1,12 +1,14 @@
 # Specification
 
 ## Summary
-**Goal:** Add a dedicated RSVP Responses viewer button to the dashboard, fix navigation link text visibility on the landing page, and fix the mobile music controller.
+**Goal:** Expand the Wedding Invite Studio with 6 new advanced templates, richer customization options, and the ability to save invitations in multiple theme variants.
 
 **Planned changes:**
-- Add a visually distinct "View RSVP Responses" button (gold/crimson accent) to each invitation card on `/dashboard` and inside the invitation editor at `/dashboard/:slug`
-- Clicking the button opens a modal/panel showing all RSVP submissions (Guest Name, Phone, Attending badge, Guest Count, Message, Submitted At) with a summary row (total responses, confirmed, declined) and an empty state when no RSVPs exist, fetched via the existing `getRSVPsByInvitation` hook
-- Fix nav link text ("Home", "Dashboard") in `Header.tsx` to use light/ivory/gold colors in the transparent header state and remain readable when scrolled, with appropriate hover states on desktop and mobile
-- Fix `MusicController.tsx` so the floating button has a minimum 44×44px touch target, tap events work on mobile browsers, audio playback respects mobile autoplay restrictions (requires user gesture), and the panel opens/closes correctly on mobile
+- Add 6 new invitation templates (Floral Boho, Regal Emerald, Dusty Rose Romantic, Midnight Luxe, Rustic Parchment, Pastel Garden) to `templateDefinitions.ts`, each with unique font pairings, color palettes, gradient backgrounds, and decorative motifs
+- Update `TemplateSelector` to group templates into categories (e.g., Royal Indian, Modern Minimal, Romantic, Dark Luxe, Boho & Floral, Vintage & Rustic), show richer styled preview cards, and add "New"/"Premium" badges to newly added templates
+- Enhance `TemplateThemeStep` customization panel with a background style picker (solid, gradient, pattern, texture), an accent color intensity slider, a border/frame style selector (3+ options), and a layout density toggle (compact/spacious), all updating the live preview in real time
+- Update the backend Motoko actor to add a `savedThemes` array field to the invitation record, and add `saveThemeVariant`, `getThemeVariants`, and `deleteThemeVariant` functions, while keeping the existing single `template` field and all CRUD operations intact
+- Add "Save as Single Theme" and "Save as Theme Variant" buttons to the `TemplateThemeStep` in the wizard and editor, plus a scrollable row of saved variant thumbnail cards each with Apply and Delete actions
+- Add `useSaveThemeVariant`, `useGetThemeVariants`, and `useDeleteThemeVariant` React Query hooks in `useQueries.ts`
 
-**User-visible outcome:** Dashboard users can now view RSVP guest responses directly from invitation cards; navigation links are always readable on the landing page; and the background music controller works correctly on mobile devices.
+**User-visible outcome:** Users can browse a larger, categorized template library, customize templates with more advanced styling controls, and save their invitation in multiple theme variants that they can switch between, apply, or delete at any time.

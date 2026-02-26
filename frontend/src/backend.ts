@@ -114,6 +114,12 @@ export interface Event {
     description: string;
     eventType: EventType;
 }
+export interface ThemeConfig {
+    fontChoice: string;
+    backgroundChoice: string;
+    template: string;
+    colorScheme: string;
+}
 export interface Invitation {
     id: string;
     weddingDate: string;
@@ -126,6 +132,7 @@ export interface Invitation {
     fontChoice: string;
     updatedAt: bigint;
     selectedTemplate: string;
+    savedThemes: Array<ThemeConfig>;
     backgroundChoice: string;
     brideName: string;
     groomName: string;
@@ -161,6 +168,7 @@ export interface backendInterface {
     deleteEvent(eventId: string): Promise<void>;
     deleteInvitation(slug: string): Promise<void>;
     deletePhoto(photoId: string): Promise<void>;
+    deleteThemeVariant(invitationId: string, themeIndex: bigint): Promise<void>;
     getAllInvitations(): Promise<Array<Invitation>>;
     getBackgroundMusic(invitationId: string): Promise<Array<BackgroundMusic>>;
     getEventsByInvitation(invitationId: string): Promise<Array<Event>>;
@@ -168,7 +176,9 @@ export interface backendInterface {
     getPhotosByInvitation(invitationId: string): Promise<Array<Photo>>;
     getRSVPsByInvitation(invitationId: string): Promise<Array<RSVPEntry>>;
     getRSVPsStats(invitationId: string): Promise<RSVPStats>;
+    getThemeVariants(invitationId: string): Promise<Array<ThemeConfig>>;
     publishInvitation(slug: string): Promise<Invitation>;
+    saveThemeVariant(invitationId: string, themeConfig: ThemeConfig): Promise<void>;
     setBackgroundMusic(invitationId: string, musicId: string, musicUrl: string, autoPlay: boolean): Promise<BackgroundMusic>;
     submitRSVP(invitationId: string, rsvpId: string, guestName: string, guestPhone: string, attending: boolean, guestCount: bigint, message: string): Promise<RSVPEntry>;
     updateEvent(eventId: string, title: string, date: string, time: string, venue: string, description: string, eventType: EventType): Promise<Event>;
@@ -258,6 +268,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.deletePhoto(arg0);
+            return result;
+        }
+    }
+    async deleteThemeVariant(arg0: string, arg1: bigint): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteThemeVariant(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteThemeVariant(arg0, arg1);
             return result;
         }
     }
@@ -359,6 +383,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getThemeVariants(arg0: string): Promise<Array<ThemeConfig>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getThemeVariants(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getThemeVariants(arg0);
+            return result;
+        }
+    }
     async publishInvitation(arg0: string): Promise<Invitation> {
         if (this.processError) {
             try {
@@ -370,6 +408,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.publishInvitation(arg0);
+            return result;
+        }
+    }
+    async saveThemeVariant(arg0: string, arg1: ThemeConfig): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.saveThemeVariant(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.saveThemeVariant(arg0, arg1);
             return result;
         }
     }

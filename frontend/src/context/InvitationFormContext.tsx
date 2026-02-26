@@ -30,6 +30,11 @@ export interface FormData {
   colorScheme: string;
   fontChoice: string;
   backgroundChoice: string;
+  // Advanced customization
+  backgroundStyle: string;
+  accentIntensity: number;
+  borderStyle: string;
+  layoutDensity: string;
   // Step 4: Media
   photos: { id: string; imageUrl: string }[];
   musicUrl: string;
@@ -52,6 +57,10 @@ const defaultFormData: FormData = {
   colorScheme: 'gold-crimson',
   fontChoice: 'cinzel-inter',
   backgroundChoice: 'floral',
+  backgroundStyle: 'gradient',
+  accentIntensity: 100,
+  borderStyle: 'classic',
+  layoutDensity: 'spacious',
   photos: [],
   musicUrl: '',
   musicAutoPlay: false,

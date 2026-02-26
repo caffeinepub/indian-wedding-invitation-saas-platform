@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Invitation, Event, RSVPEntry, RSVPStats, Photo, BackgroundMusic } from '../backend';
+import type { Invitation, Event, RSVPEntry, RSVPStats, Photo, BackgroundMusic, ThemeConfig } from '../backend';
 import { EventType } from '../backend';
 
 export { EventType };
@@ -376,5 +376,53 @@ export function useRSVPsStats(invitationId: string) {
       return actor.getRSVPsStats(invitationId);
     },
     enabled: !!actor && !isFetching && !!invitationId,
+  });
+}
+
+// ─── Theme Variants ──────────────────────────────────────────────────────────
+
+export function useGetThemeVariants(invitationId: string) {
+  const { actor, isFetching } = useActor();
+  return useQuery<ThemeConfig[]>({
+    queryKey: ['themeVariants', invitationId],
+    queryFn: async () => {
+      if (!actor || !invitationId) return [];
+      try {
+        return await actor.getThemeVariants(invitationId);
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!actor && !isFetching && !!invitationId,
+  });
+}
+
+export function useSaveThemeVariant() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { invitationId: string; themeConfig: ThemeConfig }) => {
+      if (!actor) throw new Error('Actor not initialized');
+      return actor.saveThemeVariant(params.invitationId, params.themeConfig);
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['themeVariants', vars.invitationId] });
+      queryClient.invalidateQueries({ queryKey: ['invitation', vars.invitationId] });
+    },
+  });
+}
+
+export function useDeleteThemeVariant() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: { invitationId: string; themeIndex: bigint }) => {
+      if (!actor) throw new Error('Actor not initialized');
+      return actor.deleteThemeVariant(params.invitationId, params.themeIndex);
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['themeVariants', vars.invitationId] });
+      queryClient.invalidateQueries({ queryKey: ['invitation', vars.invitationId] });
+    },
   });
 }

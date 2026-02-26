@@ -1,67 +1,106 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T09:45:41.232Z",
+  "generatedAt": "2026-02-26T02:38:16.142Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 6,
+    "implemented": 5,
     "items": [
       {
-        "id": "REQ-14",
-        "summary": "Add a prominent dedicated 'View RSVP Responses' button on each invitation card in the creator dashboard (/dashboard) and inside the invitation editor (/dashboard/:slug). Clicking it opens a modal or expands a panel showing all submitted RSVP guest responses for that invitation fetched via getRSVPsByInvitation. Display: Guest Name, Phone, Attending (Yes/No badge), Guest Count, Message, and Submitted At date in a clean styled table/card list. Include a summary row with total responses, total confirmed guests, and total declined. Show a graceful empty state when no responses exist. Style the button prominently (gold/crimson accent, distinct from other action buttons) so it stands out as a special action.",
+        "id": "REQ-1",
+        "summary": "Expand the template library in `frontend/src/utils/templateDefinitions.ts` by adding at least 6 new distinct, modern, and advanced invitation templates. New templates must include diverse design styles such as: Floral Boho, Regal Emerald, Dusty Rose Romantic, Midnight Luxe, Rustic Parchment, and Pastel Garden. Each template must define unique font pairings, color palettes, gradient backgrounds, and decorative motifs (border patterns, overlay textures) that are visually distinct from each other and from the current 6 templates.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/dashboard/RSVPResponsesModal.tsx",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/pages/InvitationEditor.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/utils/templateDefinitions.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/dashboard/RSVPResponsesModal.tsx",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/pages/InvitationEditor.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/utils/templateDefinitions.ts"
         ]
       },
       {
-        "id": "REQ-15",
-        "summary": "Fix the navigation link text visibility in the site header (Header.tsx) on the home/landing page. The 'Home' and 'Dashboard' nav link text is currently hidden/invisible against the dark or image-based background. Apply a light text color (ivory/white or gold) to all navigation links when the header is in its transparent (top-of-page) state, and ensure the text remains readable in the scrolled/filled state as well. Add a subtle semi-transparent dark backdrop or a distinct border/boundary around the navigation links if needed to guarantee contrast on all backgrounds. Update hover states to match the new color scheme.",
+        "id": "REQ-2",
+        "summary": "Enhance the `TemplateSelector` component to group and display the expanded template library with improved visual previews. Each template card must show a richer simulated preview reflecting the template's unique color palette, fonts, and decorative style. Add a 'New' or 'Premium' badge label to the newly added templates. Group templates into meaningful categories (e.g., 'Royal Indian', 'Modern Minimal', 'Romantic', 'Dark Luxe', 'Boho & Floral', 'Vintage & Rustic').",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/layout/Header.tsx"
+          "frontend/src/components/templates/TemplateSelector.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/layout/Header.tsx"
+          "frontend/src/components/templates/TemplateSelector.tsx"
         ]
       },
       {
-        "id": "REQ-16",
-        "summary": "Fix the floating background music controller (MusicController.tsx) so it activates and functions correctly on mobile devices. Currently the music controller does not open or respond to taps on mobile (works on desktop only). Ensure: the floating button has a sufficiently large touch target (at least 44x44px), tap events are handled correctly (use onClick which works for both touch and mouse), autoplay restrictions on mobile are handled by requiring a user gesture before starting audio, the play/pause state toggles correctly on tap, and the controller panel opens/closes on mobile. Test that audio actually plays after the user taps play on a mobile browser.",
+        "id": "REQ-3",
+        "summary": "Enhance the customization panel in `TemplateThemeStep` to provide more advanced per-template customization options: (1) a background style picker with at least 4 options (solid, gradient, pattern, texture), (2) an accent color intensity slider, (3) a border/frame style selector with at least 3 decorative frame options, and (4) a layout density toggle (compact / spacious). These options must update the live preview in real time.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/media/MusicController.tsx"
+          "frontend/src/components/wizard/TemplateThemeStep.tsx",
+          "frontend/src/context/InvitationFormContext.tsx",
+          "frontend/src/components/templates/TemplatePreview.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/media/MusicController.tsx"
+          "frontend/src/components/wizard/TemplateThemeStep.tsx",
+          "frontend/src/context/InvitationFormContext.tsx",
+          "frontend/src/components/templates/TemplatePreview.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Update the backend Motoko actor in `backend/main.mo` to support storing multiple theme variants per invitation. Add a `savedThemes` field (array of theme/template config records) to the invitation data type. Add backend functions: `saveThemeVariant(invitationId, themeConfig)` to append a theme variant, `getThemeVariants(invitationId)` to retrieve all saved variants, and `deleteThemeVariant(invitationId, themeIndex)` to remove a specific variant. The existing single `template` field must remain for the active/published theme.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-5",
+        "summary": "In the invitation creation wizard (`CreateInvitationWizard.tsx`) and the `InvitationEditor.tsx`, add a 'Save Theme' section on the TemplateThemeStep. This section must include: (1) a 'Save as Single Theme' button that saves only the currently selected template/customization as the active theme, and (2) a 'Save as Theme Variant' button that adds the current configuration as an additional saved variant without replacing the active theme. Display all saved theme variants as small thumbnail cards below the template selector, with options to apply (set as active) or delete each variant.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/wizard/TemplateThemeStep.tsx",
+          "frontend/src/pages/InvitationEditor.tsx",
+          "frontend/src/pages/CreateInvitationWizard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/wizard/TemplateThemeStep.tsx",
+          "frontend/src/pages/InvitationEditor.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Add React Query hooks in `frontend/src/hooks/useQueries.ts` for the new backend theme variant operations: `useSaveThemeVariant`, `useGetThemeVariants`, and `useDeleteThemeVariant`, following the same patterns as existing mutation/query hooks in that file.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
+    "build-template/README.md",
+    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/dashboard/RSVPResponsesModal.tsx",
-    "frontend/src/components/layout/Header.tsx",
-    "frontend/src/components/media/MusicController.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/templates/TemplatePreview.tsx",
+    "frontend/src/components/templates/TemplateSelector.tsx",
+    "frontend/src/components/wizard/TemplateThemeStep.tsx",
+    "frontend/src/context/InvitationFormContext.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/Dashboard.tsx",
     "frontend/src/pages/InvitationEditor.tsx",
+    "frontend/src/utils/templateDefinitions.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

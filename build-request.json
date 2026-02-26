@@ -1,85 +1,131 @@
 {
   "kind": "build_request",
-  "title": "RSVP Responses Button, Nav Text Contrast Fix & Mobile Music Controller Fix",
+  "title": "Add Advanced Templates with Design Variations and Multi-Theme Save Option",
+  "projectName": "Wedding Invite Studio",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-14",
-      "text": "Add a prominent dedicated 'View RSVP Responses' button on each invitation card in the creator dashboard (/dashboard) and inside the invitation editor (/dashboard/:slug). Clicking it opens a modal or expands a panel showing all submitted RSVP guest responses for that invitation fetched via getRSVPsByInvitation. Display: Guest Name, Phone, Attending (Yes/No badge), Guest Count, Message, and Submitted At date in a clean styled table/card list. Include a summary row with total responses, total confirmed guests, and total declined. Show a graceful empty state when no responses exist. Style the button prominently (gold/crimson accent, distinct from other action buttons) so it stands out as a special action.",
+      "id": "REQ-1",
+      "text": "Expand the template library in `frontend/src/utils/templateDefinitions.ts` by adding at least 6 new distinct, modern, and advanced invitation templates. New templates must include diverse design styles such as: Floral Boho, Regal Emerald, Dusty Rose Romantic, Midnight Luxe, Rustic Parchment, and Pastel Garden. Each template must define unique font pairings, color palettes, gradient backgrounds, and decorative motifs (border patterns, overlay textures) that are visually distinct from each other and from the current 6 templates.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-9"
         ],
         "quotes": [
-          "yes create a special button for that were it shows that"
+          "add more unique, modern, and advanced templates with better design variations"
         ]
       },
       "acceptanceCriteria": [
-        "A visually distinct 'View RSVP Responses' button appears on each invitation card on the /dashboard page",
-        "The same button appears inside the invitation editor at /dashboard/:slug",
-        "Clicking the button opens a modal or expandable panel showing all RSVP submissions",
-        "The panel displays Guest Name, Phone, Attending badge (Yes=green/No=red), Guest Count, Message, and Submitted At",
-        "A summary row shows total responses, total confirmed guests, and total declined",
-        "An elegant empty state is shown when no RSVPs have been submitted",
-        "The button uses a premium gold/crimson accent color distinct from Edit, Preview, Publish, and Delete buttons",
-        "Data is fetched using the existing getRSVPsByInvitation React Query hook pattern"
+        "At least 6 new templates are added to templateDefinitions.ts with unique IDs, names, and full style configurations.",
+        "Each new template has a distinct color palette, font pairing, and gradient/background style not duplicated by another template.",
+        "All new templates render correctly in TemplateSelector, TemplatePreview, and TemplateThemeStep components."
       ]
     },
     {
-      "id": "REQ-15",
-      "text": "Fix the navigation link text visibility in the site header (Header.tsx) on the home/landing page. The 'Home' and 'Dashboard' nav link text is currently hidden/invisible against the dark or image-based background. Apply a light text color (ivory/white or gold) to all navigation links when the header is in its transparent (top-of-page) state, and ensure the text remains readable in the scrolled/filled state as well. Add a subtle semi-transparent dark backdrop or a distinct border/boundary around the navigation links if needed to guarantee contrast on all backgrounds. Update hover states to match the new color scheme.",
+      "id": "REQ-2",
+      "text": "Enhance the `TemplateSelector` component to group and display the expanded template library with improved visual previews. Each template card must show a richer simulated preview reflecting the template's unique color palette, fonts, and decorative style. Add a 'New' or 'Premium' badge label to the newly added templates. Group templates into meaningful categories (e.g., 'Royal Indian', 'Modern Minimal', 'Romantic', 'Dark Luxe', 'Boho & Floral', 'Vintage & Rustic').",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-9"
         ],
         "quotes": [
-          "on home tab 'home' and 'dashboard wriiten is hides due to background fix it or makes it s own boundry or fix it"
+          "better design variations and customization options"
         ]
       },
       "acceptanceCriteria": [
-        "'Home' and 'Dashboard' nav link text is clearly legible against the landing page hero background in both transparent and scrolled header states",
-        "Navigation links use a light color (ivory/white or gold) in the transparent header state",
-        "Text remains readable after the header gains a background on scroll",
-        "If a backdrop or boundary treatment is used, it is consistent with the luxury aesthetic",
-        "Hover states are visible and use appropriate gold/blush accent colors",
-        "Fix applies on both desktop and mobile navigation"
+        "TemplateSelector displays all new and existing templates grouped by updated categories.",
+        "Each card shows a styled preview using the template's own colors and fonts.",
+        "New templates are visually distinguished with a badge."
       ]
     },
     {
-      "id": "REQ-16",
-      "text": "Fix the floating background music controller (MusicController.tsx) so it activates and functions correctly on mobile devices. Currently the music controller does not open or respond to taps on mobile (works on desktop only). Ensure: the floating button has a sufficiently large touch target (at least 44x44px), tap events are handled correctly (use onClick which works for both touch and mouse), autoplay restrictions on mobile are handled by requiring a user gesture before starting audio, the play/pause state toggles correctly on tap, and the controller panel opens/closes on mobile. Test that audio actually plays after the user taps play on a mobile browser.",
+      "id": "REQ-3",
+      "text": "Enhance the customization panel in `TemplateThemeStep` to provide more advanced per-template customization options: (1) a background style picker with at least 4 options (solid, gradient, pattern, texture), (2) an accent color intensity slider, (3) a border/frame style selector with at least 3 decorative frame options, and (4) a layout density toggle (compact / spacious). These options must update the live preview in real time.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-9"
         ],
         "quotes": [
-          "in mobile music not opens directly in laptop it working"
+          "customization options"
         ]
       },
       "acceptanceCriteria": [
-        "The floating music controller button is tappable on mobile browsers (iOS Safari, Android Chrome)",
-        "Tapping the floating button opens/closes the music controller panel on mobile",
-        "The touch target for the button is at least 44x44px",
-        "Audio plays after the user taps the play button on mobile (respects mobile autoplay restrictions by requiring user gesture)",
-        "Play/pause state toggles correctly on repeated taps",
-        "The controller remains functional and visible on small screens without layout overflow",
-        "Music controller continues to work on desktop/laptop as before"
+        "Background style picker renders at least 4 options and the preview updates immediately on selection.",
+        "Accent color intensity slider is functional and visually reflected in the preview.",
+        "Border/frame style selector shows at least 3 options that affect the preview card's border.",
+        "Layout density toggle changes spacing in the live preview."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Update the backend Motoko actor in `backend/main.mo` to support storing multiple theme variants per invitation. Add a `savedThemes` field (array of theme/template config records) to the invitation data type. Add backend functions: `saveThemeVariant(invitationId, themeConfig)` to append a theme variant, `getThemeVariants(invitationId)` to retrieve all saved variants, and `deleteThemeVariant(invitationId, themeIndex)` to remove a specific variant. The existing single `template` field must remain for the active/published theme.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "an option to save it in multiple themes or just a single selected theme"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Invitation record includes a `savedThemes` array field.",
+        "saveThemeVariant appends a new theme config and returns the updated list.",
+        "getThemeVariants returns all saved theme variants for a given invitation.",
+        "deleteThemeVariant removes the theme at the specified index.",
+        "Existing single-template field and all existing invitation CRUD operations continue to work unchanged."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "In the invitation creation wizard (`CreateInvitationWizard.tsx`) and the `InvitationEditor.tsx`, add a 'Save Theme' section on the TemplateThemeStep. This section must include: (1) a 'Save as Single Theme' button that saves only the currently selected template/customization as the active theme, and (2) a 'Save as Theme Variant' button that adds the current configuration as an additional saved variant without replacing the active theme. Display all saved theme variants as small thumbnail cards below the template selector, with options to apply (set as active) or delete each variant.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ],
+        "quotes": [
+          "an option to save it in multiple themes or just a single selected theme"
+        ]
+      },
+      "acceptanceCriteria": [
+        "'Save as Single Theme' button saves the active template config and replaces any previously active theme.",
+        "'Save as Theme Variant' button appends the current config to the saved variants list without changing the active theme.",
+        "Saved theme variant thumbnails are displayed in a scrollable row below the template selector.",
+        "Each variant thumbnail has an 'Apply' button and a 'Delete' button.",
+        "Applying a variant sets it as the active template and updates the live preview.",
+        "Deleting a variant removes it from the list and calls the backend deleteThemeVariant function."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Add React Query hooks in `frontend/src/hooks/useQueries.ts` for the new backend theme variant operations: `useSaveThemeVariant`, `useGetThemeVariants`, and `useDeleteThemeVariant`, following the same patterns as existing mutation/query hooks in that file.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9"
+        ]
+      },
+      "acceptanceCriteria": [
+        "useSaveThemeVariant mutation hook calls the backend saveThemeVariant function and invalidates relevant queries on success.",
+        "useGetThemeVariants query hook fetches all theme variants for a given invitation ID.",
+        "useDeleteThemeVariant mutation hook calls deleteThemeVariant and invalidates relevant queries on success."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files listed in frontend.immutablePaths",
-    "All backend calls must use existing React Query hooks in useQueries.ts",
-    "Do not change the backend data model or Motoko actor"
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "All existing invitation CRUD operations and the active single-template field must remain fully functional.",
+    "New templates must not duplicate existing template IDs or names."
   ],
   "nonGoals": [
-    "Adding new backend functions — use existing getRSVPsByInvitation",
-    "Redesigning the entire header or navigation structure",
-    "Adding authentication or login to the dashboard",
-    "Changing the music file storage mechanism"
+    "Changing the overall multi-step wizard flow or step ordering.",
+    "Adding real-time collaboration or multi-user editing.",
+    "Implementing paid/subscription gating for premium templates.",
+    "Modifying the RSVP, photo gallery, or music upload features."
   ],
   "imageRequirements": {
     "required": [],

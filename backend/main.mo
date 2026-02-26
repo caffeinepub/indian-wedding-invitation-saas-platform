@@ -4,8 +4,19 @@ import Text "mo:core/Text";
 import Time "mo:core/Time";
 import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
+import Nat "mo:core/Nat";
+import VarArray "mo:core/VarArray";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
+  type ThemeConfig = {
+    template : Text;
+    colorScheme : Text;
+    fontChoice : Text;
+    backgroundChoice : Text;
+  };
+
   type Invitation = {
     id : Text;
     brideName : Text;
@@ -24,6 +35,7 @@ actor {
     isPublished : Bool;
     createdAt : Int;
     updatedAt : Int;
+    savedThemes : [ThemeConfig];
   };
 
   type EventType = {
@@ -94,7 +106,22 @@ actor {
     };
   };
 
-  public shared ({ caller }) func createInvitation(slug : Text, brideName : Text, groomName : Text, weddingDate : Text, weddingTime : Text, venueName : Text, venueAddress : Text, googleMapsLink : Text, familyDetails : Text, invitationMessage : Text, selectedTemplate : Text, colorScheme : Text, fontChoice : Text, backgroundChoice : Text) : async Invitation {
+  public shared ({ caller }) func createInvitation(
+    slug : Text,
+    brideName : Text,
+    groomName : Text,
+    weddingDate : Text,
+    weddingTime : Text,
+    venueName : Text,
+    venueAddress : Text,
+    googleMapsLink : Text,
+    familyDetails : Text,
+    invitationMessage : Text,
+    selectedTemplate : Text,
+    colorScheme : Text,
+    fontChoice : Text,
+    backgroundChoice : Text,
+  ) : async Invitation {
     validateSlug(slug);
 
     let invitation : Invitation = {
@@ -115,12 +142,28 @@ actor {
       isPublished = false;
       createdAt = now();
       updatedAt = now();
+      savedThemes = [];
     };
     invitationStore.add(slug, invitation);
     invitation;
   };
 
-  public shared ({ caller }) func updateInvitation(slug : Text, brideName : Text, groomName : Text, weddingDate : Text, weddingTime : Text, venueName : Text, venueAddress : Text, googleMapsLink : Text, familyDetails : Text, invitationMessage : Text, selectedTemplate : Text, colorScheme : Text, fontChoice : Text, backgroundChoice : Text) : async Invitation {
+  public shared ({ caller }) func updateInvitation(
+    slug : Text,
+    brideName : Text,
+    groomName : Text,
+    weddingDate : Text,
+    weddingTime : Text,
+    venueName : Text,
+    venueAddress : Text,
+    googleMapsLink : Text,
+    familyDetails : Text,
+    invitationMessage : Text,
+    selectedTemplate : Text,
+    colorScheme : Text,
+    fontChoice : Text,
+    backgroundChoice : Text,
+  ) : async Invitation {
     switch (invitationStore.get(slug)) {
       case (null) { Runtime.trap("Invitation not found") };
       case (?existing) {
@@ -142,6 +185,7 @@ actor {
           isPublished = existing.isPublished;
           createdAt = existing.createdAt;
           updatedAt = now();
+          savedThemes = existing.savedThemes;
         };
         invitationStore.add(slug, updated);
         updated;
@@ -178,7 +222,16 @@ actor {
     invitationStore.remove(slug);
   };
 
-  public shared ({ caller }) func addEvent(invitationId : Text, eventId : Text, title : Text, date : Text, time : Text, venue : Text, description : Text, eventType : EventType) : async Event {
+  public shared ({ caller }) func addEvent(
+    invitationId : Text,
+    eventId : Text,
+    title : Text,
+    date : Text,
+    time : Text,
+    venue : Text,
+    description : Text,
+    eventType : EventType,
+  ) : async Event {
     switch (invitationStore.get(invitationId)) {
       case (null) { Runtime.trap("Associated invitation not found") };
       case (?_) {
@@ -198,7 +251,15 @@ actor {
     };
   };
 
-  public shared ({ caller }) func updateEvent(eventId : Text, title : Text, date : Text, time : Text, venue : Text, description : Text, eventType : EventType) : async Event {
+  public shared ({ caller }) func updateEvent(
+    eventId : Text,
+    title : Text,
+    date : Text,
+    time : Text,
+    venue : Text,
+    description : Text,
+    eventType : EventType,
+  ) : async Event {
     switch (eventStore.get(eventId)) {
       case (null) { Runtime.trap("Event not found") };
       case (?existing) {
@@ -235,7 +296,15 @@ actor {
     list.toArray();
   };
 
-  public shared ({ caller }) func submitRSVP(invitationId : Text, rsvpId : Text, guestName : Text, guestPhone : Text, attending : Bool, guestCount : Nat, message : Text) : async RSVPEntry {
+  public shared ({ caller }) func submitRSVP(
+    invitationId : Text,
+    rsvpId : Text,
+    guestName : Text,
+    guestPhone : Text,
+    attending : Bool,
+    guestCount : Nat,
+    message : Text,
+  ) : async RSVPEntry {
     switch (invitationStore.get(invitationId)) {
       case (null) { Runtime.trap("Associated invitation not found") };
       case (?_) {
@@ -346,5 +415,60 @@ actor {
       };
     };
     list.toArray();
+  };
+
+  // Theme variant functions
+  public shared ({ caller }) func saveThemeVariant(invitationId : Text, themeConfig : ThemeConfig) : async () {
+    switch (invitationStore.get(invitationId)) {
+      case (null) { Runtime.trap("Invitation not found") };
+      case (?invitation) {
+        let newSavedThemes = invitation.savedThemes.concat([themeConfig]);
+        let updatedInvitation : Invitation = {
+          invitation with savedThemes = newSavedThemes;
+        };
+        invitationStore.add(invitationId, updatedInvitation);
+      };
+    };
+  };
+
+  public query ({ caller }) func getThemeVariants(invitationId : Text) : async [ThemeConfig] {
+    switch (invitationStore.get(invitationId)) {
+      case (null) { Runtime.trap("Invitation not found") };
+      case (?invitation) { invitation.savedThemes };
+    };
+  };
+
+  public shared ({ caller }) func deleteThemeVariant(invitationId : Text, themeIndex : Nat) : async () {
+    switch (invitationStore.get(invitationId)) {
+      case (null) { Runtime.trap("Invitation not found") };
+      case (?invitation) {
+        if (themeIndex >= invitation.savedThemes.size()) {
+          Runtime.trap("Invalid theme index");
+        };
+
+        let themesArray : [ThemeConfig] = invitation.savedThemes;
+        let mutableThemes : [var ?ThemeConfig] = themesArray.toVarArray<ThemeConfig>().map(
+          func(theme) {
+            ?theme;
+          }
+        );
+        mutableThemes[themeIndex] := null;
+
+        // Convert mutable array back to immutable before using filterMap
+        let filteredThemes = mutableThemes.toArray().filterMap(
+          func(theme) {
+            switch (theme) {
+              case (null) { null };
+              case (?t) { ?t };
+            };
+          }
+        );
+
+        let updatedInvitation : Invitation = {
+          invitation with savedThemes = filteredThemes;
+        };
+        invitationStore.add(invitationId, updatedInvitation);
+      };
+    };
   };
 };

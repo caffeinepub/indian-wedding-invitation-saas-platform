@@ -286,7 +286,7 @@ function EditorContent({
             <EventManagementStep />
           </TabsContent>
           <TabsContent value="template">
-            <TemplateThemeStep />
+            <TemplateThemeStep invitationId={slug} />
           </TabsContent>
           <TabsContent value="media">
             <MediaManagementStep />

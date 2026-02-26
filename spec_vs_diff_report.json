@@ -1,19 +1,48 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T09:45:41.228Z",
-  "summary": "The diff implements all three requirements (REQ-14, REQ-15, REQ-16) with good coverage. REQ-14 adds RSVPResponsesModal and integrates it into Dashboard.tsx and InvitationEditor.tsx. REQ-15 fixes Header.tsx nav text contrast. REQ-16 refactors MusicController.tsx for mobile support. Most acceptance criteria appear satisfied, with minor uncertainty about a few details due to truncation.",
-  "missing_requirements": [],
-  "hallucinated_features": [],
-  "confidence": 0.88,
+  "generatedAt": "2026-02-26T02:38:16.138Z",
+  "summary": "The diff implements most of the required features across REQ-1 through REQ-6. REQ-1 adds new templates (Regal Emerald, Pastel Garden visible in truncated diff). REQ-2 enhances TemplateSelector with categories and badges. REQ-3 adds advanced customization controls in TemplateThemeStep. REQ-4 updates backend/main.mo with savedThemes and new functions. REQ-5 adds Save Theme section in TemplateThemeStep. REQ-6 adds new React Query hooks. However, there are some gaps: the 'Save as Single Theme' button only shows a toast without persisting; CreateInvitationWizard.tsx is not visibly modified; the migration module was not requested.",
+  "missing_requirements": [
+    {
+      "id": "REQ-5",
+      "requirement": "In CreateInvitationWizard.tsx, add a 'Save Theme' section on the TemplateThemeStep with 'Save as Single Theme' and 'Save as Theme Variant' buttons.",
+      "reason": "The diff summary for CreateInvitationWizard.tsx shows no modification — only InvitationEditor.tsx is noted as passing invitationId to TemplateThemeStep. The wizard file does not appear to have been updated to pass invitationId or add Save Theme functionality.",
+      "evidence": [
+        "frontend-file-summaries.txt",
+        "frontend/src/pages/InvitationEditor.tsx"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "'Save as Single Theme' button must actually save and persist the active template config, replacing any previously active theme.",
+      "reason": "In TemplateThemeStep.tsx, handleSaveAsSingle only calls toast.success without invoking any backend mutation or update operation to persist the active theme.",
+      "evidence": [
+        "frontend/src/components/wizard/TemplateThemeStep.tsx"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "A backend migration module (backend/migration.mo) was added to handle data migration from old invitation records to new ones with savedThemes.",
+      "reason": "The build request only asked to update backend/main.mo with new fields and functions. A separate migration.mo file was not requested.",
+      "evidence": [
+        "backend/migration.mo"
+      ]
+    }
+  ],
+  "confidence": 0.72,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/dashboard/RSVPResponsesModal.tsx",
-    "frontend/src/components/layout/Header.tsx",
-    "frontend/src/components/media/MusicController.tsx",
+    "frontend/src/components/templates/TemplatePreview.tsx",
+    "frontend/src/components/templates/TemplateSelector.tsx",
+    "frontend/src/components/wizard/TemplateThemeStep.tsx",
+    "frontend/src/context/InvitationFormContext.tsx",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/Dashboard.tsx",
     "frontend/src/pages/InvitationEditor.tsx",
+    "frontend/src/utils/templateDefinitions.ts",
     "project_state.json"
   ]
 }

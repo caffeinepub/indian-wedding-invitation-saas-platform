@@ -32,6 +32,12 @@ export const Photo = IDL.Record({
   'imageUrl' : IDL.Text,
   'uploadedAt' : IDL.Int,
 });
+export const ThemeConfig = IDL.Record({
+  'fontChoice' : IDL.Text,
+  'backgroundChoice' : IDL.Text,
+  'template' : IDL.Text,
+  'colorScheme' : IDL.Text,
+});
 export const Invitation = IDL.Record({
   'id' : IDL.Text,
   'weddingDate' : IDL.Text,
@@ -44,6 +50,7 @@ export const Invitation = IDL.Record({
   'fontChoice' : IDL.Text,
   'updatedAt' : IDL.Int,
   'selectedTemplate' : IDL.Text,
+  'savedThemes' : IDL.Vec(ThemeConfig),
   'backgroundChoice' : IDL.Text,
   'brideName' : IDL.Text,
   'groomName' : IDL.Text,
@@ -113,6 +120,7 @@ export const idlService = IDL.Service({
   'deleteEvent' : IDL.Func([IDL.Text], [], []),
   'deleteInvitation' : IDL.Func([IDL.Text], [], []),
   'deletePhoto' : IDL.Func([IDL.Text], [], []),
+  'deleteThemeVariant' : IDL.Func([IDL.Text, IDL.Nat], [], []),
   'getAllInvitations' : IDL.Func([], [IDL.Vec(Invitation)], ['query']),
   'getBackgroundMusic' : IDL.Func(
       [IDL.Text],
@@ -128,7 +136,9 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getRSVPsStats' : IDL.Func([IDL.Text], [RSVPStats], ['query']),
+  'getThemeVariants' : IDL.Func([IDL.Text], [IDL.Vec(ThemeConfig)], ['query']),
   'publishInvitation' : IDL.Func([IDL.Text], [Invitation], []),
+  'saveThemeVariant' : IDL.Func([IDL.Text, ThemeConfig], [], []),
   'setBackgroundMusic' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Bool],
       [BackgroundMusic],
@@ -193,6 +203,12 @@ export const idlFactory = ({ IDL }) => {
     'imageUrl' : IDL.Text,
     'uploadedAt' : IDL.Int,
   });
+  const ThemeConfig = IDL.Record({
+    'fontChoice' : IDL.Text,
+    'backgroundChoice' : IDL.Text,
+    'template' : IDL.Text,
+    'colorScheme' : IDL.Text,
+  });
   const Invitation = IDL.Record({
     'id' : IDL.Text,
     'weddingDate' : IDL.Text,
@@ -205,6 +221,7 @@ export const idlFactory = ({ IDL }) => {
     'fontChoice' : IDL.Text,
     'updatedAt' : IDL.Int,
     'selectedTemplate' : IDL.Text,
+    'savedThemes' : IDL.Vec(ThemeConfig),
     'backgroundChoice' : IDL.Text,
     'brideName' : IDL.Text,
     'groomName' : IDL.Text,
@@ -274,6 +291,7 @@ export const idlFactory = ({ IDL }) => {
     'deleteEvent' : IDL.Func([IDL.Text], [], []),
     'deleteInvitation' : IDL.Func([IDL.Text], [], []),
     'deletePhoto' : IDL.Func([IDL.Text], [], []),
+    'deleteThemeVariant' : IDL.Func([IDL.Text, IDL.Nat], [], []),
     'getAllInvitations' : IDL.Func([], [IDL.Vec(Invitation)], ['query']),
     'getBackgroundMusic' : IDL.Func(
         [IDL.Text],
@@ -289,7 +307,13 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getRSVPsStats' : IDL.Func([IDL.Text], [RSVPStats], ['query']),
+    'getThemeVariants' : IDL.Func(
+        [IDL.Text],
+        [IDL.Vec(ThemeConfig)],
+        ['query'],
+      ),
     'publishInvitation' : IDL.Func([IDL.Text], [Invitation], []),
+    'saveThemeVariant' : IDL.Func([IDL.Text, ThemeConfig], [], []),
     'setBackgroundMusic' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Bool],
         [BackgroundMusic],

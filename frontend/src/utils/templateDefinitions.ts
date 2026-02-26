@@ -1,22 +1,25 @@
 export interface TemplateDefinition {
   id: string;
   name: string;
-  category: 'royal-indian' | 'modern-minimal' | 'cinematic-dark';
+  category: 'royal-indian' | 'modern-minimal' | 'cinematic-dark' | 'romantic' | 'boho-floral' | 'vintage-rustic';
   description: string;
   primaryColor: string;
   secondaryColor: string;
   accentColor: string;
   bgColor: string;
   textColor: string;
+  textSecondaryColor: string;
   headingFont: string;
   bodyFont: string;
   defaultColorScheme: string;
   defaultFont: string;
   defaultBackground: string;
   previewGradient: string;
+  isNew?: boolean;
 }
 
 export const TEMPLATES: TemplateDefinition[] = [
+  // ── Royal Indian ──────────────────────────────────────────────────────────
   {
     id: 'royal-gold',
     name: 'Royal Maharaja',
@@ -27,6 +30,7 @@ export const TEMPLATES: TemplateDefinition[] = [
     accentColor: '#FFD700',
     bgColor: '#FFF8E7',
     textColor: '#2C1810',
+    textSecondaryColor: '#6B3A2A',
     headingFont: 'Cinzel',
     bodyFont: 'Inter',
     defaultColorScheme: 'gold-crimson',
@@ -44,6 +48,7 @@ export const TEMPLATES: TemplateDefinition[] = [
     accentColor: '#E8C547',
     bgColor: '#FDF5E6',
     textColor: '#1A0A0A',
+    textSecondaryColor: '#5A2A1A',
     headingFont: 'Cormorant Garamond',
     bodyFont: 'Inter',
     defaultColorScheme: 'maroon-gold',
@@ -51,6 +56,27 @@ export const TEMPLATES: TemplateDefinition[] = [
     defaultBackground: 'paisley',
     previewGradient: 'linear-gradient(135deg, #800020 0%, #C5A028 50%, #800020 100%)',
   },
+  {
+    id: 'regal-emerald',
+    name: 'Regal Emerald',
+    category: 'royal-indian',
+    description: 'Lush emerald green with antique gold — regal and timeless',
+    primaryColor: '#C9A84C',
+    secondaryColor: '#1B5E3B',
+    accentColor: '#F0D060',
+    bgColor: '#F2F9F5',
+    textColor: '#0D2B1A',
+    textSecondaryColor: '#2E6B45',
+    headingFont: 'Cinzel',
+    bodyFont: 'Lato',
+    defaultColorScheme: 'emerald-gold',
+    defaultFont: 'cinzel-lato',
+    defaultBackground: 'floral',
+    previewGradient: 'linear-gradient(135deg, #1B5E3B 0%, #C9A84C 55%, #1B5E3B 100%)',
+    isNew: true,
+  },
+
+  // ── Modern Minimal ────────────────────────────────────────────────────────
   {
     id: 'modern-blush',
     name: 'Blush Elegance',
@@ -61,6 +87,7 @@ export const TEMPLATES: TemplateDefinition[] = [
     accentColor: '#C47C7C',
     bgColor: '#FDFAFA',
     textColor: '#2D1B1B',
+    textSecondaryColor: '#7A4A4A',
     headingFont: 'Playfair Display',
     bodyFont: 'Inter',
     defaultColorScheme: 'blush-rose',
@@ -78,6 +105,7 @@ export const TEMPLATES: TemplateDefinition[] = [
     accentColor: '#A07840',
     bgColor: '#FAFAF8',
     textColor: '#1A1A1A',
+    textSecondaryColor: '#5A4A30',
     headingFont: 'Cinzel',
     bodyFont: 'Inter',
     defaultColorScheme: 'ivory-gold',
@@ -85,6 +113,48 @@ export const TEMPLATES: TemplateDefinition[] = [
     defaultBackground: 'watercolor',
     previewGradient: 'linear-gradient(135deg, #C9A96E 0%, #F5F0E8 50%, #A07840 100%)',
   },
+  {
+    id: 'pastel-garden',
+    name: 'Pastel Garden',
+    category: 'modern-minimal',
+    description: 'Soft lavender and sage with airy botanical accents',
+    primaryColor: '#9B7EC8',
+    secondaryColor: '#7BAE8A',
+    accentColor: '#D4B8E0',
+    bgColor: '#FAF8FF',
+    textColor: '#2A1F3D',
+    textSecondaryColor: '#5A4A70',
+    headingFont: 'Playfair Display',
+    bodyFont: 'Raleway',
+    defaultColorScheme: 'lavender-sage',
+    defaultFont: 'playfair-raleway',
+    defaultBackground: 'minimal',
+    previewGradient: 'linear-gradient(135deg, #9B7EC8 0%, #D4B8E0 45%, #7BAE8A 100%)',
+    isNew: true,
+  },
+
+  // ── Romantic ──────────────────────────────────────────────────────────────
+  {
+    id: 'dusty-rose-romantic',
+    name: 'Dusty Rose Romance',
+    category: 'romantic',
+    description: 'Dreamy dusty rose and champagne — soft, intimate, and romantic',
+    primaryColor: '#C4788A',
+    secondaryColor: '#E8C9B0',
+    accentColor: '#A0506A',
+    bgColor: '#FDF6F0',
+    textColor: '#3D1A24',
+    textSecondaryColor: '#8A4A5A',
+    headingFont: 'Cormorant Garamond',
+    bodyFont: 'Raleway',
+    defaultColorScheme: 'dusty-rose',
+    defaultFont: 'cormorant-raleway',
+    defaultBackground: 'watercolor',
+    previewGradient: 'linear-gradient(135deg, #C4788A 0%, #E8C9B0 50%, #A0506A 100%)',
+    isNew: true,
+  },
+
+  // ── Dark Luxe ─────────────────────────────────────────────────────────────
   {
     id: 'cinematic-jewel',
     name: 'Jewel Noir',
@@ -95,6 +165,7 @@ export const TEMPLATES: TemplateDefinition[] = [
     accentColor: '#7B2FBE',
     bgColor: '#0D0820',
     textColor: '#F5E6C8',
+    textSecondaryColor: '#C8A87A',
     headingFont: 'Cinzel',
     bodyFont: 'Inter',
     defaultColorScheme: 'jewel-dark',
@@ -112,6 +183,7 @@ export const TEMPLATES: TemplateDefinition[] = [
     accentColor: '#4A90D9',
     bgColor: '#060E1A',
     textColor: '#E8D5C0',
+    textSecondaryColor: '#A08060',
     headingFont: 'Cormorant Garamond',
     bodyFont: 'Inter',
     defaultColorScheme: 'midnight-rose',
@@ -119,15 +191,82 @@ export const TEMPLATES: TemplateDefinition[] = [
     defaultBackground: 'dark-minimal',
     previewGradient: 'linear-gradient(135deg, #0A1628 0%, #4A90D9 40%, #C9956C 100%)',
   },
+  {
+    id: 'midnight-luxe',
+    name: 'Midnight Luxe',
+    category: 'cinematic-dark',
+    description: 'Obsidian black with platinum and champagne — ultra-modern luxury',
+    primaryColor: '#D4C5A0',
+    secondaryColor: '#1A1A2E',
+    accentColor: '#E8D5A0',
+    bgColor: '#0A0A14',
+    textColor: '#F0EAD6',
+    textSecondaryColor: '#B0A080',
+    headingFont: 'Cinzel',
+    bodyFont: 'Open Sans',
+    defaultColorScheme: 'obsidian-platinum',
+    defaultFont: 'cinzel-opensans',
+    defaultBackground: 'dark-minimal',
+    previewGradient: 'linear-gradient(135deg, #0A0A14 0%, #1A1A2E 40%, #D4C5A0 100%)',
+    isNew: true,
+  },
+
+  // ── Boho & Floral ─────────────────────────────────────────────────────────
+  {
+    id: 'floral-boho',
+    name: 'Floral Boho',
+    category: 'boho-floral',
+    description: 'Earthy terracotta and wildflower hues — free-spirited and organic',
+    primaryColor: '#C4703A',
+    secondaryColor: '#8B9E6A',
+    accentColor: '#E8A060',
+    bgColor: '#FDF8F0',
+    textColor: '#2D1A0A',
+    textSecondaryColor: '#7A4A2A',
+    headingFont: 'Cormorant Garamond',
+    bodyFont: 'Lato',
+    defaultColorScheme: 'terracotta-sage',
+    defaultFont: 'cormorant-lato',
+    defaultBackground: 'floral',
+    previewGradient: 'linear-gradient(135deg, #C4703A 0%, #8B9E6A 50%, #E8A060 100%)',
+    isNew: true,
+  },
+
+  // ── Vintage & Rustic ──────────────────────────────────────────────────────
+  {
+    id: 'rustic-parchment',
+    name: 'Rustic Parchment',
+    category: 'vintage-rustic',
+    description: 'Aged parchment and sepia tones — warm, nostalgic, and handcrafted',
+    primaryColor: '#8B6914',
+    secondaryColor: '#C4A882',
+    accentColor: '#6B4A10',
+    bgColor: '#F5EDD8',
+    textColor: '#2A1A08',
+    textSecondaryColor: '#6A4A20',
+    headingFont: 'Playfair Display',
+    bodyFont: 'Lato',
+    defaultColorScheme: 'parchment-sepia',
+    defaultFont: 'playfair-lato',
+    defaultBackground: 'paisley',
+    previewGradient: 'linear-gradient(135deg, #8B6914 0%, #C4A882 50%, #6B4A10 100%)',
+    isNew: true,
+  },
 ];
 
 export const COLOR_SCHEMES = [
   { id: 'gold-crimson', name: 'Gold & Crimson', colors: ['#D4AF37', '#8B0000', '#FFF8E7'] },
   { id: 'maroon-gold', name: 'Maroon & Gold', colors: ['#800020', '#C5A028', '#FDF5E6'] },
+  { id: 'emerald-gold', name: 'Emerald & Gold', colors: ['#1B5E3B', '#C9A84C', '#F2F9F5'] },
   { id: 'blush-rose', name: 'Blush & Rose', colors: ['#E8A0A0', '#C47C7C', '#FDFAFA'] },
   { id: 'ivory-gold', name: 'Ivory & Gold', colors: ['#C9A96E', '#F5F0E8', '#FAFAF8'] },
+  { id: 'lavender-sage', name: 'Lavender & Sage', colors: ['#9B7EC8', '#7BAE8A', '#FAF8FF'] },
+  { id: 'dusty-rose', name: 'Dusty Rose', colors: ['#C4788A', '#E8C9B0', '#FDF6F0'] },
   { id: 'jewel-dark', name: 'Jewel Tones', colors: ['#7B2FBE', '#D4AF37', '#1A0A2E'] },
   { id: 'midnight-rose', name: 'Midnight Rose', colors: ['#4A90D9', '#C9956C', '#0A1628'] },
+  { id: 'obsidian-platinum', name: 'Obsidian & Platinum', colors: ['#D4C5A0', '#1A1A2E', '#0A0A14'] },
+  { id: 'terracotta-sage', name: 'Terracotta & Sage', colors: ['#C4703A', '#8B9E6A', '#FDF8F0'] },
+  { id: 'parchment-sepia', name: 'Parchment & Sepia', colors: ['#8B6914', '#C4A882', '#F5EDD8'] },
 ];
 
 export const FONT_CHOICES = [
@@ -135,6 +274,12 @@ export const FONT_CHOICES = [
   { id: 'cormorant-inter', name: 'Cormorant & Inter', heading: 'Cormorant Garamond', body: 'Inter', sample: 'Eternal Love' },
   { id: 'playfair-inter', name: 'Playfair & Inter', heading: 'Playfair Display', body: 'Inter', sample: 'Eternal Love' },
   { id: 'cinzel-cormorant', name: 'Cinzel & Cormorant', heading: 'Cinzel', body: 'Cormorant Garamond', sample: 'Eternal Love' },
+  { id: 'cinzel-lato', name: 'Cinzel & Lato', heading: 'Cinzel', body: 'Lato', sample: 'Eternal Love' },
+  { id: 'cormorant-lato', name: 'Cormorant & Lato', heading: 'Cormorant Garamond', body: 'Lato', sample: 'Eternal Love' },
+  { id: 'playfair-raleway', name: 'Playfair & Raleway', heading: 'Playfair Display', body: 'Raleway', sample: 'Eternal Love' },
+  { id: 'cormorant-raleway', name: 'Cormorant & Raleway', heading: 'Cormorant Garamond', body: 'Raleway', sample: 'Eternal Love' },
+  { id: 'cinzel-opensans', name: 'Cinzel & Open Sans', heading: 'Cinzel', body: 'Open Sans', sample: 'Eternal Love' },
+  { id: 'playfair-lato', name: 'Playfair & Lato', heading: 'Playfair Display', body: 'Lato', sample: 'Eternal Love' },
 ];
 
 export const BACKGROUND_CHOICES = [

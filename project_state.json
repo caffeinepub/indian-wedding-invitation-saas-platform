@@ -1,115 +1,48 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 7,
-  "summary": "AI-powered Indian Wedding Invitation SaaS Platform where couples can create stunning digital invitations, manage multiple events (Haldi, Mehndi, Sangeet, etc.), customize luxury templates, upload photos/music, and share beautiful guest-facing invitation pages via unique URLs. Features premium creator dashboard, animated event cards, RSVP forms, countdown timers, WhatsApp sharing, and a cinematic guest view — all wrapped in ultra-luxury UI with Indian cultural aesthetics, smooth animations, and full mobile responsiveness.",
-  "architectural_notes": [
-    "SaaS multi-invitation architecture: each invitation gets a unique public URL slug (e.g. /bride-groom)",
-    "Guest view must be fully view-only and non-editable; separate from creator/editor routes",
-    "No complex authentication required initially; simple creator panel access is sufficient",
-    "Template switching must preserve all user data (events, photos, details)",
-    "Media handling: support drag & drop upload, lazy loading for images, floating music controller for audio",
-    "Mobile music autoplay requires user gesture interaction first — floating music controller must respond to tap events and not rely on autoplay without gesture"
-  ],
-  "known_issues": [
-    "Some text colors in the guest-facing invitation view are hard to read — need color/contrast review",
-    "Mobile: floating music controller does not open/activate on mobile devices — works on desktop only",
-    "Home/landing page: 'Home' and 'Dashboard' nav text hidden by background — needs contrast fix or boundary/border treatment"
-  ],
-  "isFixRequest": true,
+  "projectStateVersion": 3,
+  "summary": "Invitation app with template management. User is working on invitation creation features including template variety and theme-based saving options.",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-build-a-multi-step-invitation-creation-wizard-step-1-couple-details-as-a-full-page-react-form-with-fields-bride-name-groom-name-couple-photo-upload-drag-drop-wedding-date-wedding-time-venue-name-venue-address-google-maps-link-family-details-rich-text-area-and-invitation-message-rich-text-area-show-a-live-progress-bar-across-steps-persist-form-state-across-steps-without-data-loss-on-completion-of-all-steps-call-the-backend-createinvitation-function-and-redirect-to-the-creator-dashboard-for-that-invitation",
-      "title": "Build a multi-step invitation creation wizard (Step 1: Couple Details) as a full-page React form with fields: Bride Name, Groom Name, Couple Photo upload (drag & drop), Wedding Date, Wedding Time, Venue Name, Venue Address, Google Maps Link, Family Details (rich text area), and Invitation Message (rich text area). Show a live progress bar across steps. Persist form state across steps without data loss. On completion of all steps, call the backend createInvitation function and redirect to the creator dashboard for that invitation.",
+      "id": "feature-expand-the-template-library-in-frontend-src-utils-templatedefinitions-ts-by-adding-at-least-6-new-distinct-modern-and-advanced-invitation-templates-new-templates-must-include-diverse-design-styles-such-as-floral-boho-regal-emerald-dusty-rose-romantic-midnight-luxe-rustic-parchment-and-pastel-garden-each-template-must-define-unique-font-pairings-color-palettes-gradient-backgrounds-and-decorative-motifs-border-patterns-overlay-textures-that-are-visually-distinct-from-each-other-and-from-the-current-6-templates",
+      "title": "Expand the template library in `frontend/src/utils/templateDefinitions.ts` by adding at least 6 new distinct, modern, and advanced invitation templates. New templates must include diverse design styles such as: Floral Boho, Regal Emerald, Dusty Rose Romantic, Midnight Luxe, Rustic Parchment, and Pastel Garden. Each template must define unique font pairings, color palettes, gradient backgrounds, and decorative motifs (border patterns, overlay textures) that are visually distinct from each other and from the current 6 templates.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-the-templateselector-component-to-group-and-display-the-expanded-template-library-with-improved-visual-previews-each-template-card-must-show-a-richer-simulated-preview-reflecting-the-template-s-unique-color-palette-fonts-and-decorative-style-add-a-new-or-premium-badge-label-to-the-newly-added-templates-group-templates-into-meaningful-categories-e-g-royal-indian-modern-minimal-romantic-dark-luxe-boho-floral-vintage-rustic",
+      "title": "Enhance the `TemplateSelector` component to group and display the expanded template library with improved visual previews. Each template card must show a richer simulated preview reflecting the template's unique color palette, fonts, and decorative style. Add a 'New' or 'Premium' badge label to the newly added templates. Group templates into meaningful categories (e.g., 'Royal Indian', 'Modern Minimal', 'Romantic', 'Dark Luxe', 'Boho & Floral', 'Vintage & Rustic').",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-build-step-2-of-the-creation-wizard-multi-event-management-display-a-structured-event-creator-ui-where-users-can-add-multiple-events-each-event-card-includes-event-type-selector-haldi-mehndi-sangeet-wedding-ceremony-reception-custom-event-title-input-date-picker-time-picker-venue-input-and-description-textarea-events-are-displayed-as-premium-animated-cards-with-gradient-backgrounds-icons-per-event-type-and-smooth-entrance-animations-users-can-add-edit-reorder-and-delete-events-save-all-events-linked-to-the-current-invitation-via-the-backend-addevent-updateevent-deleteevent-functions",
-      "title": "Build Step 2 of the creation wizard: Multi-Event Management. Display a structured event creator UI where users can add multiple events. Each event card includes: Event Type selector (Haldi, Mehndi, Sangeet, Wedding Ceremony, Reception, Custom), Event Title input, Date picker, Time picker, Venue input, and Description textarea. Events are displayed as premium animated cards with gradient backgrounds, icons per event type, and smooth entrance animations. Users can add, edit, reorder, and delete events. Save all events linked to the current invitation via the backend addEvent/updateEvent/deleteEvent functions.",
+      "id": "feature-enhance-the-customization-panel-in-templatethemestep-to-provide-more-advanced-per-template-customization-options-1-a-background-style-picker-with-at-least-4-options-solid-gradient-pattern-texture-2-an-accent-color-intensity-slider-3-a-border-frame-style-selector-with-at-least-3-decorative-frame-options-and-4-a-layout-density-toggle-compact-spacious-these-options-must-update-the-live-preview-in-real-time",
+      "title": "Enhance the customization panel in `TemplateThemeStep` to provide more advanced per-template customization options: (1) a background style picker with at least 4 options (solid, gradient, pattern, texture), (2) an accent color intensity slider, (3) a border/frame style selector with at least 3 decorative frame options, and (4) a layout density toggle (compact / spacious). These options must update the live preview in real time.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-build-a-template-theme-selector-panel-in-the-creator-dashboard-offer-at-least-6-templates-2-royal-indian-ornate-gold-red-maroon-with-floral-motifs-2-modern-minimal-clean-ivory-blush-tones-geometric-and-2-cinematic-dark-deep-jewel-tones-dramatic-typography-each-template-preview-renders-a-live-miniature-of-the-guest-invitation-include-color-scheme-picker-preset-palettes-custom-hex-font-pairing-selector-at-least-4-options-including-devanagari-inspired-and-serif-options-and-background-texture-pattern-selector-switching-templates-must-preserve-all-invitation-data-and-only-change-visual-presentation-persist-selected-template-and-customization-options-in-the-backend-updateinvitation-call",
-      "title": "Build a Template & Theme Selector panel in the creator dashboard. Offer at least 6 templates: 2 Royal Indian (ornate gold/red/maroon with floral motifs), 2 Modern Minimal (clean ivory/blush tones, geometric), and 2 Cinematic Dark (deep jewel tones, dramatic typography). Each template preview renders a live miniature of the guest invitation. Include color scheme picker (preset palettes + custom hex), font pairing selector (at least 4 options including Devanagari-inspired and serif options), and background texture/pattern selector. Switching templates must preserve all invitation data and only change visual presentation. Persist selected template and customization options in the backend updateInvitation call.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-build-a-media-management-section-in-the-creator-dashboard-with-two-subsystems-1-photo-gallery-drag-drop-upload-area-accepting-multiple-images-simultaneously-with-lazy-loaded-thumbnail-grid-elegant-hover-animations-image-reordering-and-individual-delete-images-are-stored-via-the-backend-addphoto-function-2-background-music-file-upload-for-audio-mp3-wav-toggle-for-auto-play-on-invitation-open-and-a-preview-player-store-music-via-backend-setbackgroundmusic-display-a-floating-music-controller-button-play-pause-volume-in-both-the-preview-and-guest-invitation-view",
-      "title": "Build a Media Management section in the creator dashboard with two subsystems: (1) Photo Gallery — drag & drop upload area accepting multiple images simultaneously, with lazy-loaded thumbnail grid, elegant hover animations, image reordering, and individual delete. Images are stored via the backend addPhoto function. (2) Background Music — file upload for audio (MP3/WAV), toggle for auto-play on invitation open, and a preview player. Store music via backend setBackgroundMusic. Display a floating music controller button (play/pause/volume) in both the preview and guest invitation view.",
+      "id": "feature-in-the-invitation-creation-wizard-createinvitationwizard-tsx-and-the-invitationeditor-tsx-add-a-save-theme-section-on-the-templatethemestep-this-section-must-include-1-a-save-as-single-theme-button-that-saves-only-the-currently-selected-template-customization-as-the-active-theme-and-2-a-save-as-theme-variant-button-that-adds-the-current-configuration-as-an-additional-saved-variant-without-replacing-the-active-theme-display-all-saved-theme-variants-as-small-thumbnail-cards-below-the-template-selector-with-options-to-apply-set-as-active-or-delete-each-variant",
+      "title": "In the invitation creation wizard (`CreateInvitationWizard.tsx`) and the `InvitationEditor.tsx`, add a 'Save Theme' section on the TemplateThemeStep. This section must include: (1) a 'Save as Single Theme' button that saves only the currently selected template/customization as the active theme, and (2) a 'Save as Theme Variant' button that adds the current configuration as an additional saved variant without replacing the active theme. Display all saved theme variants as small thumbnail cards below the template selector, with options to apply (set as active) or delete each variant.",
       "reqIds": [
         "REQ-5"
       ],
       "version": 1
     },
     {
-      "id": "feature-build-the-cinematic-guest-facing-invitation-view-at-route-slug-e-g-shivangi-avanish-this-view-is-strictly-read-only-and-non-editable-it-must-include-1-full-screen-cinematic-hero-section-with-couple-photo-names-in-elegant-typography-and-animated-entrance-2-animated-countdown-timer-to-the-wedding-date-3-couple-introduction-section-with-invitation-message-and-family-details-4-premium-event-timeline-each-event-displayed-as-an-animated-card-with-icon-date-time-venue-5-photo-gallery-with-lightbox-support-and-smooth-scroll-reveal-animations-6-venue-section-with-address-and-a-view-on-google-maps-button-linking-to-the-provided-google-maps-url-7-rsvp-form-collecting-guest-name-phone-attendance-confirmation-guest-count-and-message-submits-via-backend-submitrsvp-8-whatsapp-share-button-that-shares-the-invitation-url-9-floating-background-music-controller-if-music-is-uploaded-the-view-must-be-publicly-accessible-via-the-slug-without-any-authentication",
-      "title": "Build the cinematic guest-facing invitation view at route /[slug] (e.g., /shivangi-avanish). This view is strictly read-only and non-editable. It must include: (1) Full-screen cinematic hero section with couple photo, names in elegant typography, and animated entrance. (2) Animated countdown timer to the wedding date. (3) Couple introduction section with invitation message and family details. (4) Premium event timeline — each event displayed as an animated card with icon, date, time, venue. (5) Photo gallery with lightbox support and smooth scroll reveal animations. (6) Venue section with address and a 'View on Google Maps' button linking to the provided Google Maps URL. (7) RSVP form collecting guest name, phone, attendance confirmation, guest count, and message — submits via backend submitRSVP. (8) WhatsApp share button that shares the invitation URL. (9) Floating background music controller if music is uploaded. The view must be publicly accessible via the slug without any authentication.",
+      "id": "feature-add-react-query-hooks-in-frontend-src-hooks-usequeries-ts-for-the-new-backend-theme-variant-operations-usesavethemevariant-usegetthemevariants-and-usedeletethemevariant-following-the-same-patterns-as-existing-mutation-query-hooks-in-that-file",
+      "title": "Add React Query hooks in `frontend/src/hooks/useQueries.ts` for the new backend theme variant operations: `useSaveThemeVariant`, `useGetThemeVariants`, and `useDeleteThemeVariant`, following the same patterns as existing mutation/query hooks in that file.",
       "reqIds": [
         "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-build-a-creator-admin-dashboard-at-route-dashboard-and-dashboard-slug-for-managing-individual-invitations-the-dashboard-homepage-lists-all-created-invitations-as-cards-showing-couple-names-wedding-date-published-status-and-action-buttons-edit-preview-publish-delete-the-individual-invitation-editor-at-dashboard-slug-provides-tabbed-navigation-across-couple-details-events-template-theme-media-and-preview-the-preview-tab-renders-the-full-guest-invitation-view-in-an-iframe-or-embedded-component-to-show-live-changes-include-a-prominent-publish-invitation-button-that-calls-the-backend-publishinvitation-function-and-generates-the-shareable-public-link-no-login-or-authentication-is-required-for-this-initial-version",
-      "title": "Build a Creator/Admin Dashboard at route /dashboard and /dashboard/[slug] for managing individual invitations. The dashboard homepage lists all created invitations as cards showing couple names, wedding date, published status, and action buttons (Edit, Preview, Publish, Delete). The individual invitation editor at /dashboard/[slug] provides tabbed navigation across: Couple Details, Events, Template & Theme, Media, and Preview. The Preview tab renders the full guest invitation view in an iframe or embedded component to show live changes. Include a prominent 'Publish Invitation' button that calls the backend publishInvitation function and generates the shareable public link. No login or authentication is required for this initial version.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-an-ultra-premium-luxury-indian-wedding-aesthetic-consistently-across-the-entire-platform-visual-direction-rich-gold-ivory-deep-crimson-and-blush-rose-as-the-primary-palette-ornate-but-clean-layout-inspired-by-high-end-indian-wedding-brands-cinzel-or-cormorant-garamond-for-display-headings-inter-for-body-text-subtle-mandala-or-floral-svg-motifs-as-decorative-dividers-apple-level-micro-animations-smooth-fade-ins-parallax-scrolling-on-hero-sections-staggered-card-entrances-using-css-transitions-or-framer-motion-cinematic-full-bleed-section-transitions-glassmorphism-cards-for-event-and-template-selectors-mobile-first-fully-responsive-grid-layout-all-interactions-must-feel-premium-buttons-have-hover-shimmer-effects-form-inputs-have-elegant-focus-states-and-loading-states-use-graceful-skeleton-screens",
-      "title": "Apply an ultra-premium, luxury Indian wedding aesthetic consistently across the entire platform. Visual direction: rich gold, ivory, deep crimson, and blush rose as the primary palette; ornate but clean layout inspired by high-end Indian wedding brands; Cinzel or Cormorant Garamond for display headings, Inter for body text; subtle mandala or floral SVG motifs as decorative dividers; Apple-level micro-animations (smooth fade-ins, parallax scrolling on hero sections, staggered card entrances using CSS transitions or Framer Motion); cinematic full-bleed section transitions; glassmorphism cards for event and template selectors; mobile-first fully responsive grid layout. All interactions must feel premium — buttons have hover shimmer effects, form inputs have elegant focus states, and loading states use graceful skeleton screens.",
-      "reqIds": [
-        "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-scalable-url-routing-for-the-saas-multi-invitation-architecture-each-invitation-is-accessible-at-slug-e-g-shivangi-avanish-for-the-guest-view-the-creator-dashboard-is-at-dashboard-individual-invitation-editors-are-at-dashboard-slug-the-platform-home-page-at-serves-as-a-landing-page-showcasing-the-platform-with-a-hero-section-feature-highlights-sample-invitation-previews-and-a-create-your-invitation-cta-button-ensure-client-side-routing-handles-all-paths-correctly-and-unknown-slugs-show-a-graceful-404-page",
-      "title": "Implement scalable URL routing for the SaaS multi-invitation architecture. Each invitation is accessible at /:slug (e.g., /shivangi-avanish) for the guest view. The creator dashboard is at /dashboard. Individual invitation editors are at /dashboard/:slug. The platform home page at / serves as a landing page showcasing the platform with a hero section, feature highlights, sample invitation previews, and a 'Create Your Invitation' CTA button. Ensure client-side routing handles all paths correctly and unknown slugs show a graceful 404 page.",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-generate-the-following-static-image-assets-for-use-throughout-the-platform-as-decorative-and-branding-elements-stored-in-frontend-public-assets-generated-render-these-as-img-tags-or-css-backgrounds-where-appropriate-in-the-ui",
-      "title": "Generate the following static image assets for use throughout the platform as decorative and branding elements, stored in frontend/public/assets/generated. Render these as img tags or CSS backgrounds where appropriate in the UI.",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-prominent-dedicated-view-rsvp-responses-button-on-each-invitation-card-in-the-creator-dashboard-dashboard-and-inside-the-invitation-editor-dashboard-slug-clicking-it-opens-a-modal-or-expands-a-panel-showing-all-submitted-rsvp-guest-responses-for-that-invitation-fetched-via-getrsvpsbyinvitation-display-guest-name-phone-attending-yes-no-badge-guest-count-message-and-submitted-at-date-in-a-clean-styled-table-card-list-include-a-summary-row-with-total-responses-total-confirmed-guests-and-total-declined-show-a-graceful-empty-state-when-no-responses-exist-style-the-button-prominently-gold-crimson-accent-distinct-from-other-action-buttons-so-it-stands-out-as-a-special-action",
-      "title": "Add a prominent dedicated 'View RSVP Responses' button on each invitation card in the creator dashboard (/dashboard) and inside the invitation editor (/dashboard/:slug). Clicking it opens a modal or expands a panel showing all submitted RSVP guest responses for that invitation fetched via getRSVPsByInvitation. Display: Guest Name, Phone, Attending (Yes/No badge), Guest Count, Message, and Submitted At date in a clean styled table/card list. Include a summary row with total responses, total confirmed guests, and total declined. Show a graceful empty state when no responses exist. Style the button prominently (gold/crimson accent, distinct from other action buttons) so it stands out as a special action.",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-the-navigation-link-text-visibility-in-the-site-header-header-tsx-on-the-home-landing-page-the-home-and-dashboard-nav-link-text-is-currently-hidden-invisible-against-the-dark-or-image-based-background-apply-a-light-text-color-ivory-white-or-gold-to-all-navigation-links-when-the-header-is-in-its-transparent-top-of-page-state-and-ensure-the-text-remains-readable-in-the-scrolled-filled-state-as-well-add-a-subtle-semi-transparent-dark-backdrop-or-a-distinct-border-boundary-around-the-navigation-links-if-needed-to-guarantee-contrast-on-all-backgrounds-update-hover-states-to-match-the-new-color-scheme",
-      "title": "Fix the navigation link text visibility in the site header (Header.tsx) on the home/landing page. The 'Home' and 'Dashboard' nav link text is currently hidden/invisible against the dark or image-based background. Apply a light text color (ivory/white or gold) to all navigation links when the header is in its transparent (top-of-page) state, and ensure the text remains readable in the scrolled/filled state as well. Add a subtle semi-transparent dark backdrop or a distinct border/boundary around the navigation links if needed to guarantee contrast on all backgrounds. Update hover states to match the new color scheme.",
-      "reqIds": [
-        "REQ-15"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-the-floating-background-music-controller-musiccontroller-tsx-so-it-activates-and-functions-correctly-on-mobile-devices-currently-the-music-controller-does-not-open-or-respond-to-taps-on-mobile-works-on-desktop-only-ensure-the-floating-button-has-a-sufficiently-large-touch-target-at-least-44x44px-tap-events-are-handled-correctly-use-onclick-which-works-for-both-touch-and-mouse-autoplay-restrictions-on-mobile-are-handled-by-requiring-a-user-gesture-before-starting-audio-the-play-pause-state-toggles-correctly-on-tap-and-the-controller-panel-opens-closes-on-mobile-test-that-audio-actually-plays-after-the-user-taps-play-on-a-mobile-browser",
-      "title": "Fix the floating background music controller (MusicController.tsx) so it activates and functions correctly on mobile devices. Currently the music controller does not open or respond to taps on mobile (works on desktop only). Ensure: the floating button has a sufficiently large touch target (at least 44x44px), tap events are handled correctly (use onClick which works for both touch and mouse), autoplay restrictions on mobile are handled by requiring a user gesture before starting audio, the play/pause state toggles correctly on tap, and the controller panel opens/closes on mobile. Test that audio actually plays after the user taps play on a mobile browser.",
-      "reqIds": [
-        "REQ-16"
       ],
       "version": 1
     }
@@ -117,105 +50,27 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Invitation creation flow: bride/groom names, couple photos, wedding date/time, venue, Google Maps link, family details, invitation message",
+      "summary": "Add more unique, modern, and advanced templates with better design variations and customization options",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Multi-event management system (Haldi, Mehndi, Sangeet, Wedding, Reception) with animated premium event cards including date, time, venue, description",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Template & theme system: multiple luxury/royal/modern templates, color/font/background customization, switch templates without data loss",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Media system: drag & drop photo gallery with lazy loading, background music upload with auto-play and floating music controller",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Cinematic guest-facing invitation view: animated couple intro, countdown timer, event timeline, gallery, venue/Maps button, RSVP form, WhatsApp share — view-only secure public link",
+      "summary": "When creating an invitation, add option to save it in multiple themes or just a single selected theme",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-6",
-      "summary": "Creator/admin dashboard: edit invitation anytime, update photos/events, live preview, publish invitation (no complex login required initially)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Ultra-premium UI: luxury wedding brand quality, Apple-level smooth animations, cinematic transitions, elegant typography, Indian cultural aesthetics, mobile-first fully responsive",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Business/SaaS-level architecture: unique invitation URLs (e.g. /shivangi-avanish), multiple invitations support, SEO-optimized pages, template marketplace ready, future payment integration ready",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Build a Motoko backend actor with the following data models and functions: (1) Invitation record containing id (unique slug like 'shivangi-avanish'), brideeName, groomName, weddingDate, weddingTime, venueName, venueAddress, googleMapsLink, familyDetails (text), invitationMessage, selectedTemplate (text), colorScheme, fontChoice, backgroundChoice, isPublished (bool), createdAt, updatedAt. (2) Event record containing id, invitationId, title, date, time, venue, description, eventType (Haldi/Mehndi/Sangeet/Wedding/Reception/Custom). (3) RSVPEntry record with id, invitationId, guestName, guestPhone, attending (bool), guestCount, message, submittedAt. (4) Expose CRUD functions: createInvitation, updateInvitation, getInvitationBySlug, getAllInvitations, publishInvitation, deleteInvitation. (5) Event CRUD: addEvent, updateEvent, deleteEvent, getEventsByInvitation. (6) RSVP: submitRSVP, getRSVPsByInvitation. (7) Photo gallery: addPhoto (stores base64 or URL string), deletePhoto, getPhotosByInvitation. (8) Music: setBackgroundMusic (stores base64 or URL string, autoPlay bool), getBackgroundMusic. (9) Slug uniqueness validation on creation. Store all data in stable vars for upgrade safety.",
+      "summary": "Update the backend Motoko actor in `backend/main.mo` to support storing multiple theme variants per invitation. Add a `savedThemes` field (array of theme/template config records) to the invitation data type. Add backend functions: `saveThemeVariant(invitationId, themeConfig)` to append a theme variant, `getThemeVariants(invitationId)` to retrieve all saved variants, and `deleteThemeVariant(invitationId, themeIndex)` to remove a specific variant. The existing single `template` field must remain for the active/published theme.",
       "reqIds": [
-        "REQ-1"
+        "REQ-4"
       ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Add RSVP responses viewer in creator dashboard showing all submitted guest responses in a clean table/list view",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-11",
-      "summary": "Fix the header/navigation tab text contrast on the home (landing) page. The navigation link text is currently black and becomes invisible against the dark or image-based background. Change navigation link text to use a light color (ivory/white or gold) with appropriate hover states so links are always legible regardless of the background behind the fixed header. Ensure the scroll-aware background change in Header.tsx does not leave text unreadable in either the transparent or filled state.",
-      "reqIds": [
-        "REQ-11"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Audit and fix all text color contrast issues across the guest-facing invitation view (GuestInvitation.tsx and its child components: HeroSection, CountdownTimer, CoupleIntroduction, EventTimeline, PhotoGalleryLightbox, VenueSection, RSVPForm). For each of the 6 templates, ensure all body text, labels, headings, form placeholders, and button text meet readable contrast requirements. Pay special attention to: text over semi-transparent or gradient backgrounds, light-colored text on light template backgrounds (Modern Minimal / ivory templates), and dark text on dark templates (Cinematic Dark). Update template-driven color tokens and inline styles so every piece of text is comfortably readable.",
-      "reqIds": [
-        "REQ-12"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "Add an RSVP Responses tab/section to the individual invitation editor page at /dashboard/:slug (InvitationEditor.tsx). This section should fetch all RSVP submissions for the invitation via the existing getRSVPsByInvitation backend function and display them in a clean, styled table or card list showing: Guest Name, Phone, Attending (Yes/No badge), Guest Count, Message, and Submitted At date. Include a summary row showing total responses, total confirmed guests, and total declined. Show a graceful empty state when no responses have been submitted yet. The data should be fetched using the existing React Query pattern in useQueries.ts.",
-      "reqIds": [
-        "REQ-13"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Add a dedicated/special button in the creator dashboard to view RSVP responses (not just a tab — a prominent button that opens/shows all submitted RSVP guest responses for the invitation)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-15",
-      "summary": "Fix mobile music controller: music player/controller does not open or activate on mobile devices (works on laptop/desktop). Ensure the floating music controller button is tappable and functional on mobile, and music plays correctly on mobile browsers (handle autoplay restrictions with user gesture).",
-      "reqIds": [],
       "status": "pending"
     }
   ],
   "gameProjectType": "none",
-  "projectName": "Indian Wedding Invitation SaaS Platform",
+  "projectName": "Wedding Invite Studio",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }
