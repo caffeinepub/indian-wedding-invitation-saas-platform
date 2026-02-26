@@ -1,83 +1,61 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T02:38:16.142Z",
+  "generatedAt": "2026-02-26T03:56:14.605Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 6,
-    "implemented": 5,
+    "total": 5,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Expand the template library in `frontend/src/utils/templateDefinitions.ts` by adding at least 6 new distinct, modern, and advanced invitation templates. New templates must include diverse design styles such as: Floral Boho, Regal Emerald, Dusty Rose Romantic, Midnight Luxe, Rustic Parchment, and Pastel Garden. Each template must define unique font pairings, color palettes, gradient backgrounds, and decorative motifs (border patterns, overlay textures) that are visually distinct from each other and from the current 6 templates.",
-        "status": "implemented",
+        "summary": "Fix the Color Scheme selector in TemplateThemeStep so that selecting a color scheme immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component without requiring a page reload.",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/utils/templateDefinitions.ts"
+          "frontend/src/components/templates/ColorSchemePicker.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/utils/templateDefinitions.ts"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Enhance the `TemplateSelector` component to group and display the expanded template library with improved visual previews. Each template card must show a richer simulated preview reflecting the template's unique color palette, fonts, and decorative style. Add a 'New' or 'Premium' badge label to the newly added templates. Group templates into meaningful categories (e.g., 'Royal Indian', 'Modern Minimal', 'Romantic', 'Dark Luxe', 'Boho & Floral', 'Vintage & Rustic').",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/templates/TemplateSelector.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/templates/TemplateSelector.tsx"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Enhance the customization panel in `TemplateThemeStep` to provide more advanced per-template customization options: (1) a background style picker with at least 4 options (solid, gradient, pattern, texture), (2) an accent color intensity slider, (3) a border/frame style selector with at least 3 decorative frame options, and (4) a layout density toggle (compact / spacious). These options must update the live preview in real time.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/wizard/TemplateThemeStep.tsx",
-          "frontend/src/context/InvitationFormContext.tsx",
-          "frontend/src/components/templates/TemplatePreview.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/wizard/TemplateThemeStep.tsx",
-          "frontend/src/context/InvitationFormContext.tsx",
-          "frontend/src/components/templates/TemplatePreview.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Update the backend Motoko actor in `backend/main.mo` to support storing multiple theme variants per invitation. Add a `savedThemes` field (array of theme/template config records) to the invitation data type. Add backend functions: `saveThemeVariant(invitationId, themeConfig)` to append a theme variant, `getThemeVariants(invitationId)` to retrieve all saved variants, and `deleteThemeVariant(invitationId, themeIndex)` to remove a specific variant. The existing single `template` field must remain for the active/published theme.",
-        "status": "unknown",
-        "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-5",
-        "summary": "In the invitation creation wizard (`CreateInvitationWizard.tsx`) and the `InvitationEditor.tsx`, add a 'Save Theme' section on the TemplateThemeStep. This section must include: (1) a 'Save as Single Theme' button that saves only the currently selected template/customization as the active theme, and (2) a 'Save as Theme Variant' button that adds the current configuration as an additional saved variant without replacing the active theme. Display all saved theme variants as small thumbnail cards below the template selector, with options to apply (set as active) or delete each variant.",
+        "id": "REQ-2",
+        "summary": "Fix the Font Pairing selector in TemplateThemeStep so that selecting a font pairing immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/components/templates/FontSelector.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Fix the Background Style selector in TemplateThemeStep so that selecting a background style immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/components/wizard/TemplateThemeStep.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Audit and fix the data flow between TemplateThemeStep, ColorSchemePicker, FontSelector, and TemplatePreview to ensure all three selector values (colorScheme, fontPairing, backgroundStyle) are correctly read from and written to InvitationFormContext via the updateFormData callback, and that TemplatePreview consumes these values reactively from context.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/wizard/TemplateThemeStep.tsx",
-          "frontend/src/pages/InvitationEditor.tsx",
-          "frontend/src/pages/CreateInvitationWizard.tsx"
+          "frontend/src/components/templates/TemplatePreview.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/wizard/TemplateThemeStep.tsx",
-          "frontend/src/pages/InvitationEditor.tsx"
+          "frontend/src/components/templates/TemplatePreview.tsx"
         ]
       },
       {
-        "id": "REQ-6",
-        "summary": "Add React Query hooks in `frontend/src/hooks/useQueries.ts` for the new backend theme variant operations: `useSaveThemeVariant`, `useGetThemeVariants`, and `useDeleteThemeVariant`, following the same patterns as existing mutation/query hooks in that file.",
-        "status": "implemented",
+        "id": "REQ-5",
+        "summary": "Ensure that when an existing invitation is loaded in InvitationEditor, the colorScheme, fontPairing, and backgroundStyle values saved in the backend are correctly hydrated into InvitationFormContext so that the selectors and preview reflect the previously saved values on load.",
+        "status": "missing",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/pages/InvitationEditor.tsx"
         ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
-        ]
+        "matchedFiles": []
       }
     ]
   },
@@ -85,22 +63,10 @@
     "backend/main.mo",
     "backend/migration.mo",
     "build-request.json",
-    "build-template/README.md",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
     "frontend/src/components/templates/TemplatePreview.tsx",
-    "frontend/src/components/templates/TemplateSelector.tsx",
-    "frontend/src/components/wizard/TemplateThemeStep.tsx",
-    "frontend/src/context/InvitationFormContext.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/InvitationEditor.tsx",
-    "frontend/src/utils/templateDefinitions.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

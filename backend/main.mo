@@ -1,11 +1,11 @@
 import Map "mo:core/Map";
 import List "mo:core/List";
+import Runtime "mo:core/Runtime";
 import Text "mo:core/Text";
 import Time "mo:core/Time";
-import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
-import Nat "mo:core/Nat";
 import VarArray "mo:core/VarArray";
+import Nat "mo:core/Nat";
 import Migration "migration";
 
 (with migration = Migration.run)

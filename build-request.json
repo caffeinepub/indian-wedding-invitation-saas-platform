@@ -1,131 +1,107 @@
 {
   "kind": "build_request",
-  "title": "Add Advanced Templates with Design Variations and Multi-Theme Save Option",
-  "projectName": "Wedding Invite Studio",
-  "priority": "normal",
+  "title": "Fix Color Scheme, Font Pairing, and Background Style selectors not updating preview or persisting on save",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Expand the template library in `frontend/src/utils/templateDefinitions.ts` by adding at least 6 new distinct, modern, and advanced invitation templates. New templates must include diverse design styles such as: Floral Boho, Regal Emerald, Dusty Rose Romantic, Midnight Luxe, Rustic Parchment, and Pastel Garden. Each template must define unique font pairings, color palettes, gradient backgrounds, and decorative motifs (border patterns, overlay textures) that are visually distinct from each other and from the current 6 templates.",
+      "text": "Fix the Color Scheme selector in TemplateThemeStep so that selecting a color scheme immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component without requiring a page reload.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-9"
+          "msg-1"
         ],
         "quotes": [
-          "add more unique, modern, and advanced templates with better design variations"
+          "the Color Scheme, Font Pairing, and Background Style selectors are not reflecting any changes in the live preview or after saving"
         ]
       },
       "acceptanceCriteria": [
-        "At least 6 new templates are added to templateDefinitions.ts with unique IDs, names, and full style configurations.",
-        "Each new template has a distinct color palette, font pairing, and gradient/background style not duplicated by another template.",
-        "All new templates render correctly in TemplateSelector, TemplatePreview, and TemplateThemeStep components."
+        "Clicking a color scheme swatch in ColorSchemePicker updates the form context's color scheme field immediately.",
+        "The TemplatePreview component re-renders to reflect the newly selected color scheme without a page reload.",
+        "The selected color scheme is persisted when the invitation is saved."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Enhance the `TemplateSelector` component to group and display the expanded template library with improved visual previews. Each template card must show a richer simulated preview reflecting the template's unique color palette, fonts, and decorative style. Add a 'New' or 'Premium' badge label to the newly added templates. Group templates into meaningful categories (e.g., 'Royal Indian', 'Modern Minimal', 'Romantic', 'Dark Luxe', 'Boho & Floral', 'Vintage & Rustic').",
+      "text": "Fix the Font Pairing selector in TemplateThemeStep so that selecting a font pairing immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-9"
+          "msg-1"
         ],
         "quotes": [
-          "better design variations and customization options"
+          "the Color Scheme, Font Pairing, and Background Style selectors are not reflecting any changes in the live preview or after saving"
         ]
       },
       "acceptanceCriteria": [
-        "TemplateSelector displays all new and existing templates grouped by updated categories.",
-        "Each card shows a styled preview using the template's own colors and fonts.",
-        "New templates are visually distinguished with a badge."
+        "Clicking a font pairing option in FontSelector updates the form context's font pairing field immediately.",
+        "The TemplatePreview component re-renders using the selected font pairing's heading and body fonts.",
+        "The selected font pairing is persisted when the invitation is saved."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Enhance the customization panel in `TemplateThemeStep` to provide more advanced per-template customization options: (1) a background style picker with at least 4 options (solid, gradient, pattern, texture), (2) an accent color intensity slider, (3) a border/frame style selector with at least 3 decorative frame options, and (4) a layout density toggle (compact / spacious). These options must update the live preview in real time.",
+      "text": "Fix the Background Style selector in TemplateThemeStep so that selecting a background style immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-9"
+          "msg-1"
         ],
         "quotes": [
-          "customization options"
+          "the Color Scheme, Font Pairing, and Background Style selectors are not reflecting any changes in the live preview or after saving"
         ]
       },
       "acceptanceCriteria": [
-        "Background style picker renders at least 4 options and the preview updates immediately on selection.",
-        "Accent color intensity slider is functional and visually reflected in the preview.",
-        "Border/frame style selector shows at least 3 options that affect the preview card's border.",
-        "Layout density toggle changes spacing in the live preview."
+        "Selecting a background style option updates the form context's background style field immediately.",
+        "The TemplatePreview component re-renders to show the selected background style (e.g., watercolor texture, ornate border).",
+        "The selected background style is persisted when the invitation is saved."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Update the backend Motoko actor in `backend/main.mo` to support storing multiple theme variants per invitation. Add a `savedThemes` field (array of theme/template config records) to the invitation data type. Add backend functions: `saveThemeVariant(invitationId, themeConfig)` to append a theme variant, `getThemeVariants(invitationId)` to retrieve all saved variants, and `deleteThemeVariant(invitationId, themeIndex)` to remove a specific variant. The existing single `template` field must remain for the active/published theme.",
-      "target": "backend",
+      "text": "Audit and fix the data flow between TemplateThemeStep, ColorSchemePicker, FontSelector, and TemplatePreview to ensure all three selector values (colorScheme, fontPairing, backgroundStyle) are correctly read from and written to InvitationFormContext via the updateFormData callback, and that TemplatePreview consumes these values reactively from context.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-9"
+          "msg-1"
         ],
         "quotes": [
-          "an option to save it in multiple themes or just a single selected theme"
+          "the Color Scheme, Font Pairing, and Background Style selectors are not reflecting any changes in the live preview or after saving"
         ]
       },
       "acceptanceCriteria": [
-        "Invitation record includes a `savedThemes` array field.",
-        "saveThemeVariant appends a new theme config and returns the updated list.",
-        "getThemeVariants returns all saved theme variants for a given invitation.",
-        "deleteThemeVariant removes the theme at the specified index.",
-        "Existing single-template field and all existing invitation CRUD operations continue to work unchanged."
+        "ColorSchemePicker, FontSelector, and the Background Style selector all call updateFormData with the correct field names matching those consumed by TemplatePreview.",
+        "TemplatePreview reads colorScheme, fontPairing, and backgroundStyle directly from InvitationFormContext (not from stale local state or props).",
+        "No selector selection is silently lost or overwritten during re-renders or step navigation."
       ]
     },
     {
       "id": "REQ-5",
-      "text": "In the invitation creation wizard (`CreateInvitationWizard.tsx`) and the `InvitationEditor.tsx`, add a 'Save Theme' section on the TemplateThemeStep. This section must include: (1) a 'Save as Single Theme' button that saves only the currently selected template/customization as the active theme, and (2) a 'Save as Theme Variant' button that adds the current configuration as an additional saved variant without replacing the active theme. Display all saved theme variants as small thumbnail cards below the template selector, with options to apply (set as active) or delete each variant.",
-      "target": "frontend",
+      "text": "Ensure that when an existing invitation is loaded in InvitationEditor, the colorScheme, fontPairing, and backgroundStyle values saved in the backend are correctly hydrated into InvitationFormContext so that the selectors and preview reflect the previously saved values on load.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-9"
+          "msg-1"
         ],
         "quotes": [
-          "an option to save it in multiple themes or just a single selected theme"
+          "not reflecting any changes in the live preview or after saving"
         ]
       },
       "acceptanceCriteria": [
-        "'Save as Single Theme' button saves the active template config and replaces any previously active theme.",
-        "'Save as Theme Variant' button appends the current config to the saved variants list without changing the active theme.",
-        "Saved theme variant thumbnails are displayed in a scrollable row below the template selector.",
-        "Each variant thumbnail has an 'Apply' button and a 'Delete' button.",
-        "Applying a variant sets it as the active template and updates the live preview.",
-        "Deleting a variant removes it from the list and calls the backend deleteThemeVariant function."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Add React Query hooks in `frontend/src/hooks/useQueries.ts` for the new backend theme variant operations: `useSaveThemeVariant`, `useGetThemeVariants`, and `useDeleteThemeVariant`, following the same patterns as existing mutation/query hooks in that file.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-9"
-        ]
-      },
-      "acceptanceCriteria": [
-        "useSaveThemeVariant mutation hook calls the backend saveThemeVariant function and invalidates relevant queries on success.",
-        "useGetThemeVariants query hook fetches all theme variants for a given invitation ID.",
-        "useDeleteThemeVariant mutation hook calls deleteThemeVariant and invalidates relevant queries on success."
+        "Opening an existing invitation in the editor pre-selects the saved color scheme, font pairing, and background style in their respective selectors.",
+        "The TemplatePreview shows the previously saved customization immediately on load.",
+        "Saving the invitation persists the current selector values to the backend without resetting them."
       ]
     }
   ],
   "constraints": [
     "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-    "All existing invitation CRUD operations and the active single-template field must remain fully functional.",
-    "New templates must not duplicate existing template IDs or names."
+    "All fix changes must be confined to frontend components and context; do not alter the backend data schema unless strictly required to persist missing fields."
   ],
   "nonGoals": [
-    "Changing the overall multi-step wizard flow or step ordering.",
-    "Adding real-time collaboration or multi-user editing.",
-    "Implementing paid/subscription gating for premium templates.",
-    "Modifying the RSVP, photo gallery, or music upload features."
+    "Adding new template options or design variants beyond fixing existing ones.",
+    "Redesigning the TemplateThemeStep UI layout.",
+    "Fixing unrelated invitation editor bugs not mentioned in this request."
   ],
   "imageRequirements": {
     "required": [],

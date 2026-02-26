@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-expand-the-template-library-in-frontend-src-utils-templatedefinitions-ts-by-adding-at-least-6-new-distinct-modern-and-advanced-invitation-templates-new-templates-must-include-diverse-design-styles-such-as-floral-boho-regal-emerald-dusty-rose-romantic-midnight-luxe-rustic-parchment-and-pastel-garden-each-template-must-define-unique-font-pairings-color-palettes-gradient-backgrounds-and-decorative-motifs-border-patterns-overlay-textures-that-are-visually-distinct-from-each-other-and-from-the-current-6-templates",
-      "featureTitle": "Expand the template library in `frontend/src/utils/templateDefinitions.ts` by adding at least 6 new distinct, modern, and advanced invitation templates. New templates must include diverse design styles such as: Floral Boho, Regal Emerald, Dusty Rose Romantic, Midnight Luxe, Rustic Parchment, and Pastel Garden. Each template must define unique font pairings, color palettes, gradient backgrounds, and decorative motifs (border patterns, overlay textures) that are visually distinct from each other and from the current 6 templates.",
+      "featureId": "feature-audit-and-fix-the-data-flow-between-templatethemestep-colorschemepicker-fontselector-and-templatepreview-to-ensure-all-three-selector-values-colorscheme-fontpairing-backgroundstyle-are-correctly-read-from-and-written-to-invitationformcontext-via-the-updateformdata-callback-and-that-templatepreview-consumes-these-values-reactively-from-context",
+      "featureTitle": "Audit and fix the data flow between TemplateThemeStep, ColorSchemePicker, FontSelector, and TemplatePreview to ensure all three selector values (colorScheme, fontPairing, backgroundStyle) are correctly read from and written to InvitationFormContext via the updateFormData callback, and that TemplatePreview consumes these values reactively from context.",
       "files": [
-        "frontend/src/utils/templateDefinitions.ts"
+        "frontend/src/components/templates/TemplatePreview.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -15,82 +15,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-enhance-the-templateselector-component-to-group-and-display-the-expanded-template-library-with-improved-visual-previews-each-template-card-must-show-a-richer-simulated-preview-reflecting-the-template-s-unique-color-palette-fonts-and-decorative-style-add-a-new-or-premium-badge-label-to-the-newly-added-templates-group-templates-into-meaningful-categories-e-g-royal-indian-modern-minimal-romantic-dark-luxe-boho-floral-vintage-rustic",
-      "featureTitle": "Enhance the `TemplateSelector` component to group and display the expanded template library with improved visual previews. Each template card must show a richer simulated preview reflecting the template's unique color palette, fonts, and decorative style. Add a 'New' or 'Premium' badge label to the newly added templates. Group templates into meaningful categories (e.g., 'Royal Indian', 'Modern Minimal', 'Romantic', 'Dark Luxe', 'Boho & Floral', 'Vintage & Rustic').",
-      "files": [
-        "frontend/src/components/templates/TemplateSelector.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-enhance-the-customization-panel-in-templatethemestep-to-provide-more-advanced-per-template-customization-options-1-a-background-style-picker-with-at-least-4-options-solid-gradient-pattern-texture-2-an-accent-color-intensity-slider-3-a-border-frame-style-selector-with-at-least-3-decorative-frame-options-and-4-a-layout-density-toggle-compact-spacious-these-options-must-update-the-live-preview-in-real-time",
-      "featureTitle": "Enhance the customization panel in `TemplateThemeStep` to provide more advanced per-template customization options: (1) a background style picker with at least 4 options (solid, gradient, pattern, texture), (2) an accent color intensity slider, (3) a border/frame style selector with at least 3 decorative frame options, and (4) a layout density toggle (compact / spacious). These options must update the live preview in real time.",
-      "files": [
-        "frontend/src/components/templates/TemplatePreview.tsx",
-        "frontend/src/components/wizard/TemplateThemeStep.tsx",
-        "frontend/src/context/InvitationFormContext.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-in-the-invitation-creation-wizard-createinvitationwizard-tsx-and-the-invitationeditor-tsx-add-a-save-theme-section-on-the-templatethemestep-this-section-must-include-1-a-save-as-single-theme-button-that-saves-only-the-currently-selected-template-customization-as-the-active-theme-and-2-a-save-as-theme-variant-button-that-adds-the-current-configuration-as-an-additional-saved-variant-without-replacing-the-active-theme-display-all-saved-theme-variants-as-small-thumbnail-cards-below-the-template-selector-with-options-to-apply-set-as-active-or-delete-each-variant",
-      "featureTitle": "In the invitation creation wizard (`CreateInvitationWizard.tsx`) and the `InvitationEditor.tsx`, add a 'Save Theme' section on the TemplateThemeStep. This section must include: (1) a 'Save as Single Theme' button that saves only the currently selected template/customization as the active theme, and (2) a 'Save as Theme Variant' button that adds the current configuration as an additional saved variant without replacing the active theme. Display all saved theme variants as small thumbnail cards below the template selector, with options to apply (set as active) or delete each variant.",
-      "files": [
-        "frontend/src/components/wizard/TemplateThemeStep.tsx",
-        "frontend/src/pages/InvitationEditor.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-react-query-hooks-in-frontend-src-hooks-usequeries-ts-for-the-new-backend-theme-variant-operations-usesavethemevariant-usegetthemevariants-and-usedeletethemevariant-following-the-same-patterns-as-existing-mutation-query-hooks-in-that-file",
-      "featureTitle": "Add React Query hooks in `frontend/src/hooks/useQueries.ts` for the new backend theme variant operations: `useSaveThemeVariant`, `useGetThemeVariants`, and `useDeleteThemeVariant`, following the same patterns as existing mutation/query hooks in that file.",
-      "files": [
-        "frontend/src/hooks/useQueries.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-6"
+        "REQ-4"
       ],
       "confidence": "high"
     }

@@ -1,109 +1,85 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add Advanced Templates with Design Variations and Multi-Theme Save Option",
+  "title": "Fix Color Scheme, Font Pairing, and Background Style selectors not updating preview or persisting on save",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Expand template library with 6 new distinct advanced templates (Floral Boho, Regal Emerald, Dusty Rose Romantic, Midnight Luxe, Rustic Parchment, Pastel Garden) in templateDefinitions.ts",
+      "summary": "Fix ColorSchemePicker to update InvitationFormContext and reflect changes in live preview",
       "acceptanceCriteria": [
-        "At least 6 new templates are added to templateDefinitions.ts with unique IDs, names, and full style configurations.",
-        "Each new template has a distinct color palette, font pairing, and gradient/background style not duplicated by another template.",
-        "All new templates render correctly in TemplateSelector, TemplatePreview, and TemplateThemeStep components."
+        "Clicking a color scheme swatch in ColorSchemePicker updates the form context's color scheme field immediately.",
+        "The TemplatePreview component re-renders to reflect the newly selected color scheme without a page reload.",
+        "The selected color scheme is persisted when the invitation is saved."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/templateDefinitions.ts",
+          "path": "frontend/src/components/templates/ColorSchemePicker.tsx",
           "operation": "modify",
-          "description": "Add 6 new template definitions (Floral Boho, Regal Emerald, Dusty Rose Romantic, Midnight Luxe, Rustic Parchment, Pastel Garden) to the TEMPLATES array. Each template must include unique id, name, category, fonts (heading and body), colors (primary, secondary, accent, text, textSecondary, background), gradient (type, from, to), and backgroundStyle properties. Ensure no duplicate IDs or names. Use diverse font pairings (e.g., Cormorant+Lato, Cinzel+Open Sans, Playfair+Raleway) and visually distinct color schemes (emerald greens, dusty rose pinks, midnight blues/blacks, rustic earth tones, soft pastels)."
+          "description": "Replace local selectedScheme state with controlled behavior using the value prop and onChange callback. When a color scheme card is clicked, call onChange(scheme.id) to propagate the selection to the parent component (TemplateThemeStep). Remove the internal useState hook and make the component fully controlled by its parent."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Enhance TemplateSelector to display expanded template library with improved previews, category grouping, and 'New' badges on newly added templates",
+      "summary": "Fix FontSelector to update InvitationFormContext and reflect changes in live preview",
       "acceptanceCriteria": [
-        "TemplateSelector displays all new and existing templates grouped by updated categories.",
-        "Each card shows a styled preview using the template's own colors and fonts.",
-        "New templates are visually distinguished with a badge."
+        "Clicking a font pairing option in FontSelector updates the form context's font pairing field immediately.",
+        "The TemplatePreview component re-renders using the selected font pairing's heading and body fonts.",
+        "The selected font pairing is persisted when the invitation is saved."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/templates/TemplateSelector.tsx",
+          "path": "frontend/src/components/templates/FontSelector.tsx",
           "operation": "modify",
-          "description": "Update the template grouping logic to include new categories: 'Royal Indian', 'Modern Minimal', 'Romantic', 'Dark Luxe', 'Boho & Floral', 'Vintage & Rustic'. Enhance each template card to render a richer simulated preview reflecting the template's unique gradient, color palette, and font styles. Add a conditional 'New' or 'Premium' badge component (using shadcn/ui Badge) positioned at the top-right of cards for templates added in REQ-1. Ensure the preview uses the template's actual colors and fonts for heading and body text samples."
+          "description": "Replace local selectedFont state with controlled behavior using the value prop and onChange callback. When a font card is clicked, call onChange(font) to propagate the selection to the parent component (TemplateThemeStep). Remove the internal useState hook and make the component fully controlled by its parent."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Enhance TemplateThemeStep customization panel with advanced options: background style picker (4 options), accent color intensity slider, border/frame style selector (3 options), and layout density toggle",
+      "summary": "Fix Background Style selector to update InvitationFormContext and reflect changes in live preview",
       "acceptanceCriteria": [
-        "Background style picker renders at least 4 options and the preview updates immediately on selection.",
-        "Accent color intensity slider is functional and visually reflected in the preview.",
-        "Border/frame style selector shows at least 3 options that affect the preview card's border.",
-        "Layout density toggle changes spacing in the live preview."
+        "Selecting a background style option updates the form context's background style field immediately.",
+        "The TemplatePreview component re-renders to show the selected background style (e.g., watercolor texture, ornate border).",
+        "The selected background style is persisted when the invitation is saved."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/wizard/TemplateThemeStep.tsx",
           "operation": "modify",
-          "description": "Add four new customization controls to the template customization panel: (1) A background style picker using shadcn/ui RadioGroup or ToggleGroup with options 'solid', 'gradient', 'pattern', 'texture'; (2) An accent color intensity slider using shadcn/ui Slider (range 50-150%, default 100%); (3) A border/frame style selector with options 'none', 'classic', 'ornate'; (4) A layout density toggle ('compact' / 'spacious'). Store these settings in the InvitationFormContext and ensure the live TemplatePreview updates in real time when any control changes. Use state management to propagate changes immediately to the preview component."
-        },
-        {
-          "path": "frontend/src/context/InvitationFormContext.tsx",
-          "operation": "modify",
-          "description": "Extend the InvitationFormData type to include new optional fields: backgroundStyle (string), accentIntensity (number), borderStyle (string), layoutDensity (string). Add corresponding update functions to the context value. Initialize these fields with sensible defaults in the initial state."
-        },
+          "description": "Wire the Background Style radio group to call updateFormData with the correct field name matching what TemplatePreview expects (backgroundChoice). Pass controlled value and onChange handlers to ColorSchemePicker and FontSelector so they update the form context via updateFormData. Ensure the onColorSchemeChange callback updates formData.colorScheme, onFontChange updates formData.fontChoice, and the background style RadioGroup onChange updates formData.backgroundChoice."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Audit and fix data flow between selectors and TemplatePreview to ensure reactive state updates",
+      "acceptanceCriteria": [
+        "ColorSchemePicker, FontSelector, and the Background Style selector all call updateFormData with the correct field names matching those consumed by TemplatePreview.",
+        "TemplatePreview reads colorScheme, fontPairing, and backgroundStyle directly from InvitationFormContext (not from stale local state or props).",
+        "No selector selection is silently lost or overwritten during re-renders or step navigation."
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/components/templates/TemplatePreview.tsx",
           "operation": "modify",
-          "description": "Update the preview rendering logic to consume and apply the new customization fields from InvitationFormContext: backgroundStyle (apply solid color, gradient, pattern overlay, or texture background), accentIntensity (scale accent color opacity or brightness), borderStyle (apply CSS border or frame overlay styles), and layoutDensity (adjust padding and spacing classes). Ensure all styles are applied inline or via dynamic Tailwind classes so the preview updates in real time."
+          "description": "Replace prop-based data access with useInvitationForm hook to read colorScheme (formData.colorScheme), fontChoice (formData.fontChoice), and backgroundChoice (formData.backgroundChoice) directly from InvitationFormContext. Remove any local state that duplicates context values. Ensure the component re-renders reactively whenever these context values change."
         }
       ]
     },
     {
       "id": "REQ-5",
-      "summary": "Add 'Save Theme' section to TemplateThemeStep with 'Save as Single Theme' and 'Save as Theme Variant' buttons, and display saved theme variant thumbnails with apply/delete actions",
+      "summary": "Ensure existing invitation data is hydrated into InvitationFormContext on editor load",
       "acceptanceCriteria": [
-        "'Save as Single Theme' button saves the active template config and replaces any previously active theme.",
-        "'Save as Theme Variant' button appends the current config to the saved variants list without changing the active theme.",
-        "Saved theme variant thumbnails are displayed in a scrollable row below the template selector.",
-        "Each variant thumbnail has an 'Apply' button and a 'Delete' button.",
-        "Applying a variant sets it as the active template and updates the live preview.",
-        "Deleting a variant removes it from the list and calls the backend deleteThemeVariant function."
+        "Opening an existing invitation in the editor pre-selects the saved color scheme, font pairing, and background style in their respective selectors.",
+        "The TemplatePreview shows the previously saved customization immediately on load.",
+        "Saving the invitation persists the current selector values to the backend without resetting them."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/components/wizard/TemplateThemeStep.tsx",
-          "operation": "modify",
-          "description": "Add a 'Save Theme' section below the customization panel containing two buttons: 'Save as Single Theme' (primary button) and 'Save as Theme Variant' (secondary button). 'Save as Single Theme' updates the invitation's active template fields (selectedTemplate, colorScheme, fontChoice, backgroundChoice) in the form context. 'Save as Theme Variant' calls the useSaveThemeVariant mutation to append the current theme configuration to the savedThemes array without changing the active theme. Below the buttons, render a horizontal scrollable container displaying all saved theme variants as small thumbnail cards (fetched via useGetThemeVariants). Each thumbnail shows a mini preview using the variant's colors/fonts and includes an 'Apply' button that loads the variant into the form context and an icon 'Delete' button that calls useDeleteThemeVariant. Use shadcn/ui Button, Card, and ScrollArea components."
-        },
         {
           "path": "frontend/src/pages/InvitationEditor.tsx",
           "operation": "modify",
-          "description": "Ensure the TemplateThemeStep tab renders the updated TemplateThemeStep component with the new 'Save Theme' section. Verify that saved theme variants are fetched and displayed when the user navigates to the template tab. No additional wiring changes needed if the step component handles state internally via hooks."
-        },
-        {
-          "path": "frontend/src/pages/CreateInvitationWizard.tsx",
-          "operation": "modify",
-          "description": "Ensure the TemplateThemeStep in the creation wizard renders the updated TemplateThemeStep component with the new 'Save Theme' section. Since the invitation may not exist yet during creation, conditionally render the saved variants section only if an invitation ID is available (e.g., after the invitation has been created). Add a note in the UI or disable variant features until the invitation is saved."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "Add React Query hooks for theme variant operations: useSaveThemeVariant, useGetThemeVariants, useDeleteThemeVariant in useQueries.ts",
-      "acceptanceCriteria": [
-        "useSaveThemeVariant mutation hook calls the backend saveThemeVariant function and invalidates relevant queries on success.",
-        "useGetThemeVariants query hook fetches all theme variants for a given invitation ID.",
-        "useDeleteThemeVariant mutation hook calls deleteThemeVariant and invalidates relevant queries on success."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Add three new hooks following the existing pattern: (1) useGetThemeVariants: a useQuery hook that calls actor.getThemeVariants(invitationId) with query key ['themeVariants', invitationId]. (2) useSaveThemeVariant: a useMutation hook that calls actor.saveThemeVariant(invitationId, themeConfig) and invalidates ['themeVariants', invitationId] and ['invitation', invitationId] on success. (3) useDeleteThemeVariant: a useMutation hook that calls actor.deleteThemeVariant(invitationId, themeIndex) and invalidates the same queries on success. Ensure proper error handling and loading states."
+          "description": "Ensure the useEffect that hydrates invitation data into formData includes colorScheme, fontChoice, and backgroundChoice fields from the loaded invitation object. Verify that updateFormData is called with all theme-related fields when the invitation query succeeds, so TemplateThemeStep selectors and TemplatePreview display the saved values correctly on mount."
         }
       ]
     }

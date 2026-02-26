@@ -1,6 +1,6 @@
 import React from 'react';
 import { FormData } from '@/context/InvitationFormContext';
-import { getTemplateById } from '@/utils/templateDefinitions';
+import { getTemplateById, COLOR_SCHEMES, FONT_CHOICES } from '@/utils/templateDefinitions';
 
 interface TemplatePreviewProps {
   formData: FormData;
@@ -37,26 +37,54 @@ export default function TemplatePreview({ formData }: TemplatePreviewProps) {
   const borderStyle = formData.borderStyle ?? 'classic';
   const layoutDensity = formData.layoutDensity ?? 'spacious';
 
-  const scaledPrimary = scaleColor(template.primaryColor, intensity);
-  const scaledAccent = scaleColor(template.accentColor, intensity);
+  // Resolve color scheme: use selected colorScheme from COLOR_SCHEMES if available,
+  // otherwise fall back to template defaults.
+  const colorSchemeData = COLOR_SCHEMES.find((s) => s.id === formData.colorScheme);
+  const primaryColor = colorSchemeData ? colorSchemeData.colors[0] : template.primaryColor;
+  const accentColor = colorSchemeData ? colorSchemeData.colors[1] : template.accentColor;
+  const bgColor = colorSchemeData ? colorSchemeData.colors[2] : template.bgColor;
 
-  // Background computation
-  let bgStyle: React.CSSProperties = { background: template.bgColor };
-  if (backgroundStyle === 'gradient') {
+  // Resolve font choice: use selected fontChoice from FONT_CHOICES if available,
+  // otherwise fall back to template defaults.
+  const fontChoiceData = FONT_CHOICES.find((f) => f.id === formData.fontChoice);
+  const headingFont = fontChoiceData ? fontChoiceData.heading : template.headingFont;
+
+  const scaledPrimary = scaleColor(primaryColor, intensity);
+  const scaledAccent = scaleColor(accentColor, intensity);
+
+  // Map backgroundChoice (floral/paisley/minimal/watercolor/dark-floral/dark-minimal)
+  // to a backgroundStyle override so the main Background Style selector is reflected.
+  const backgroundChoiceStyleMap: Record<string, string> = {
+    floral: 'texture',
+    paisley: 'pattern',
+    minimal: 'solid',
+    watercolor: 'texture',
+    'dark-floral': 'texture',
+    'dark-minimal': 'solid',
+  };
+  // backgroundChoice takes precedence over the advanced backgroundStyle toggle
+  const effectiveBackgroundStyle =
+    formData.backgroundChoice && backgroundChoiceStyleMap[formData.backgroundChoice]
+      ? backgroundChoiceStyleMap[formData.backgroundChoice]
+      : backgroundStyle;
+
+  // Background computation using resolved colors
+  let bgStyle: React.CSSProperties = { background: bgColor };
+  if (effectiveBackgroundStyle === 'gradient') {
     bgStyle = {
-      background: `linear-gradient(160deg, ${template.bgColor} 0%, ${template.secondaryColor}18 60%, ${template.primaryColor}12 100%)`,
+      background: `linear-gradient(160deg, ${bgColor} 0%, ${accentColor}18 60%, ${primaryColor}12 100%)`,
     };
-  } else if (backgroundStyle === 'solid') {
-    bgStyle = { background: template.bgColor };
-  } else if (backgroundStyle === 'pattern') {
+  } else if (effectiveBackgroundStyle === 'solid') {
+    bgStyle = { background: bgColor };
+  } else if (effectiveBackgroundStyle === 'pattern') {
     bgStyle = {
-      background: template.bgColor,
-      backgroundImage: `radial-gradient(${template.primaryColor}15 1px, transparent 1px)`,
+      background: bgColor,
+      backgroundImage: `radial-gradient(${primaryColor}15 1px, transparent 1px)`,
       backgroundSize: '12px 12px',
     };
-  } else if (backgroundStyle === 'texture') {
+  } else if (effectiveBackgroundStyle === 'texture') {
     bgStyle = {
-      background: `linear-gradient(135deg, ${template.bgColor} 25%, ${template.secondaryColor}20 50%, ${template.bgColor} 75%)`,
+      background: `linear-gradient(135deg, ${bgColor} 25%, ${accentColor}20 50%, ${bgColor} 75%)`,
       backgroundSize: '20px 20px',
     };
   }
@@ -87,6 +115,9 @@ export default function TemplatePreview({ formData }: TemplatePreviewProps) {
   const nameSizeClass = isCompact ? 'text-xs' : 'text-sm';
   const eventPad = isCompact ? 'p-1.5' : 'p-2';
 
+  // Text color derived from bgColor brightness
+  const textColor = isDark ? template.textColor : template.textColor;
+
   return (
     <div
       className="relative overflow-hidden rounded-2xl"
@@ -100,12 +131,20 @@ export default function TemplatePreview({ formData }: TemplatePreviewProps) {
       }}
     >
       {/* Watercolor texture overlay for light themes */}
-      {!isDark && backgroundStyle !== 'pattern' && (
+      {!isDark && effectiveBackgroundStyle === 'texture' && (
         <img
           src="/assets/generated/watercolor-texture.dim_1200x800.png"
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: backgroundStyle === 'texture' ? 0.15 : 0.08 }}
+          style={{ opacity: 0.15 }}
+        />
+      )}
+      {!isDark && effectiveBackgroundStyle !== 'texture' && effectiveBackgroundStyle !== 'pattern' && (
+        <img
+          src="/assets/generated/watercolor-texture.dim_1200x800.png"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.06 }}
         />
       )}
 
@@ -144,15 +183,15 @@ export default function TemplatePreview({ formData }: TemplatePreviewProps) {
         )}
 
         {/* Names */}
-        <div style={{ fontFamily: template.headingFont, color: scaledPrimary }}>
+        <div style={{ fontFamily: headingFont, color: scaledPrimary }}>
           <p className={`${nameSizeClass} font-bold`}>{formData.brideName || 'Bride'}</p>
-          <p className="text-xs opacity-60 my-0.5" style={{ color: template.textColor }}>&</p>
+          <p className="text-xs opacity-60 my-0.5" style={{ color: textColor }}>&</p>
           <p className={`${nameSizeClass} font-bold`}>{formData.groomName || 'Groom'}</p>
         </div>
 
         {/* Date */}
         {formData.weddingDate && (
-          <p className="text-xs font-inter" style={{ color: template.textColor, opacity: 0.7 }}>
+          <p className="text-xs font-inter" style={{ color: textColor, opacity: 0.7 }}>
             {new Date(formData.weddingDate).toLocaleDateString('en-IN', {
               day: 'numeric',
               month: 'long',
@@ -163,7 +202,7 @@ export default function TemplatePreview({ formData }: TemplatePreviewProps) {
 
         {/* Venue */}
         {formData.venueName && (
-          <p className="text-xs font-inter" style={{ color: template.textColor, opacity: 0.6 }}>
+          <p className="text-xs font-inter" style={{ color: textColor, opacity: 0.6 }}>
             {formData.venueName}
           </p>
         )}
@@ -184,11 +223,11 @@ export default function TemplatePreview({ formData }: TemplatePreviewProps) {
           >
             <p
               className="text-xs font-bold"
-              style={{ fontFamily: template.headingFont, color: scaledPrimary }}
+              style={{ fontFamily: headingFont, color: scaledPrimary }}
             >
               {event.title}
             </p>
-            <p className="text-xs font-inter" style={{ color: template.textColor, opacity: 0.6 }}>
+            <p className="text-xs font-inter" style={{ color: textColor, opacity: 0.6 }}>
               {event.date} • {event.venue}
             </p>
           </div>

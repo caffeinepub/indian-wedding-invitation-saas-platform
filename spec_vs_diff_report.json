@@ -1,33 +1,57 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T02:38:16.138Z",
-  "summary": "The diff implements most of the required features across REQ-1 through REQ-6. REQ-1 adds new templates (Regal Emerald, Pastel Garden visible in truncated diff). REQ-2 enhances TemplateSelector with categories and badges. REQ-3 adds advanced customization controls in TemplateThemeStep. REQ-4 updates backend/main.mo with savedThemes and new functions. REQ-5 adds Save Theme section in TemplateThemeStep. REQ-6 adds new React Query hooks. However, there are some gaps: the 'Save as Single Theme' button only shows a toast without persisting; CreateInvitationWizard.tsx is not visibly modified; the migration module was not requested.",
+  "generatedAt": "2026-02-26T03:56:14.602Z",
+  "summary": "The diff shows backend schema changes (adding colorScheme, fontChoice, backgroundChoice fields to the Invitation type and CRUD methods) and updates to TemplatePreview.tsx to consume colorScheme, fontChoice, and backgroundChoice from formData. However, the critical frontend components responsible for the selector-to-context data flow (TemplateThemeStep, ColorSchemePicker, FontSelector, InvitationFormContext, InvitationEditor) are not shown as modified. The diff does not demonstrate fixes to the selector components themselves, the context update callbacks, or the hydration logic on load.",
   "missing_requirements": [
     {
-      "id": "REQ-5",
-      "requirement": "In CreateInvitationWizard.tsx, add a 'Save Theme' section on the TemplateThemeStep with 'Save as Single Theme' and 'Save as Theme Variant' buttons.",
-      "reason": "The diff summary for CreateInvitationWizard.tsx shows no modification — only InvitationEditor.tsx is noted as passing invitationId to TemplateThemeStep. The wizard file does not appear to have been updated to pass invitationId or add Save Theme functionality.",
+      "id": "REQ-1",
+      "requirement": "Fix the Color Scheme selector in TemplateThemeStep so that selecting a color scheme immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
+      "reason": "Neither TemplateThemeStep nor ColorSchemePicker appear in the modified files. There is no evidence that the selector's onChange handler was wired to call updateFormData on the context.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Fix the Font Pairing selector in TemplateThemeStep so that selecting a font pairing immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
+      "reason": "FontSelector and TemplateThemeStep are not in the modified files list. No changes to the font pairing selector's event handler or context binding are visible.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Fix the Background Style selector in TemplateThemeStep so that selecting a background style immediately updates the InvitationFormContext state and is reflected in the live TemplatePreview component.",
+      "reason": "The background style selector component and TemplateThemeStep are not shown as modified. No fix to the selector's updateFormData wiring is evident.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Audit and fix the data flow between TemplateThemeStep, ColorSchemePicker, FontSelector, and TemplatePreview to ensure all three selector values are correctly read from and written to InvitationFormContext via updateFormData, and that TemplatePreview consumes these values reactively from context.",
+      "reason": "TemplateThemeStep, ColorSchemePicker, FontSelector, and InvitationFormContext are not in the modified files. Only TemplatePreview.tsx was modified to read from formData, but without the selector components being fixed, the full data flow audit and fix is incomplete.",
       "evidence": [
-        "frontend-file-summaries.txt",
-        "frontend/src/pages/InvitationEditor.tsx"
+        "frontend/src/components/templates/TemplatePreview.tsx"
       ]
     },
     {
       "id": "REQ-5",
-      "requirement": "'Save as Single Theme' button must actually save and persist the active template config, replacing any previously active theme.",
-      "reason": "In TemplateThemeStep.tsx, handleSaveAsSingle only calls toast.success without invoking any backend mutation or update operation to persist the active theme.",
+      "requirement": "Ensure that when an existing invitation is loaded in InvitationEditor, the colorScheme, fontPairing, and backgroundStyle values saved in the backend are correctly hydrated into InvitationFormContext so that selectors and preview reflect the previously saved values on load.",
+      "reason": "InvitationEditor.tsx and InvitationFormContext are not shown as modified files. The frontend-file-summaries.txt entry for InvitationEditor only mentions passing slug as invitationId prop, with no mention of hydrating colorScheme, fontChoice, or backgroundChoice into context on load.",
       "evidence": [
-        "frontend/src/components/wizard/TemplateThemeStep.tsx"
+        "frontend-file-summaries.txt"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "A backend migration module (backend/migration.mo) was added to handle data migration from old invitation records to new ones with savedThemes.",
-      "reason": "The build request only asked to update backend/main.mo with new fields and functions. A separate migration.mo file was not requested.",
+      "description": "Backend migration module (migration.mo) added as a no-op stub",
+      "reason": "The build request states constraints against altering the backend data schema unless strictly required, and adding a migration.mo file was not requested in any requirement. The migration module is a no-op and appears to be unrequested scaffolding.",
       "evidence": [
         "backend/migration.mo"
+      ]
+    },
+    {
+      "description": "Backend Invitation schema extended with ThemeConfig type and savedThemes array field",
+      "reason": "While adding colorScheme/fontChoice/backgroundChoice to the backend schema could be justified for REQ-5 persistence, the addition of the ThemeConfig record type and savedThemes array field was not requested in any requirement.",
+      "evidence": [
+        "backend/main.mo"
       ]
     }
   ],
@@ -37,12 +61,6 @@
     "backend/migration.mo",
     "frontend-file-summaries.txt",
     "frontend/src/components/templates/TemplatePreview.tsx",
-    "frontend/src/components/templates/TemplateSelector.tsx",
-    "frontend/src/components/wizard/TemplateThemeStep.tsx",
-    "frontend/src/context/InvitationFormContext.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/InvitationEditor.tsx",
-    "frontend/src/utils/templateDefinitions.ts",
     "project_state.json"
   ]
 }
