@@ -19,6 +19,28 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
+export const Photo = IDL.Record({
+  'id' : IDL.Text,
+  'invitationId' : IDL.Text,
+  'imageUrl' : IDL.Text,
+  'uploadedAt' : IDL.Int,
+});
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
+export const EventInput = IDL.Record({
+  'id' : IDL.Text,
+  'title' : IDL.Text,
+  'venue' : IDL.Text,
+  'date' : IDL.Text,
+  'invitationId' : IDL.Text,
+  'time' : IDL.Text,
+  'description' : IDL.Text,
+  'eventType' : IDL.Text,
+});
 export const EventType = IDL.Variant({
   'mehndi' : IDL.Null,
   'sangeet' : IDL.Null,
@@ -37,17 +59,21 @@ export const Event = IDL.Record({
   'description' : IDL.Text,
   'eventType' : EventType,
 });
-export const Photo = IDL.Record({
-  'id' : IDL.Text,
-  'invitationId' : IDL.Text,
-  'imageUrl' : IDL.Text,
-  'uploadedAt' : IDL.Int,
-});
-export const ExternalBlob = IDL.Vec(IDL.Nat8);
-export const UserRole = IDL.Variant({
-  'admin' : IDL.Null,
-  'user' : IDL.Null,
-  'guest' : IDL.Null,
+export const InvitationInput = IDL.Record({
+  'weddingDate' : IDL.Text,
+  'invitationMessage' : IDL.Text,
+  'weddingTime' : IDL.Text,
+  'venueAddress' : IDL.Text,
+  'slug' : IDL.Text,
+  'googleMapsLink' : IDL.Text,
+  'fontChoice' : IDL.Text,
+  'selectedTemplate' : IDL.Text,
+  'backgroundChoice' : IDL.Text,
+  'brideName' : IDL.Text,
+  'groomName' : IDL.Text,
+  'venueName' : IDL.Text,
+  'familyDetails' : IDL.Text,
+  'colorScheme' : IDL.Text,
 });
 export const ThemeConfig = IDL.Record({
   'name' : IDL.Text,
@@ -116,6 +142,23 @@ export const RSVPStats = IDL.Record({
   'totalResponses' : IDL.Nat,
   'totalDeclined' : IDL.Nat,
 });
+export const RSVPInput = IDL.Record({
+  'rsvpId' : IDL.Text,
+  'guestCount' : IDL.Nat,
+  'invitationId' : IDL.Text,
+  'guestName' : IDL.Text,
+  'message' : IDL.Text,
+  'attending' : IDL.Bool,
+  'guestPhone' : IDL.Text,
+});
+export const UpdateEventInput = IDL.Record({
+  'title' : IDL.Text,
+  'venue' : IDL.Text,
+  'date' : IDL.Text,
+  'time' : IDL.Text,
+  'description' : IDL.Text,
+  'eventType' : IDL.Text,
+});
 
 export const idlService = IDL.Service({
   '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -145,20 +188,6 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-  'addEvent' : IDL.Func(
-      [
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        EventType,
-      ],
-      [Event],
-      [],
-    ),
   'addPhoto' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [Photo], []),
   'addPhotos' : IDL.Func(
       [IDL.Text, IDL.Opt(ExternalBlob), IDL.Opt(ExternalBlob)],
@@ -166,26 +195,8 @@ export const idlService = IDL.Service({
       [],
     ),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-  'createInvitation' : IDL.Func(
-      [
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-        IDL.Text,
-      ],
-      [Invitation],
-      [],
-    ),
+  'createEvent' : IDL.Func([EventInput], [Event], []),
+  'createInvitation' : IDL.Func([InvitationInput], [Invitation], []),
   'deleteEvent' : IDL.Func([IDL.Text], [], []),
   'deleteInvitation' : IDL.Func([IDL.Text], [], []),
   'deletePhoto' : IDL.Func([IDL.Text], [], []),
@@ -226,16 +237,8 @@ export const idlService = IDL.Service({
       [],
     ),
   'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
-  'submitWeddingInvitationRSVP' : IDL.Func(
-      [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Bool, IDL.Nat, IDL.Text],
-      [RSVPEntry],
-      [],
-    ),
-  'updateEvent' : IDL.Func(
-      [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, EventType],
-      [Event],
-      [],
-    ),
+  'submitWeddingInvitationRSVP' : IDL.Func([RSVPInput], [RSVPEntry], []),
+  'updateEvent' : IDL.Func([IDL.Text, UpdateEventInput], [Event], []),
   'updateInvitation' : IDL.Func(
       [
         IDL.Text,
@@ -272,6 +275,28 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
+  const Photo = IDL.Record({
+    'id' : IDL.Text,
+    'invitationId' : IDL.Text,
+    'imageUrl' : IDL.Text,
+    'uploadedAt' : IDL.Int,
+  });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
+  const EventInput = IDL.Record({
+    'id' : IDL.Text,
+    'title' : IDL.Text,
+    'venue' : IDL.Text,
+    'date' : IDL.Text,
+    'invitationId' : IDL.Text,
+    'time' : IDL.Text,
+    'description' : IDL.Text,
+    'eventType' : IDL.Text,
+  });
   const EventType = IDL.Variant({
     'mehndi' : IDL.Null,
     'sangeet' : IDL.Null,
@@ -290,17 +315,21 @@ export const idlFactory = ({ IDL }) => {
     'description' : IDL.Text,
     'eventType' : EventType,
   });
-  const Photo = IDL.Record({
-    'id' : IDL.Text,
-    'invitationId' : IDL.Text,
-    'imageUrl' : IDL.Text,
-    'uploadedAt' : IDL.Int,
-  });
-  const ExternalBlob = IDL.Vec(IDL.Nat8);
-  const UserRole = IDL.Variant({
-    'admin' : IDL.Null,
-    'user' : IDL.Null,
-    'guest' : IDL.Null,
+  const InvitationInput = IDL.Record({
+    'weddingDate' : IDL.Text,
+    'invitationMessage' : IDL.Text,
+    'weddingTime' : IDL.Text,
+    'venueAddress' : IDL.Text,
+    'slug' : IDL.Text,
+    'googleMapsLink' : IDL.Text,
+    'fontChoice' : IDL.Text,
+    'selectedTemplate' : IDL.Text,
+    'backgroundChoice' : IDL.Text,
+    'brideName' : IDL.Text,
+    'groomName' : IDL.Text,
+    'venueName' : IDL.Text,
+    'familyDetails' : IDL.Text,
+    'colorScheme' : IDL.Text,
   });
   const ThemeConfig = IDL.Record({
     'name' : IDL.Text,
@@ -366,6 +395,23 @@ export const idlFactory = ({ IDL }) => {
     'totalResponses' : IDL.Nat,
     'totalDeclined' : IDL.Nat,
   });
+  const RSVPInput = IDL.Record({
+    'rsvpId' : IDL.Text,
+    'guestCount' : IDL.Nat,
+    'invitationId' : IDL.Text,
+    'guestName' : IDL.Text,
+    'message' : IDL.Text,
+    'attending' : IDL.Bool,
+    'guestPhone' : IDL.Text,
+  });
+  const UpdateEventInput = IDL.Record({
+    'title' : IDL.Text,
+    'venue' : IDL.Text,
+    'date' : IDL.Text,
+    'time' : IDL.Text,
+    'description' : IDL.Text,
+    'eventType' : IDL.Text,
+  });
   
   return IDL.Service({
     '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -395,20 +441,6 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-    'addEvent' : IDL.Func(
-        [
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          EventType,
-        ],
-        [Event],
-        [],
-      ),
     'addPhoto' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [Photo], []),
     'addPhotos' : IDL.Func(
         [IDL.Text, IDL.Opt(ExternalBlob), IDL.Opt(ExternalBlob)],
@@ -416,26 +448,8 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-    'createInvitation' : IDL.Func(
-        [
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-          IDL.Text,
-        ],
-        [Invitation],
-        [],
-      ),
+    'createEvent' : IDL.Func([EventInput], [Event], []),
+    'createInvitation' : IDL.Func([InvitationInput], [Invitation], []),
     'deleteEvent' : IDL.Func([IDL.Text], [], []),
     'deleteInvitation' : IDL.Func([IDL.Text], [], []),
     'deletePhoto' : IDL.Func([IDL.Text], [], []),
@@ -480,16 +494,8 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
-    'submitWeddingInvitationRSVP' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Bool, IDL.Nat, IDL.Text],
-        [RSVPEntry],
-        [],
-      ),
-    'updateEvent' : IDL.Func(
-        [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, EventType],
-        [Event],
-        [],
-      ),
+    'submitWeddingInvitationRSVP' : IDL.Func([RSVPInput], [RSVPEntry], []),
+    'updateEvent' : IDL.Func([IDL.Text, UpdateEventInput], [Event], []),
     'updateInvitation' : IDL.Func(
         [
           IDL.Text,

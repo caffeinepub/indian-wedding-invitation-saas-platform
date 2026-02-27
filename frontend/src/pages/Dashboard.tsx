@@ -1,55 +1,58 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { Plus, Edit, Eye, Trash2, Copy, Users, Heart, Loader2, CheckCircle, Globe } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Share2, Users, Calendar, MapPin, RefreshCw, Loader2, BarChart2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 import { useGetAllInvitations, useDeleteInvitation, usePublishInvitation } from '../hooks/useQueries';
 import RSVPResponsesModal from '../components/dashboard/RSVPResponsesModal';
-import SkeletonLoader from '../components/SkeletonLoader';
-import type { Invitation } from '../backend';
+import Header from '../components/layout/Header';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { data: invitations, isLoading, error } = useGetAllInvitations();
+  const { data: invitations, isLoading, error, refetch } = useGetAllInvitations();
   const deleteInvitation = useDeleteInvitation();
   const publishInvitation = usePublishInvitation();
-  const [selectedInvitation, setSelectedInvitation] = useState<Invitation | null>(null);
-  const [showRSVPModal, setShowRSVPModal] = useState(false);
-  const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [selectedInvitationId, setSelectedInvitationId] = useState<string | null>(null);
 
   const handleDelete = async (slug: string) => {
-    if (!confirm('Are you sure you want to delete this invitation? This action cannot be undone.')) return;
+    if (!confirm('Are you sure you want to delete this invitation?')) return;
+    setActionError(null);
     try {
       await deleteInvitation.mutateAsync(slug);
-    } catch (err) {
-      console.error('Failed to delete invitation:', err);
+      toast.success('Invitation deleted successfully');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to delete invitation';
+      setActionError(msg.includes('Unauthorized') ? 'Unable to delete invitation. Please try again.' : msg);
     }
   };
 
   const handlePublish = async (slug: string) => {
+    setActionError(null);
     try {
       await publishInvitation.mutateAsync(slug);
-    } catch (err) {
-      console.error('Failed to publish invitation:', err);
+      toast.success('Invitation published successfully!');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to publish invitation';
+      setActionError(msg.includes('Unauthorized') ? 'Unable to publish invitation. Please try again.' : msg);
     }
   };
 
-  const handleCopyLink = (slug: string) => {
+  const handleShare = (slug: string) => {
     const url = `${window.location.origin}/invitation/${slug}`;
     navigator.clipboard.writeText(url);
-    setCopiedSlug(slug);
-    setTimeout(() => setCopiedSlug(null), 2000);
-  };
-
-  const handleViewRSVPs = (invitation: Invitation) => {
-    setSelectedInvitation(invitation);
-    setShowRSVPModal(true);
+    toast.success('Invitation link copied to clipboard!');
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-ivory-50 dark:bg-charcoal-900 pt-24 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => <SkeletonLoader key={i} variant="invitation-card" />)}
+      <div className="min-h-screen" style={{ backgroundColor: 'oklch(0.98 0.005 80)' }}>
+        <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4" style={{ color: 'oklch(0.72 0.12 75)' }} />
+            <p style={{ color: 'oklch(0.50 0.04 60)' }}>Loading your invitations...</p>
           </div>
         </div>
       </div>
@@ -58,183 +61,203 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-ivory-50 dark:bg-charcoal-900 pt-24 px-4 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-crimson-500 text-lg mb-4">Failed to load invitations</p>
-          <p className="text-charcoal-500 text-sm">{String(error)}</p>
+      <div className="min-h-screen" style={{ backgroundColor: 'oklch(0.98 0.005 80)' }}>
+        <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center max-w-md mx-auto p-8 rounded-2xl border shadow-card" style={{ backgroundColor: 'oklch(0.99 0.003 80)', borderColor: 'oklch(0.88 0.02 80)' }}>
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'oklch(0.93 0.03 15)' }}>
+              <RefreshCw className="w-8 h-8" style={{ color: 'oklch(0.55 0.20 25)' }} />
+            </div>
+            <h2 className="text-xl font-semibold mb-2" style={{ color: 'oklch(0.18 0.02 60)', fontFamily: '"Playfair Display", serif' }}>
+              Service Unavailable
+            </h2>
+            <p className="text-sm mb-6" style={{ color: 'oklch(0.50 0.04 60)' }}>
+              We're having trouble loading your invitations. Please check your connection and try again.
+            </p>
+            <Button onClick={() => refetch()} className="flex items-center gap-2 mx-auto" style={{ backgroundColor: 'oklch(0.55 0.18 45)', color: 'oklch(0.99 0.003 80)' }}>
+              <RefreshCw className="w-4 h-4" />
+              Try Again
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-ivory-50 dark:bg-charcoal-900 pt-24 pb-16 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
+    <div className="min-h-screen" style={{ backgroundColor: 'oklch(0.98 0.005 80)' }}>
+      <Header />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Header */}
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="h-px w-8 bg-gold-400" />
-              <span className="text-gold-600 font-sans text-xs tracking-[0.3em] uppercase">Your Collection</span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-serif text-charcoal-800 dark:text-ivory-100">
-              Wedding Invitations
+            <h1 className="text-3xl font-bold mb-1" style={{ color: 'oklch(0.18 0.02 60)', fontFamily: '"Playfair Display", serif' }}>
+              My Invitations
             </h1>
-            <p className="text-charcoal-500 dark:text-ivory-400 mt-1 font-sans">
-              {invitations?.length || 0} invitation{invitations?.length !== 1 ? 's' : ''} created
+            <p className="text-sm" style={{ color: 'oklch(0.50 0.04 60)' }}>
+              {invitations?.length || 0} invitation{(invitations?.length || 0) !== 1 ? 's' : ''} created
             </p>
           </div>
-
-          <button
+          <Button
             onClick={() => navigate({ to: '/create' })}
-            className="flex items-center gap-2 px-6 py-3 bg-gold-500 hover:bg-gold-400 text-charcoal-900 font-semibold rounded-full transition-all duration-300 shadow-luxury hover:shadow-xl"
+            className="flex items-center gap-2"
+            style={{ backgroundColor: 'oklch(0.55 0.18 45)', color: 'oklch(0.99 0.003 80)' }}
           >
-            <Plus className="w-5 h-5" />
-            Create New
-          </button>
+            <Plus className="w-4 h-4" />
+            New Invitation
+          </Button>
         </div>
 
-        {/* Empty State */}
-        {(!invitations || invitations.length === 0) && (
-          <div className="text-center py-24">
-            <div className="w-24 h-24 bg-gold-50 dark:bg-gold-900/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Heart className="w-12 h-12 text-gold-400" />
-            </div>
-            <h2 className="text-2xl font-serif text-charcoal-700 dark:text-ivory-200 mb-3">
-              No Invitations Yet
-            </h2>
-            <p className="text-charcoal-500 dark:text-ivory-400 mb-8 max-w-md mx-auto">
-              Create your first beautiful wedding invitation and share it with your loved ones.
-            </p>
-            <button
-              onClick={() => navigate({ to: '/create' })}
-              className="px-8 py-3 bg-gold-500 hover:bg-gold-400 text-charcoal-900 font-semibold rounded-full transition-all duration-300 shadow-luxury"
-            >
-              <Plus className="w-5 h-5 inline mr-2" />
-              Create Your First Invitation
-            </button>
+        {/* Action Error Banner */}
+        {actionError && (
+          <div className="mb-6 p-4 rounded-xl border flex items-center gap-3" style={{ backgroundColor: 'oklch(0.97 0.03 80)', borderColor: 'oklch(0.82 0.09 78)', color: 'oklch(0.45 0.16 45)' }}>
+            <span className="text-sm">{actionError}</span>
+            <button onClick={() => setActionError(null)} className="ml-auto text-xs underline">Dismiss</button>
           </div>
         )}
 
-        {/* Invitation Grid */}
+        {/* Empty State */}
+        {(!invitations || invitations.length === 0) && (
+          <div className="text-center py-20">
+            <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'oklch(0.94 0.02 80)' }}>
+              <Calendar className="w-12 h-12" style={{ color: 'oklch(0.72 0.12 75)' }} />
+            </div>
+            <h2 className="text-2xl font-semibold mb-3" style={{ color: 'oklch(0.18 0.02 60)', fontFamily: '"Playfair Display", serif' }}>
+              No Invitations Yet
+            </h2>
+            <p className="text-base mb-8 max-w-md mx-auto" style={{ color: 'oklch(0.50 0.04 60)' }}>
+              Create your first beautiful wedding invitation and share it with your loved ones.
+            </p>
+            <Button
+              onClick={() => navigate({ to: '/create' })}
+              size="lg"
+              className="flex items-center gap-2 mx-auto"
+              style={{ backgroundColor: 'oklch(0.55 0.18 45)', color: 'oklch(0.99 0.003 80)' }}
+            >
+              <Plus className="w-5 h-5" />
+              Create Your First Invitation
+            </Button>
+          </div>
+        )}
+
+        {/* Invitations Grid */}
         {invitations && invitations.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {invitations.map((invitation) => (
               <div
                 key={invitation.id}
-                className="bg-white dark:bg-charcoal-800 rounded-2xl shadow-soft hover:shadow-luxury transition-all duration-300 border border-gold-100 dark:border-charcoal-700 overflow-hidden group"
+                className="rounded-2xl border shadow-card overflow-hidden transition-all hover:shadow-card-hover"
+                style={{ backgroundColor: 'oklch(0.99 0.003 80)', borderColor: 'oklch(0.88 0.02 80)' }}
               >
-                {/* Card Header with Photos */}
-                <div className="relative h-32 bg-gradient-to-br from-gold-100 to-gold-200 dark:from-gold-900/30 dark:to-gold-800/20 flex items-center justify-center overflow-hidden">
-                  <div className="flex items-center gap-4">
-                    {invitation.bridePhoto ? (
-                      <img
-                        src={invitation.bridePhoto.getDirectURL()}
-                        alt="Bride"
-                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-gold-200 dark:bg-gold-800 flex items-center justify-center border-2 border-white shadow-md">
-                        <Heart className="w-6 h-6 text-gold-500" />
+                {/* Card Header */}
+                <div className="p-5 border-b" style={{ borderColor: 'oklch(0.88 0.02 80)', background: 'linear-gradient(135deg, oklch(0.97 0.01 80), oklch(0.94 0.02 80))' }}>
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="text-lg font-semibold leading-tight" style={{ color: 'oklch(0.18 0.02 60)', fontFamily: '"Playfair Display", serif' }}>
+                        {invitation.brideName} & {invitation.groomName}
+                      </h3>
+                      <p className="text-xs mt-0.5" style={{ color: 'oklch(0.50 0.04 60)' }}>/{invitation.id}</p>
+                    </div>
+                    <Badge
+                      variant={invitation.isPublished ? 'default' : 'secondary'}
+                      className="text-xs"
+                      style={invitation.isPublished
+                        ? { backgroundColor: 'oklch(0.55 0.18 45)', color: 'oklch(0.99 0.003 80)' }
+                        : { backgroundColor: 'oklch(0.88 0.02 80)', color: 'oklch(0.50 0.04 60)' }
+                      }
+                    >
+                      {invitation.isPublished ? 'Published' : 'Draft'}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {invitation.weddingDate && (
+                      <div className="flex items-center gap-2 text-xs" style={{ color: 'oklch(0.50 0.04 60)' }}>
+                        <Calendar className="w-3.5 h-3.5" style={{ color: 'oklch(0.72 0.12 75)' }} />
+                        {invitation.weddingDate}
+                        {invitation.weddingTime && ` at ${invitation.weddingTime}`}
                       </div>
                     )}
-                    <Heart className="w-5 h-5 text-gold-500 fill-current" />
-                    {invitation.groomPhoto ? (
-                      <img
-                        src={invitation.groomPhoto.getDirectURL()}
-                        alt="Groom"
-                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-gold-200 dark:bg-gold-800 flex items-center justify-center border-2 border-white shadow-md">
-                        <Heart className="w-6 h-6 text-gold-500" />
+                    {invitation.venueName && (
+                      <div className="flex items-center gap-2 text-xs" style={{ color: 'oklch(0.50 0.04 60)' }}>
+                        <MapPin className="w-3.5 h-3.5" style={{ color: 'oklch(0.72 0.12 75)' }} />
+                        {invitation.venueName}
                       </div>
                     )}
                   </div>
-
-                  {invitation.isPublished && (
-                    <div className="absolute top-3 right-3 flex items-center gap-1 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                      <Globe className="w-3 h-3" />
-                      Live
-                    </div>
-                  )}
                 </div>
 
-                {/* Card Content */}
-                <div className="p-5">
-                  <h3 className="text-lg font-serif text-charcoal-800 dark:text-ivory-100 mb-1">
-                    {invitation.brideName} & {invitation.groomName}
-                  </h3>
-                  <p className="text-charcoal-500 dark:text-ivory-400 text-sm font-sans mb-1">
-                    {invitation.weddingDate} {invitation.weddingTime && `at ${invitation.weddingTime}`}
-                  </p>
-                  <p className="text-charcoal-400 dark:text-ivory-500 text-xs font-sans mb-4 truncate">
-                    {invitation.venueName}
-                  </p>
-
-                  <div className="text-xs text-charcoal-400 dark:text-ivory-500 font-sans mb-4">
-                    <span className="bg-gold-50 dark:bg-gold-900/20 text-gold-700 dark:text-gold-400 px-2 py-1 rounded-full">
-                      /{invitation.id}
-                    </span>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
+                {/* Card Actions */}
+                <div className="p-4 space-y-2">
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => navigate({ to: '/edit/$slug', params: { slug: invitation.id } })}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-charcoal-100 dark:bg-charcoal-700 hover:bg-charcoal-200 dark:hover:bg-charcoal-600 text-charcoal-700 dark:text-ivory-200 rounded-lg text-sm font-sans transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 text-xs"
+                      style={{ borderColor: 'oklch(0.88 0.02 80)', color: 'oklch(0.40 0.03 60)' }}
                     >
                       <Edit className="w-3.5 h-3.5" />
                       Edit
-                    </button>
-
-                    <button
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => navigate({ to: '/invitation/$slug', params: { slug: invitation.id } })}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-charcoal-100 dark:bg-charcoal-700 hover:bg-charcoal-200 dark:hover:bg-charcoal-600 text-charcoal-700 dark:text-ivory-200 rounded-lg text-sm font-sans transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 text-xs"
+                      style={{ borderColor: 'oklch(0.88 0.02 80)', color: 'oklch(0.40 0.03 60)' }}
                     >
                       <Eye className="w-3.5 h-3.5" />
                       Preview
-                    </button>
-
-                    <button
-                      onClick={() => handlePublish(invitation.id)}
-                      disabled={invitation.isPublished || publishInvitation.isPending}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gold-500 hover:bg-gold-400 disabled:bg-gold-200 dark:disabled:bg-gold-900/30 text-charcoal-900 disabled:text-charcoal-400 rounded-lg text-sm font-sans transition-colors"
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleShare(invitation.id)}
+                      className="flex-1 flex items-center justify-center gap-1.5 text-xs"
+                      style={{ borderColor: 'oklch(0.88 0.02 80)', color: 'oklch(0.40 0.03 60)' }}
                     >
-                      {publishInvitation.isPending ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : invitation.isPublished ? (
-                        <CheckCircle className="w-3.5 h-3.5" />
-                      ) : (
-                        <Globe className="w-3.5 h-3.5" />
-                      )}
-                      {invitation.isPublished ? 'Published' : 'Publish'}
-                    </button>
-
-                    <button
-                      onClick={() => handleCopyLink(invitation.id)}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-charcoal-100 dark:bg-charcoal-700 hover:bg-charcoal-200 dark:hover:bg-charcoal-600 text-charcoal-700 dark:text-ivory-200 rounded-lg text-sm font-sans transition-colors"
-                    >
-                      {copiedSlug === invitation.id ? (
-                        <CheckCircle className="w-3.5 h-3.5 text-green-500" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
-                      {copiedSlug === invitation.id ? 'Copied!' : 'Copy Link'}
-                    </button>
-
-                    <button
-                      onClick={() => handleViewRSVPs(invitation)}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-charcoal-100 dark:bg-charcoal-700 hover:bg-charcoal-200 dark:hover:bg-charcoal-600 text-charcoal-700 dark:text-ivory-200 rounded-lg text-sm font-sans transition-colors"
+                      <Share2 className="w-3.5 h-3.5" />
+                      Share
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedInvitationId(invitation.id)}
+                      className="flex-1 flex items-center justify-center gap-1.5 text-xs"
+                      style={{ borderColor: 'oklch(0.88 0.02 80)', color: 'oklch(0.40 0.03 60)' }}
                     >
                       <Users className="w-3.5 h-3.5" />
                       RSVPs
-                    </button>
-
-                    <button
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    {!invitation.isPublished && (
+                      <Button
+                        size="sm"
+                        onClick={() => handlePublish(invitation.id)}
+                        disabled={publishInvitation.isPending}
+                        className="flex-1 flex items-center justify-center gap-1.5 text-xs"
+                        style={{ backgroundColor: 'oklch(0.55 0.18 45)', color: 'oklch(0.99 0.003 80)' }}
+                      >
+                        {publishInvitation.isPending ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <BarChart2 className="w-3.5 h-3.5" />
+                        )}
+                        Publish
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleDelete(invitation.id)}
                       disabled={deleteInvitation.isPending}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-crimson-50 dark:bg-crimson-900/20 hover:bg-crimson-100 dark:hover:bg-crimson-900/40 text-crimson-600 dark:text-crimson-400 rounded-lg text-sm font-sans transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 text-xs"
+                      style={{ borderColor: 'oklch(0.85 0.07 15)', color: 'oklch(0.55 0.20 25)' }}
                     >
                       {deleteInvitation.isPending ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -242,27 +265,40 @@ export default function Dashboard() {
                         <Trash2 className="w-3.5 h-3.5" />
                       )}
                       Delete
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </main>
 
       {/* RSVP Modal */}
-      {showRSVPModal && selectedInvitation && (
+      {selectedInvitationId && (
         <RSVPResponsesModal
-          invitationId={selectedInvitation.id}
-          invitationTitle={`${selectedInvitation.brideName} & ${selectedInvitation.groomName}`}
-          isOpen={showRSVPModal}
-          onClose={() => {
-            setShowRSVPModal(false);
-            setSelectedInvitation(null);
-          }}
+          invitationId={selectedInvitationId}
+          onClose={() => setSelectedInvitationId(null)}
         />
       )}
+
+      {/* Footer */}
+      <footer className="mt-16 border-t py-8 text-center" style={{ borderColor: 'oklch(0.88 0.02 80)', backgroundColor: 'oklch(0.99 0.003 80)' }}>
+        <p className="text-sm" style={{ color: 'oklch(0.50 0.04 60)' }}>
+          © {new Date().getFullYear()} Built with{' '}
+          <span style={{ color: 'oklch(0.55 0.20 25)' }}>♥</span>{' '}
+          using{' '}
+          <a
+            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:opacity-80 transition-opacity"
+            style={{ color: 'oklch(0.55 0.18 45)' }}
+          >
+            caffeine.ai
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }

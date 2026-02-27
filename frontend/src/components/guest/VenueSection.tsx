@@ -1,151 +1,151 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Invitation } from '../../backend';
+import { useScrollAnimation } from '../../hooks/useScrollAnimation';
 import { getTemplateById } from '../../utils/templateDefinitions';
-import { MapPin, ExternalLink, Navigation } from 'lucide-react';
+import { MapPin, Clock, Navigation } from 'lucide-react';
+import type { Invitation } from '../../backend';
 
 interface VenueSectionProps {
   invitation: Invitation;
+  animationMode?: 'minimal' | 'elegant' | 'cinematic';
 }
 
-export default function VenueSection({ invitation }: VenueSectionProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
+export default function VenueSection({ invitation, animationMode = 'elegant' }: VenueSectionProps) {
+  const template = getTemplateById(invitation.selectedTemplate);
+  const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
-  const template = getTemplateById(invitation.selectedTemplate) || getTemplateById('royal-gold')!;
-
-  const isDark =
-    invitation.backgroundChoice === 'dark-floral' ||
-    invitation.backgroundChoice === 'dark-minimal' ||
-    template.id?.includes('dark') ||
-    template.id?.includes('midnight') ||
-    template.id?.includes('cinematic');
-
-  const sectionBg = isDark
-    ? 'linear-gradient(180deg, #0d0a05 0%, #1a1208 100%)'
-    : `linear-gradient(180deg, #f8f2e8 0%, #fdf8f0 100%)`;
-
-  const headingColor = isDark ? '#f5f0e8' : '#2c1810';
-  const textColor = isDark ? '#d4c4a8' : '#4a3728';
-  const cardBg = isDark ? 'rgba(30, 22, 10, 0.85)' : 'rgba(255, 255, 255, 0.85)';
-  const cardBorder = `${template.primaryColor}30`;
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsVisible(true);
-      },
-      { threshold: 0.2 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  if (!invitation.venueName && !invitation.venueAddress) return null;
+  const primaryColor = template?.primaryColor || '#C9A84C';
+  const accentColor = template?.accentColor || '#8B1A1A';
+  const bgColor = template?.bgColor || '#FDF8F0';
+  // Script font: TemplateDefinition has no fontScript field
+  const fontScript = 'Great Vibes, cursive';
+  const fontHeading = template?.fontHeading || 'Cormorant Garamond, serif';
+  const fontBody = template?.fontBody || 'Lato, sans-serif';
 
   return (
     <section
-      ref={sectionRef}
-      className="py-20 px-4"
-      style={{ background: sectionBg }}
+      ref={sectionRef as React.RefObject<HTMLElement>}
+      className={`py-16 px-6 scroll-animate ${isVisible ? 'is-visible' : ''}`}
+      style={{ backgroundColor: `${bgColor}f0` }}
     >
-      <div
-        className="max-w-2xl mx-auto"
-        style={{
-          opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-          transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
-        }}
-      >
-        {/* Section header */}
-        <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div
-              className="h-px w-16"
-              style={{ background: `linear-gradient(90deg, transparent, ${template.primaryColor})` }}
-            />
-            <div className="w-2 h-2 rounded-full" style={{ background: template.primaryColor }} />
-            <div
-              className="h-px w-16"
-              style={{ background: `linear-gradient(90deg, ${template.primaryColor}, transparent)` }}
-            />
-          </div>
-          <h2
-            className="text-3xl sm:text-4xl font-bold"
-            style={{
-              fontFamily: `'${template.headingFont}', serif`,
-              color: headingColor,
-            }}
-          >
-            Venue
-          </h2>
-        </div>
-
-        {/* Venue card */}
-        <div
-          className="rounded-2xl p-6 sm:p-8 text-center shadow-xl"
+      <div className="max-w-3xl mx-auto text-center">
+        {/* Heading */}
+        <p
+          className="text-2xl md:text-3xl mb-2"
           style={{
-            background: cardBg,
-            border: `1px solid ${cardBorder}`,
-            backdropFilter: 'blur(8px)',
+            fontFamily: fontScript,
+            color: accentColor,
           }}
         >
-          {/* Map pin icon */}
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-            style={{ background: `${template.primaryColor}20` }}
-          >
-            <MapPin className="w-8 h-8" style={{ color: template.primaryColor }} />
-          </div>
+          Join us at
+        </p>
+        <h2
+          className="text-3xl md:text-4xl font-bold mb-8"
+          style={{
+            fontFamily: fontHeading,
+            color: primaryColor,
+          }}
+        >
+          {invitation.venueName || 'The Venue'}
+        </h2>
 
-          {/* Venue name */}
-          {invitation.venueName && (
-            <h3
-              className="text-2xl sm:text-3xl font-bold mb-3"
-              style={{
-                fontFamily: `'${template.headingFont}', serif`,
-                color: headingColor,
-              }}
-            >
-              {invitation.venueName}
-            </h3>
-          )}
+        {/* Divider */}
+        <div
+          className="w-24 h-0.5 mx-auto mb-8"
+          style={{ background: `linear-gradient(90deg, transparent, ${primaryColor}, transparent)` }}
+        />
 
-          {/* Venue address */}
+        {/* Venue details card */}
+        <div
+          className="rounded-2xl p-8 shadow-luxury text-left space-y-4"
+          style={{
+            background: `linear-gradient(135deg, ${primaryColor}10, ${primaryColor}05)`,
+            border: `1px solid ${primaryColor}30`,
+          }}
+        >
           {invitation.venueAddress && (
-            <p
-              className="text-base leading-relaxed mb-6"
-              style={{
-                fontFamily: `'${template.bodyFont}', sans-serif`,
-                color: textColor,
-              }}
-            >
-              {invitation.venueAddress}
-            </p>
+            <div className="flex items-start gap-3">
+              <MapPin
+                className="w-5 h-5 mt-0.5 shrink-0"
+                style={{ color: primaryColor }}
+              />
+              <div>
+                <p
+                  className="font-semibold text-sm uppercase tracking-wider mb-0.5"
+                  style={{
+                    fontFamily: fontBody,
+                    color: accentColor,
+                    opacity: 0.7,
+                  }}
+                >
+                  Address
+                </p>
+                <p
+                  className="text-base"
+                  style={{
+                    fontFamily: fontBody,
+                    color: accentColor,
+                  }}
+                >
+                  {invitation.venueAddress}
+                </p>
+              </div>
+            </div>
           )}
 
-          {/* Divider */}
-          <div
-            className="h-px w-24 mx-auto mb-6"
-            style={{ background: `linear-gradient(90deg, transparent, ${template.primaryColor}, transparent)` }}
-          />
+          {(invitation.weddingDate || invitation.weddingTime) && (
+            <div className="flex items-start gap-3">
+              <Clock
+                className="w-5 h-5 mt-0.5 shrink-0"
+                style={{ color: primaryColor }}
+              />
+              <div>
+                <p
+                  className="font-semibold text-sm uppercase tracking-wider mb-0.5"
+                  style={{
+                    fontFamily: fontBody,
+                    color: accentColor,
+                    opacity: 0.7,
+                  }}
+                >
+                  Date &amp; Time
+                </p>
+                <p
+                  className="text-base"
+                  style={{
+                    fontFamily: fontBody,
+                    color: accentColor,
+                  }}
+                >
+                  {invitation.weddingDate
+                    ? new Date(invitation.weddingDate).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })
+                    : ''}
+                  {invitation.weddingTime ? ` at ${invitation.weddingTime}` : ''}
+                </p>
+              </div>
+            </div>
+          )}
 
-          {/* Google Maps link */}
           {invitation.googleMapsLink && (
-            <a
-              href={invitation.googleMapsLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all hover:scale-105 active:scale-95"
-              style={{
-                background: `linear-gradient(135deg, ${template.primaryColor}, ${template.primaryColor}cc)`,
-                color: '#1a1008',
-                boxShadow: `0 4px 15px ${template.primaryColor}40`,
-              }}
-            >
-              <Navigation className="w-4 h-4" />
-              Get Directions
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            <div className="pt-2">
+              <a
+                href={invitation.googleMapsLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105 hover:shadow-gold"
+                style={{
+                  backgroundColor: primaryColor,
+                  color: '#fff',
+                  fontFamily: fontBody,
+                }}
+              >
+                <Navigation className="w-4 h-4" />
+                Get Directions
+              </a>
+            </div>
           )}
         </div>
       </div>

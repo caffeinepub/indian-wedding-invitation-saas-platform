@@ -1,21 +1,42 @@
 import { useEffect, useRef, useState } from 'react';
 
-export function useScrollAnimation(threshold = 0.1) {
-  const ref = useRef<HTMLDivElement>(null);
+interface UseScrollAnimationOptions {
+  threshold?: number;
+  rootMargin?: string;
+  triggerOnce?: boolean;
+}
+
+export function useScrollAnimation(options: UseScrollAnimationOptions = {}) {
+  const {
+    threshold = 0.15,
+    rootMargin = '0px 0px -60px 0px',
+    triggerOnce = true,
+  } = options;
+
+  const ref = useRef<HTMLElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
 
+    // If already visible and triggerOnce, skip
+    if (isVisible && triggerOnce) return;
+
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(element);
-        }
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            if (triggerOnce) {
+              observer.unobserve(entry.target);
+            }
+          } else if (!triggerOnce) {
+            setIsVisible(false);
+          }
+        });
       },
-      { threshold }
+      { threshold, rootMargin }
     );
 
     observer.observe(element);
@@ -23,36 +44,7 @@ export function useScrollAnimation(threshold = 0.1) {
     return () => {
       observer.disconnect();
     };
-  }, [threshold]);
+  }, [threshold, rootMargin, triggerOnce, isVisible]);
 
   return { ref, isVisible };
-}
-
-export function useLazyLoad() {
-  const ref = useRef<HTMLImageElement>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(false);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true);
-          observer.unobserve(element);
-        }
-      },
-      { threshold: 0.01, rootMargin: '200px' }
-    );
-
-    observer.observe(element);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  return { ref, isLoaded, setIsLoaded, isInView };
 }

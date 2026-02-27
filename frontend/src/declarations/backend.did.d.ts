@@ -27,6 +27,16 @@ export interface Event {
   'description' : string,
   'eventType' : EventType,
 }
+export interface EventInput {
+  'id' : string,
+  'title' : string,
+  'venue' : string,
+  'date' : string,
+  'invitationId' : string,
+  'time' : string,
+  'description' : string,
+  'eventType' : string,
+}
 export type EventType = { 'mehndi' : null } |
   { 'sangeet' : null } |
   { 'haldi' : null } |
@@ -56,6 +66,22 @@ export interface Invitation {
   'bridePhoto' : [] | [ExternalBlob],
   'colorScheme' : string,
 }
+export interface InvitationInput {
+  'weddingDate' : string,
+  'invitationMessage' : string,
+  'weddingTime' : string,
+  'venueAddress' : string,
+  'slug' : string,
+  'googleMapsLink' : string,
+  'fontChoice' : string,
+  'selectedTemplate' : string,
+  'backgroundChoice' : string,
+  'brideName' : string,
+  'groomName' : string,
+  'venueName' : string,
+  'familyDetails' : string,
+  'colorScheme' : string,
+}
 export interface InviteCode {
   'created' : Time,
   'code' : string,
@@ -83,6 +109,15 @@ export interface RSVPEntry {
   'attending' : boolean,
   'guestPhone' : string,
 }
+export interface RSVPInput {
+  'rsvpId' : string,
+  'guestCount' : bigint,
+  'invitationId' : string,
+  'guestName' : string,
+  'message' : string,
+  'attending' : boolean,
+  'guestPhone' : string,
+}
 export interface RSVPStats {
   'totalConfirmedGuests' : bigint,
   'totalResponses' : bigint,
@@ -96,6 +131,14 @@ export interface ThemeConfig {
   'colorScheme' : string,
 }
 export type Time = bigint;
+export interface UpdateEventInput {
+  'title' : string,
+  'venue' : string,
+  'date' : string,
+  'time' : string,
+  'description' : string,
+  'eventType' : string,
+}
 export interface UserProfile { 'name' : string, 'email' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -128,35 +171,14 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
-  'addEvent' : ActorMethod<
-    [string, string, string, string, string, string, string, EventType],
-    Event
-  >,
   'addPhoto' : ActorMethod<[string, string, string], Photo>,
   'addPhotos' : ActorMethod<
     [string, [] | [ExternalBlob], [] | [ExternalBlob]],
     undefined
   >,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
-  'createInvitation' : ActorMethod<
-    [
-      string,
-      string,
-      string,
-      string,
-      string,
-      string,
-      string,
-      string,
-      string,
-      string,
-      string,
-      string,
-      string,
-      string,
-    ],
-    Invitation
-  >,
+  'createEvent' : ActorMethod<[EventInput], Event>,
+  'createInvitation' : ActorMethod<[InvitationInput], Invitation>,
   'deleteEvent' : ActorMethod<[string], undefined>,
   'deleteInvitation' : ActorMethod<[string], undefined>,
   'deletePhoto' : ActorMethod<[string], undefined>,
@@ -184,14 +206,8 @@ export interface _SERVICE {
     BackgroundMusic
   >,
   'submitRSVP' : ActorMethod<[string, boolean, string], undefined>,
-  'submitWeddingInvitationRSVP' : ActorMethod<
-    [string, string, string, string, boolean, bigint, string],
-    RSVPEntry
-  >,
-  'updateEvent' : ActorMethod<
-    [string, string, string, string, string, string, EventType],
-    Event
-  >,
+  'submitWeddingInvitationRSVP' : ActorMethod<[RSVPInput], RSVPEntry>,
+  'updateEvent' : ActorMethod<[string, UpdateEventInput], Event>,
   'updateInvitation' : ActorMethod<
     [
       string,

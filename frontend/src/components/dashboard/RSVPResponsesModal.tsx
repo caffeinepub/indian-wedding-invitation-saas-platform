@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, CheckCircle2, XCircle, MessageSquare, Phone, Calendar, Loader2, X } from 'lucide-react';
+import { Users, CheckCircle2, XCircle, MessageSquare, Phone, Calendar, Loader2, X, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useGetRSVPsByInvitation, useGetRSVPsStats } from '@/hooks/useQueries';
@@ -31,10 +31,29 @@ export default function RSVPResponsesModal({
   invitationTitle,
   onClose,
 }: RSVPResponsesModalProps) {
-  const { data: rsvps, isLoading: rsvpsLoading } = useGetRSVPsByInvitation(invitationId);
-  const { data: stats, isLoading: statsLoading } = useGetRSVPsStats(invitationId);
+  const {
+    data: rsvps,
+    isLoading: rsvpsLoading,
+    error: rsvpsError,
+    refetch: refetchRsvps,
+    isFetching: rsvpsFetching,
+  } = useGetRSVPsByInvitation(invitationId);
+
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    error: statsError,
+    refetch: refetchStats,
+  } = useGetRSVPsStats(invitationId);
 
   const isLoading = rsvpsLoading || statsLoading;
+  const hasError = rsvpsError || statsError;
+  const errorMessage = rsvpsError?.message || statsError?.message || 'Service temporarily unavailable.';
+
+  const handleRetry = () => {
+    refetchRsvps();
+    refetchStats();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -74,6 +93,30 @@ export default function RSVPResponsesModal({
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-8 h-8 text-gold animate-spin" />
+          </div>
+        ) : hasError ? (
+          <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+            <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mb-4">
+              <AlertTriangle className="w-7 h-7 text-amber-500" />
+            </div>
+            <h3 className="font-serif text-base font-semibold text-charcoal mb-2">
+              Unable to Load Responses
+            </h3>
+            <p className="text-sm text-charcoal/60 max-w-xs mb-5">
+              {errorMessage}
+            </p>
+            <button
+              onClick={handleRetry}
+              disabled={rsvpsFetching}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gold-500 hover:bg-gold-400 text-charcoal-900 font-semibold rounded-full transition-all text-sm disabled:opacity-50"
+            >
+              {rsvpsFetching ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              Try Again
+            </button>
           </div>
         ) : (
           <>

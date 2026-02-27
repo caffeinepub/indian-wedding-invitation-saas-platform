@@ -1,16 +1,29 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
-  "architectural_notes": [],
+  "summary": "Invitation management platform that should work without any authentication or login system. Currently fixing UI visibility issues (black background hiding content) and ensuring invitation creation works properly.",
+  "architectural_notes": [
+    "App must function without any authentication - no login, signup, sign out, or account setup components",
+    "All auth-related backend checks and UI elements must be fully removed"
+  ],
   "known_issues": [
-    "App broken after version 18 deployment; user requested full rollback to version 5"
+    "Auth error messages still appearing: 'Your account is still being set up' and 'Please check your connection and try again'",
+    "Black background hiding all content, making app unusable",
+    "Invitation creation not working"
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-restore-all-frontend-files-to-their-exact-version-5-state-this-includes-app-tsx-routes-and-providers-all-pages-landingpage-dashboard-createinvitationwizard-invitationeditor-guestinvitation-notfound-all-components-authguard-header-wizard-steps-guest-components-media-templates-events-layout-all-hooks-usequeries-ts-context-invitationformcontext-tsx-utils-and-stylesheets-revert-any-login-gating-removal-anonymous-actor-changes-or-any-other-modifications-made-after-version-5-the-app-must-look-and-behave-exactly-as-it-did-in-version-5",
-      "title": "Restore all frontend files to their exact Version 5 state. This includes: App.tsx (routes and providers), all pages (LandingPage, Dashboard, CreateInvitationWizard, InvitationEditor, GuestInvitation, NotFound), all components (AuthGuard, Header, wizard steps, guest components, media, templates, events, layout), all hooks (useQueries.ts), context (InvitationFormContext.tsx), utils, and stylesheets. Revert any login-gating removal, anonymous actor changes, or any other modifications made after Version 5. The app must look and behave exactly as it did in Version 5.",
+      "id": "feature-fix-the-black-background-issue-throughout-the-entire-app-replace-all-black-or-near-black-background-colors-with-appropriate-light-or-themed-backgrounds-ivory-cream-white-or-the-design-system-s-defined-background-tokens-so-that-all-content-text-buttons-cards-forms-headers-is-fully-visible-and-readable",
+      "title": "Fix the black background issue throughout the entire app. Replace all black or near-black background colors with appropriate light or themed backgrounds (ivory, cream, white, or the design system's defined background tokens) so that all content — text, buttons, cards, forms, headers — is fully visible and readable.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-audit-and-fix-css-custom-properties-and-tailwind-color-token-definitions-in-frontend-index-css-and-frontend-src-index-css-to-ensure-that-the-default-light-theme-does-not-apply-dark-black-background-values-ensure-the-background-and-foreground-css-variables-as-well-as-any-body-or-root-background-styles-are-set-to-appropriate-light-theme-values-by-default",
+      "title": "Audit and fix CSS custom properties and Tailwind color token definitions in frontend/index.css and frontend/src/index.css to ensure that the default (light) theme does not apply dark/black background values. Ensure the --background and --foreground CSS variables, as well as any body or root background styles, are set to appropriate light theme values by default.",
       "reqIds": [
         "REQ-2"
       ],
@@ -20,14 +33,25 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Restore the backend (backend/main.mo) to its exact Version 5 state, including all data types (Invitation, Event, RSVP, Photo, Music), CRUD operations, blob storage, and access control logic that were present in Version 5. Undo all backend changes introduced after Version 5.",
-      "reqIds": [
-        "REQ-1"
-      ],
+      "summary": "Remove all authentication features (login, signup, sign out, account setup) and make app work independently without any login system",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Fix black background that hides all content - ensure proper color contrast and visibility throughout the app",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Fix invitation creation not working",
+      "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Wedding Invitations",
+  "gameProjectType": "none",
+  "projectName": "Invitation Management Platform",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

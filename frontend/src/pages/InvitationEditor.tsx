@@ -1,75 +1,296 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, ArrowLeft, Save, CheckCircle } from 'lucide-react';
-import {
-  useGetInvitationBySlug,
-  useUpdateInvitation,
-  useGetEventsByInvitation,
-  useAddEvent,
-  useUpdateEvent,
-  useDeleteEvent,
-  useGetPhotosByInvitation,
-  useAddPhoto,
-  useDeletePhoto,
-  useGetBackgroundMusic,
-  useSetBackgroundMusic,
-  useAddPhotos,
-} from '../hooks/useQueries';
-import { ExternalBlob } from '../backend';
-import type { EventData } from '../context/InvitationFormContext';
-import EventCard from '../components/events/EventCard';
-import EventForm from '../components/events/EventForm';
-import PhotoGalleryUpload from '../components/media/PhotoGalleryUpload';
-import MusicUploader from '../components/media/MusicUploader';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Save, Eye, ArrowLeft, Loader2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { useGetInvitationBySlug, useUpdateInvitation } from '../hooks/useQueries';
 import { InvitationFormProvider, useInvitationForm } from '../context/InvitationFormContext';
+import TemplatePreview from '../components/templates/TemplatePreview';
 import TemplateThemeStep from '../components/wizard/TemplateThemeStep';
-import { EventType } from '../backend';
+import EventManagementStep from '../components/wizard/EventManagementStep';
+import MediaManagementStep from '../components/wizard/MediaManagementStep';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
-function EditorContent() {
-  const { slug: invitationId } = useParams({ from: '/edit/$slug' });
+function EditorContent({ invitationId }: { invitationId: string }) {
   const navigate = useNavigate();
-
-  const { data: invitation, isLoading: invLoading } = useGetInvitationBySlug(invitationId);
-  const { data: events, isLoading: eventsLoading } = useGetEventsByInvitation(invitationId);
-  const { data: photos } = useGetPhotosByInvitation(invitationId);
-  const { data: musicList } = useGetBackgroundMusic(invitationId);
-
+  const { formData, updateFormData } = useInvitationForm();
   const updateInvitation = useUpdateInvitation();
-  const addEvent = useAddEvent();
-  const updateEvent = useUpdateEvent();
-  const deleteEvent = useDeleteEvent();
-  const addPhoto = useAddPhoto();
-  const deletePhoto = useDeletePhoto();
-  const setBackgroundMusic = useSetBackgroundMusic();
-  const addPhotos = useAddPhotos();
-
-  const { updateFormData } = useInvitationForm();
-
-  const [showEventForm, setShowEventForm] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<EventData | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Form state for details tab
-  const [details, setDetails] = useState({
-    brideName: '',
-    groomName: '',
-    weddingDate: '',
-    weddingTime: '',
-    venueName: '',
-    venueAddress: '',
-    googleMapsLink: '',
-    familyDetails: '',
-    invitationMessage: '',
-  });
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      await updateInvitation.mutateAsync({
+        slug: invitationId,
+        brideName: formData.brideName,
+        groomName: formData.groomName,
+        weddingDate: formData.weddingDate,
+        weddingTime: formData.weddingTime,
+        venueName: formData.venueName,
+        venueAddress: formData.venueAddress,
+        googleMapsLink: formData.googleMapsLink,
+        familyDetails: formData.familyDetails,
+        invitationMessage: formData.invitationMessage,
+        selectedTemplate: formData.selectedTemplate,
+        colorScheme: formData.colorScheme,
+        fontChoice: formData.fontChoice,
+        backgroundChoice: formData.backgroundChoice,
+      });
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Failed to save. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-  // Couple photos state
-  const [bridePhotoFile, setBridePhotoFile] = useState<File | null>(null);
-  const [groomPhotoFile, setGroomPhotoFile] = useState<File | null>(null);
+  const handlePreview = () => {
+    window.open(`/invitation/${invitationId}`, '_blank');
+  };
+
+  return (
+    <div className="flex flex-col h-screen" style={{ backgroundColor: 'oklch(0.15 0.01 60)' }}>
+      {/* Editor Toolbar */}
+      <div
+        className="flex items-center justify-between px-4 py-3 border-b shrink-0 z-40"
+        style={{ backgroundColor: 'oklch(0.18 0.015 60)', borderColor: 'oklch(0.28 0.02 60)' }}
+      >
+        <button
+          onClick={() => navigate({ to: '/dashboard' })}
+          className="flex items-center gap-2 text-sm font-medium transition-colors"
+          style={{ color: 'oklch(0.72 0.12 75)' }}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">Back to Dashboard</span>
+        </button>
+
+        <div className="flex items-center gap-2">
+          {saveSuccess && (
+            <span className="text-sm font-medium" style={{ color: 'oklch(0.65 0.15 145)' }}>Saved!</span>
+          )}
+          {saveError && (
+            <span className="text-xs font-medium max-w-[200px] truncate" style={{ color: 'oklch(0.72 0.12 75)' }} title={saveError}>
+              {saveError}
+            </span>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreview}
+            className="gap-1.5"
+            style={{ borderColor: 'oklch(0.35 0.025 60)', color: 'oklch(0.82 0.09 78)', backgroundColor: 'transparent' }}
+          >
+            <Eye className="w-4 h-4" />
+            <span className="hidden sm:inline">Preview</span>
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="gap-1.5 font-semibold"
+            style={{ backgroundColor: 'oklch(0.72 0.12 75)', color: 'oklch(0.18 0.02 60)' }}
+          >
+            {isSaving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            <span className="hidden sm:inline">{isSaving ? 'Saving...' : 'Save'}</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Editor Area */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Panel — Controls */}
+        <div
+          className="w-full md:w-[420px] lg:w-[480px] shrink-0 border-r flex flex-col overflow-hidden"
+          style={{ backgroundColor: 'oklch(0.18 0.015 60)', borderColor: 'oklch(0.28 0.02 60)' }}
+        >
+          <Tabs defaultValue="details" className="flex flex-col h-full">
+            <TabsList
+              className="shrink-0 grid grid-cols-4 m-3"
+              style={{ backgroundColor: 'oklch(0.22 0.02 60)' }}
+            >
+              <TabsTrigger value="details" className="text-xs data-[state=active]:bg-gold-500 data-[state=active]:text-charcoal-900">Details</TabsTrigger>
+              <TabsTrigger value="theme" className="text-xs data-[state=active]:bg-gold-500 data-[state=active]:text-charcoal-900">Theme</TabsTrigger>
+              <TabsTrigger value="events" className="text-xs data-[state=active]:bg-gold-500 data-[state=active]:text-charcoal-900">Events</TabsTrigger>
+              <TabsTrigger value="media" className="text-xs data-[state=active]:bg-gold-500 data-[state=active]:text-charcoal-900">Media</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="details" className="flex-1 overflow-hidden m-0">
+              <ScrollArea className="h-full">
+                <div className="p-4 space-y-4">
+                  <DetailsForm />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+
+            <TabsContent value="theme" className="flex-1 overflow-hidden m-0">
+              <ScrollArea className="h-full">
+                <TemplateThemeStep onNext={() => {}} onBack={() => {}} hideNavigation />
+              </ScrollArea>
+            </TabsContent>
+
+            <TabsContent value="events" className="flex-1 overflow-hidden m-0">
+              <ScrollArea className="h-full">
+                <div className="p-4">
+                  <EventManagementStep onNext={() => {}} onBack={() => {}} hideNavigation />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+
+            <TabsContent value="media" className="flex-1 overflow-hidden m-0">
+              <ScrollArea className="h-full">
+                <div className="p-4">
+                  <MediaManagementStep onNext={() => {}} onBack={() => {}} hideNavigation />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Right Panel — Preview */}
+        <div className="hidden md:flex flex-1 overflow-hidden" style={{ backgroundColor: 'oklch(0.22 0.02 60)' }}>
+          <ScrollArea className="w-full h-full">
+            <div className="p-6 flex justify-center">
+              <div className="w-full max-w-md">
+                <TemplatePreview />
+              </div>
+            </div>
+          </ScrollArea>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DetailsForm() {
+  const { formData, updateFormData } = useInvitationForm();
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs" style={{ color: 'oklch(0.65 0.04 60)' }}>Bride's Name</Label>
+          <Input
+            value={formData.brideName}
+            onChange={(e) => updateFormData({ brideName: e.target.value })}
+            placeholder="Bride's name"
+            className="text-sm"
+            style={{ backgroundColor: 'oklch(0.22 0.02 60)', borderColor: 'oklch(0.35 0.025 60)', color: 'oklch(0.95 0.005 80)' }}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs" style={{ color: 'oklch(0.65 0.04 60)' }}>Groom's Name</Label>
+          <Input
+            value={formData.groomName}
+            onChange={(e) => updateFormData({ groomName: e.target.value })}
+            placeholder="Groom's name"
+            className="text-sm"
+            style={{ backgroundColor: 'oklch(0.22 0.02 60)', borderColor: 'oklch(0.35 0.025 60)', color: 'oklch(0.95 0.005 80)' }}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs" style={{ color: 'oklch(0.65 0.04 60)' }}>Wedding Date</Label>
+          <Input
+            type="date"
+            value={formData.weddingDate}
+            onChange={(e) => updateFormData({ weddingDate: e.target.value })}
+            className="text-sm"
+            style={{ backgroundColor: 'oklch(0.22 0.02 60)', borderColor: 'oklch(0.35 0.025 60)', color: 'oklch(0.95 0.005 80)' }}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs" style={{ color: 'oklch(0.65 0.04 60)' }}>Wedding Time</Label>
+          <Input
+            type="time"
+            value={formData.weddingTime}
+            onChange={(e) => updateFormData({ weddingTime: e.target.value })}
+            className="text-sm"
+            style={{ backgroundColor: 'oklch(0.22 0.02 60)', borderColor: 'oklch(0.35 0.025 60)', color: 'oklch(0.95 0.005 80)' }}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs" style={{ color: 'oklch(0.65 0.04 60)' }}>Venue Name</Label>
+        <Input
+          value={formData.venueName}
+          onChange={(e) => updateFormData({ venueName: e.target.value })}
+          placeholder="Venue name"
+          className="text-sm"
+          style={{ backgroundColor: 'oklch(0.22 0.02 60)', borderColor: 'oklch(0.35 0.025 60)', color: 'oklch(0.95 0.005 80)' }}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs" style={{ color: 'oklch(0.65 0.04 60)' }}>Venue Address</Label>
+        <Input
+          value={formData.venueAddress}
+          onChange={(e) => updateFormData({ venueAddress: e.target.value })}
+          placeholder="Full address"
+          className="text-sm"
+          style={{ backgroundColor: 'oklch(0.22 0.02 60)', borderColor: 'oklch(0.35 0.025 60)', color: 'oklch(0.95 0.005 80)' }}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs" style={{ color: 'oklch(0.65 0.04 60)' }}>Google Maps Link</Label>
+        <Input
+          value={formData.googleMapsLink}
+          onChange={(e) => updateFormData({ googleMapsLink: e.target.value })}
+          placeholder="https://maps.google.com/..."
+          className="text-sm"
+          style={{ backgroundColor: 'oklch(0.22 0.02 60)', borderColor: 'oklch(0.35 0.025 60)', color: 'oklch(0.95 0.005 80)' }}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs" style={{ color: 'oklch(0.65 0.04 60)' }}>Family Details</Label>
+        <Textarea
+          value={formData.familyDetails}
+          onChange={(e) => updateFormData({ familyDetails: e.target.value })}
+          placeholder="Family details..."
+          rows={3}
+          className="text-sm resize-none"
+          style={{ backgroundColor: 'oklch(0.22 0.02 60)', borderColor: 'oklch(0.35 0.025 60)', color: 'oklch(0.95 0.005 80)' }}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs" style={{ color: 'oklch(0.65 0.04 60)' }}>Invitation Message</Label>
+        <Textarea
+          value={formData.invitationMessage}
+          onChange={(e) => updateFormData({ invitationMessage: e.target.value })}
+          placeholder="Your invitation message..."
+          rows={4}
+          className="text-sm resize-none"
+          style={{ backgroundColor: 'oklch(0.22 0.02 60)', borderColor: 'oklch(0.35 0.025 60)', color: 'oklch(0.95 0.005 80)' }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function EditorLoader({ invitationId }: { invitationId: string }) {
+  const { data: invitation, isLoading, error, refetch, isFetching } = useGetInvitationBySlug(invitationId);
+  const navigate = useNavigate();
+  const { updateFormData } = useInvitationForm();
 
   useEffect(() => {
     if (invitation) {
-      setDetails({
+      updateFormData({
         brideName: invitation.brideName,
         groomName: invitation.groomName,
         weddingDate: invitation.weddingDate,
@@ -79,480 +300,82 @@ function EditorContent() {
         googleMapsLink: invitation.googleMapsLink,
         familyDetails: invitation.familyDetails,
         invitationMessage: invitation.invitationMessage,
-      });
-
-      // Sync to form context for template preview
-      updateFormData({
-        brideName: invitation.brideName,
-        groomName: invitation.groomName,
-        weddingDate: invitation.weddingDate,
-        weddingTime: invitation.weddingTime,
-        venueName: invitation.venueName,
-        venueAddress: invitation.venueAddress,
         selectedTemplate: invitation.selectedTemplate,
         colorScheme: invitation.colorScheme,
         fontChoice: invitation.fontChoice,
         backgroundChoice: invitation.backgroundChoice,
       });
     }
-  }, [invitation, updateFormData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [invitation]);
 
-  const handleSaveDetails = async () => {
-    if (!invitation) return;
-    try {
-      await updateInvitation.mutateAsync({
-        slug: invitationId,
-        ...details,
-        selectedTemplate: invitation.selectedTemplate,
-        colorScheme: invitation.colorScheme,
-        fontChoice: invitation.fontChoice,
-        backgroundChoice: invitation.backgroundChoice,
-      });
-
-      // Upload couple photos if changed
-      if (bridePhotoFile || groomPhotoFile) {
-        let brideBlob: ExternalBlob | null = null;
-        let groomBlob: ExternalBlob | null = null;
-
-        if (bridePhotoFile) {
-          const bytes = new Uint8Array(await bridePhotoFile.arrayBuffer());
-          brideBlob = ExternalBlob.fromBytes(bytes);
-        }
-        if (groomPhotoFile) {
-          const bytes = new Uint8Array(await groomPhotoFile.arrayBuffer());
-          groomBlob = ExternalBlob.fromBytes(bytes);
-        }
-
-        await addPhotos.mutateAsync({
-          invitationId,
-          bridePhoto: brideBlob,
-          groomPhoto: groomBlob,
-        });
-      }
-
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (err) {
-      console.error('Failed to save details:', err);
-    }
-  };
-
-  const handleAddEvent = async (event: EventData) => {
-    await addEvent.mutateAsync({
-      invitationId,
-      eventId: event.id || `${invitationId}-event-${Date.now()}`,
-      title: event.title,
-      date: event.date,
-      time: event.time,
-      venue: event.venue,
-      description: event.description,
-      eventType: event.eventType as EventType,
-    });
-    setShowEventForm(false);
-  };
-
-  const handleUpdateEvent = async (event: EventData) => {
-    if (!editingEvent) return;
-    await updateEvent.mutateAsync({
-      eventId: editingEvent.id,
-      invitationId,
-      title: event.title,
-      date: event.date,
-      time: event.time,
-      venue: event.venue,
-      description: event.description,
-      eventType: event.eventType as EventType,
-    });
-    setEditingEvent(null);
-    setShowEventForm(false);
-  };
-
-  const handleDeleteEvent = async (eventId: string) => {
-    if (!confirm('Delete this event?')) return;
-    await deleteEvent.mutateAsync({ eventId, invitationId });
-  };
-
-  const handleAddPhoto = async (imageUrl: string) => {
-    await addPhoto.mutateAsync({
-      invitationId,
-      photoId: `${invitationId}-photo-${Date.now()}`,
-      imageUrl,
-    });
-  };
-
-  const handleDeletePhoto = async (photoId: string) => {
-    await deletePhoto.mutateAsync({ photoId, invitationId });
-  };
-
-  const handleSaveMusic = async (musicUrl: string, autoPlay: boolean) => {
-    await setBackgroundMusic.mutateAsync({
-      invitationId,
-      musicId: `${invitationId}-music-${Date.now()}`,
-      musicUrl,
-      autoPlay,
-    });
-  };
-
-  if (invLoading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ivory-50 dark:bg-charcoal-900">
-        <Loader2 className="w-12 h-12 animate-spin text-gold-500" />
-      </div>
-    );
-  }
-
-  if (!invitation) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-ivory-50 dark:bg-charcoal-900">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'oklch(0.15 0.01 60)' }}>
         <div className="text-center">
-          <p className="text-crimson-500 text-lg mb-4">Invitation not found</p>
-          <button onClick={() => navigate({ to: '/dashboard' })} className="text-gold-500 hover:underline">
-            Back to Dashboard
-          </button>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-3" style={{ color: 'oklch(0.72 0.12 75)' }} />
+          <p style={{ color: 'oklch(0.65 0.04 60)' }}>Loading invitation...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-ivory-50 dark:bg-charcoal-900 pt-20 pb-16">
-      <div className="max-w-5xl mx-auto px-4">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8 pt-6">
-          <button
-            onClick={() => navigate({ to: '/dashboard' })}
-            className="p-2 hover:bg-gold-50 dark:hover:bg-charcoal-700 rounded-full transition-colors"
+  if (error || !invitation) {
+    const isUnavailable = error?.message?.includes('temporarily unavailable');
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'oklch(0.15 0.01 60)' }}>
+        <div className="text-center max-w-sm mx-auto px-4">
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ backgroundColor: 'oklch(0.22 0.02 60)' }}
           >
-            <ArrowLeft className="w-5 h-5 text-charcoal-600 dark:text-ivory-300" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-serif text-charcoal-800 dark:text-ivory-100">
-              Edit: {invitation.brideName} & {invitation.groomName}
-            </h1>
-            <p className="text-charcoal-500 dark:text-ivory-400 text-sm font-sans">/{invitationId}</p>
+            <AlertTriangle className="w-8 h-8" style={{ color: 'oklch(0.72 0.12 75)' }} />
+          </div>
+          <p className="text-lg mb-2" style={{ color: 'oklch(0.95 0.005 80)', fontFamily: '"Playfair Display", serif' }}>
+            {isUnavailable ? 'Service Unavailable' : 'Invitation Not Found'}
+          </p>
+          <p className="text-sm mb-6" style={{ color: 'oklch(0.65 0.04 60)' }}>
+            {error?.message || 'Could not load this invitation.'}
+          </p>
+          <div className="flex gap-3 justify-center">
+            {isUnavailable && (
+              <Button
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="gap-1.5 font-semibold"
+                style={{ backgroundColor: 'oklch(0.72 0.12 75)', color: 'oklch(0.18 0.02 60)' }}
+              >
+                {isFetching ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+                Try Again
+              </Button>
+            )}
+            <Button
+              onClick={() => navigate({ to: '/dashboard' })}
+              variant="outline"
+              style={{ borderColor: 'oklch(0.35 0.025 60)', color: 'oklch(0.82 0.09 78)' }}
+            >
+              Back to Dashboard
+            </Button>
           </div>
         </div>
-
-        <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8">
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
-            <TabsTrigger value="theme">Theme</TabsTrigger>
-            <TabsTrigger value="media">Media</TabsTrigger>
-          </TabsList>
-
-          {/* Details Tab */}
-          <TabsContent value="details">
-            <div className="bg-white dark:bg-charcoal-800 rounded-2xl p-6 shadow-soft border border-gold-100 dark:border-charcoal-700">
-              <h2 className="text-xl font-serif text-charcoal-800 dark:text-ivory-100 mb-6">Couple Details</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                {[
-                  { label: "Bride's Name", key: 'brideName' },
-                  { label: "Groom's Name", key: 'groomName' },
-                  { label: 'Wedding Date', key: 'weddingDate', type: 'date' },
-                  { label: 'Wedding Time', key: 'weddingTime', type: 'time' },
-                  { label: 'Venue Name', key: 'venueName' },
-                  { label: 'Venue Address', key: 'venueAddress' },
-                  { label: 'Google Maps Link', key: 'googleMapsLink' },
-                ].map(({ label, key, type }) => (
-                  <div key={key}>
-                    <label className="block text-sm font-sans text-charcoal-600 dark:text-ivory-300 mb-1">{label}</label>
-                    <input
-                      type={type || 'text'}
-                      value={details[key as keyof typeof details]}
-                      onChange={e => setDetails(prev => ({ ...prev, [key]: e.target.value }))}
-                      className="w-full px-4 py-2.5 border border-gold-200 dark:border-charcoal-600 rounded-lg bg-ivory-50 dark:bg-charcoal-700 text-charcoal-800 dark:text-ivory-100 focus:outline-none focus:ring-2 focus:ring-gold-400 font-sans text-sm"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-sans text-charcoal-600 dark:text-ivory-300 mb-1">Family Details</label>
-                <textarea
-                  value={details.familyDetails}
-                  onChange={e => setDetails(prev => ({ ...prev, familyDetails: e.target.value }))}
-                  rows={3}
-                  className="w-full px-4 py-2.5 border border-gold-200 dark:border-charcoal-600 rounded-lg bg-ivory-50 dark:bg-charcoal-700 text-charcoal-800 dark:text-ivory-100 focus:outline-none focus:ring-2 focus:ring-gold-400 font-sans text-sm resize-none"
-                />
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-sm font-sans text-charcoal-600 dark:text-ivory-300 mb-1">Invitation Message</label>
-                <textarea
-                  value={details.invitationMessage}
-                  onChange={e => setDetails(prev => ({ ...prev, invitationMessage: e.target.value }))}
-                  rows={4}
-                  className="w-full px-4 py-2.5 border border-gold-200 dark:border-charcoal-600 rounded-lg bg-ivory-50 dark:bg-charcoal-700 text-charcoal-800 dark:text-ivory-100 focus:outline-none focus:ring-2 focus:ring-gold-400 font-sans text-sm resize-none"
-                />
-              </div>
-
-              {/* Couple Photos */}
-              <div className="mb-6">
-                <h3 className="text-lg font-serif text-charcoal-700 dark:text-ivory-200 mb-4">Couple Photos</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Bride Photo */}
-                  <div>
-                    <label className="block text-sm font-sans text-charcoal-600 dark:text-ivory-300 mb-2">Bride's Photo</label>
-                    {invitation.bridePhoto && !bridePhotoFile && (
-                      <img
-                        src={invitation.bridePhoto.getDirectURL()}
-                        alt="Bride"
-                        className="w-24 h-24 rounded-full object-cover mb-2 border-2 border-gold-200"
-                      />
-                    )}
-                    {bridePhotoFile && (
-                      <img
-                        src={URL.createObjectURL(bridePhotoFile)}
-                        alt="Bride preview"
-                        className="w-24 h-24 rounded-full object-cover mb-2 border-2 border-gold-400"
-                      />
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={e => setBridePhotoFile(e.target.files?.[0] || null)}
-                      className="text-sm text-charcoal-600 dark:text-ivory-300"
-                    />
-                  </div>
-
-                  {/* Groom Photo */}
-                  <div>
-                    <label className="block text-sm font-sans text-charcoal-600 dark:text-ivory-300 mb-2">Groom's Photo</label>
-                    {invitation.groomPhoto && !groomPhotoFile && (
-                      <img
-                        src={invitation.groomPhoto.getDirectURL()}
-                        alt="Groom"
-                        className="w-24 h-24 rounded-full object-cover mb-2 border-2 border-gold-200"
-                      />
-                    )}
-                    {groomPhotoFile && (
-                      <img
-                        src={URL.createObjectURL(groomPhotoFile)}
-                        alt="Groom preview"
-                        className="w-24 h-24 rounded-full object-cover mb-2 border-2 border-gold-400"
-                      />
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={e => setGroomPhotoFile(e.target.files?.[0] || null)}
-                      className="text-sm text-charcoal-600 dark:text-ivory-300"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={handleSaveDetails}
-                disabled={updateInvitation.isPending || addPhotos.isPending}
-                className="flex items-center gap-2 px-6 py-3 bg-gold-500 hover:bg-gold-400 text-charcoal-900 font-semibold rounded-full transition-all duration-300 shadow-luxury disabled:opacity-50"
-              >
-                {updateInvitation.isPending || addPhotos.isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : saveSuccess ? (
-                  <CheckCircle className="w-4 h-4" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
-                {saveSuccess ? 'Saved!' : 'Save Changes'}
-              </button>
-            </div>
-          </TabsContent>
-
-          {/* Events Tab */}
-          <TabsContent value="events">
-            <div className="bg-white dark:bg-charcoal-800 rounded-2xl p-6 shadow-soft border border-gold-100 dark:border-charcoal-700">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-serif text-charcoal-800 dark:text-ivory-100">Wedding Events</h2>
-                <button
-                  onClick={() => { setEditingEvent(null); setShowEventForm(true); }}
-                  className="px-4 py-2 bg-gold-500 hover:bg-gold-400 text-charcoal-900 font-semibold rounded-full text-sm transition-colors"
-                >
-                  + Add Event
-                </button>
-              </div>
-
-              {eventsLoading ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="w-8 h-8 animate-spin text-gold-500" />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {events?.map(event => {
-                    // Convert backend Event to EventData for EventCard
-                    const eventData: EventData = {
-                      id: event.id,
-                      title: event.title,
-                      date: event.date,
-                      time: event.time,
-                      venue: event.venue,
-                      description: event.description,
-                      eventType: event.eventType,
-                    };
-                    return (
-                      <EventCard
-                        key={event.id}
-                        event={eventData}
-                        onEdit={(e) => { setEditingEvent(e); setShowEventForm(true); }}
-                        onDelete={handleDeleteEvent}
-                      />
-                    );
-                  })}
-                  {(!events || events.length === 0) && !showEventForm && (
-                    <p className="text-center text-charcoal-400 dark:text-ivory-500 py-8 font-sans">
-                      No events added yet. Click "Add Event" to get started.
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {showEventForm && (
-                <div className="mt-6 border-t border-gold-100 dark:border-charcoal-700 pt-6">
-                  <EventForm
-                    initialEvent={editingEvent || undefined}
-                    onSave={editingEvent ? handleUpdateEvent : handleAddEvent}
-                    onCancel={() => { setShowEventForm(false); setEditingEvent(null); }}
-                  />
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* Theme Tab */}
-          <TabsContent value="theme">
-            <TemplateThemeStep
-              invitationId={invitationId}
-            />
-          </TabsContent>
-
-          {/* Media Tab */}
-          <TabsContent value="media">
-            <div className="space-y-6">
-              <div className="bg-white dark:bg-charcoal-800 rounded-2xl p-6 shadow-soft border border-gold-100 dark:border-charcoal-700">
-                <h2 className="text-xl font-serif text-charcoal-800 dark:text-ivory-100 mb-6">Photo Gallery</h2>
-                <PhotoGalleryEditorSection
-                  photos={photos?.map(p => ({ id: p.id, url: p.imageUrl })) || []}
-                  onAdd={handleAddPhoto}
-                  onDelete={handleDeletePhoto}
-                />
-              </div>
-
-              <div className="bg-white dark:bg-charcoal-800 rounded-2xl p-6 shadow-soft border border-gold-100 dark:border-charcoal-700">
-                <h2 className="text-xl font-serif text-charcoal-800 dark:text-ivory-100 mb-6">Background Music</h2>
-                <MusicEditorSection
-                  existingMusic={musicList?.[0] ? { url: musicList[0].musicUrl, autoPlay: musicList[0].autoPlay } : undefined}
-                  onSave={handleSaveMusic}
-                />
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-// Inline photo gallery editor for the editor page (doesn't use form context)
-function PhotoGalleryEditorSection({
-  photos,
-  onAdd,
-  onDelete,
-}: {
-  photos: { id: string; url: string }[];
-  onAdd: (url: string) => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
-}) {
-  const handleFiles = (files: FileList | null) => {
-    if (!files) return;
-    Array.from(files).forEach(file => {
-      if (!file.type.startsWith('image/')) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        const dataUrl = e.target?.result as string;
-        if (dataUrl) onAdd(dataUrl);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  return (
-    <div>
-      <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gold-300 dark:border-charcoal-600 rounded-xl cursor-pointer hover:border-gold-400 transition-colors bg-gold-50/50 dark:bg-charcoal-700/50 mb-4">
-        <span className="text-sm text-charcoal-500 dark:text-ivory-400 font-sans">Click to upload photos</span>
-        <input type="file" accept="image/*" multiple onChange={e => handleFiles(e.target.files)} className="hidden" />
-      </label>
-      {photos.length > 0 && (
-        <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-          {photos.map(photo => (
-            <div key={photo.id} className="relative group aspect-square">
-              <img src={photo.url} alt="" className="w-full h-full object-cover rounded-xl" />
-              <button
-                onClick={() => onDelete(photo.id)}
-                className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
-              >
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Inline music editor for the editor page (doesn't use form context)
-function MusicEditorSection({
-  existingMusic,
-  onSave,
-}: {
-  existingMusic?: { url: string; autoPlay: boolean };
-  onSave: (url: string, autoPlay: boolean) => Promise<void>;
-}) {
-  const [autoPlay, setAutoPlay] = useState(existingMusic?.autoPlay ?? false);
-
-  const handleFile = (file: File) => {
-    if (!file.type.startsWith('audio/')) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const dataUrl = e.target?.result as string;
-      if (dataUrl) onSave(dataUrl, autoPlay);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  return (
-    <div>
-      {existingMusic?.url && (
-        <div className="mb-4 p-3 bg-gold-50 dark:bg-gold-900/20 rounded-lg">
-          <p className="text-sm text-charcoal-600 dark:text-ivory-300 font-sans mb-2">Current music uploaded</p>
-          <audio controls src={existingMusic.url} className="w-full h-8" />
-        </div>
-      )}
-      <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gold-300 dark:border-charcoal-600 rounded-xl cursor-pointer hover:border-gold-400 transition-colors bg-gold-50/50 dark:bg-charcoal-700/50 mb-3">
-        <span className="text-sm text-charcoal-500 dark:text-ivory-400 font-sans">
-          {existingMusic?.url ? 'Replace music file' : 'Upload music file'}
-        </span>
-        <input type="file" accept="audio/*" onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} className="hidden" />
-      </label>
-      <label className="flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={autoPlay}
-          onChange={e => setAutoPlay(e.target.checked)}
-          className="w-4 h-4 accent-gold-500"
-        />
-        <span className="text-sm text-charcoal-600 dark:text-ivory-300 font-sans">Auto-play when invitation opens</span>
-      </label>
-    </div>
-  );
+  return <EditorContent invitationId={invitationId} />;
 }
 
 export default function InvitationEditor() {
+  const params = useParams({ from: '/edit/$slug' });
+  const invitationId = params.slug;
+
   return (
     <InvitationFormProvider>
-      <EditorContent />
+      <EditorLoader invitationId={invitationId} />
     </InvitationFormProvider>
   );
 }

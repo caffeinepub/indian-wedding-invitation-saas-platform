@@ -1,176 +1,92 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Event, EventType, Invitation } from '../../backend';
+import { useScrollAnimation } from '../../hooks/useScrollAnimation';
 import { getTemplateById } from '../../utils/templateDefinitions';
-import { Calendar, Clock, MapPin, Music, Flower, Star, Heart, Sparkles } from 'lucide-react';
+import { Calendar, Clock, MapPin } from 'lucide-react';
+import type { Invitation, Event } from '../../backend';
 
 interface EventTimelineProps {
-  events: Event[];
   invitation: Invitation;
+  events: Event[];
+  animationMode?: 'minimal' | 'elegant' | 'cinematic';
 }
 
-function getEventConfig(eventType: EventType) {
-  switch (eventType) {
-    case EventType.haldi:
-      return {
-        gradient: 'linear-gradient(135deg, #f59e0b, #d97706)',
-        icon: Flower,
-        label: 'Haldi',
-        textColor: '#1a0a00',
-        badgeBg: 'rgba(245, 158, 11, 0.15)',
-        badgeText: '#92400e',
-      };
-    case EventType.mehndi:
-      return {
-        gradient: 'linear-gradient(135deg, #10b981, #059669)',
-        icon: Flower,
-        label: 'Mehndi',
-        textColor: '#ffffff',
-        badgeBg: 'rgba(16, 185, 129, 0.15)',
-        badgeText: '#065f46',
-      };
-    case EventType.sangeet:
-      return {
-        gradient: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-        icon: Music,
-        label: 'Sangeet',
-        textColor: '#ffffff',
-        badgeBg: 'rgba(139, 92, 246, 0.15)',
-        badgeText: '#4c1d95',
-      };
-    case EventType.wedding:
-      return {
-        gradient: 'linear-gradient(135deg, #dc2626, #b91c1c)',
-        icon: Heart,
-        label: 'Wedding',
-        textColor: '#ffffff',
-        badgeBg: 'rgba(220, 38, 38, 0.15)',
-        badgeText: '#7f1d1d',
-      };
-    case EventType.reception:
-      return {
-        gradient: 'linear-gradient(135deg, #c9a84c, #a07830)',
-        icon: Star,
-        label: 'Reception',
-        textColor: '#1a0a00',
-        badgeBg: 'rgba(201, 168, 76, 0.15)',
-        badgeText: '#78350f',
-      };
-    case EventType.custom:
-    default:
-      return {
-        gradient: 'linear-gradient(135deg, #6b7280, #4b5563)',
-        icon: Sparkles,
-        label: 'Event',
-        textColor: '#ffffff',
-        badgeBg: 'rgba(107, 114, 128, 0.15)',
-        badgeText: '#1f2937',
-      };
-  }
-}
+const EVENT_GRADIENTS: Record<string, string> = {
+  haldi:     'linear-gradient(135deg, #f59e0b, #d97706)',
+  mehndi:    'linear-gradient(135deg, #16a34a, #15803d)',
+  sangeet:   'linear-gradient(135deg, #7c3aed, #6d28d9)',
+  wedding:   'linear-gradient(135deg, #dc2626, #b91c1c)',
+  reception: 'linear-gradient(135deg, #0284c7, #0369a1)',
+  custom:    'linear-gradient(135deg, #6b7280, #4b5563)',
+};
 
-interface EventCardProps {
+function EventCard({ event, index, primaryColor, accentColor, fontHeading, fontBody }: {
   event: Event;
   index: number;
-  template: ReturnType<typeof getTemplateById>;
-}
-
-function EventCard({ event, index, template }: EventCardProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const config = getEventConfig(event.eventType);
-  const Icon = config.icon;
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsVisible(true);
-      },
-      { threshold: 0.1 }
-    );
-    if (cardRef.current) observer.observe(cardRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  const formattedDate = event.date
-    ? new Date(event.date).toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    : '';
+  primaryColor: string;
+  accentColor: string;
+  fontHeading: string;
+  fontBody: string;
+}) {
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+  const eventType = typeof event.eventType === 'string'
+    ? event.eventType
+    : Object.keys(event.eventType)[0] || 'custom';
+  const gradient = EVENT_GRADIENTS[eventType] || EVENT_GRADIENTS.custom;
 
   return (
     <div
-      ref={cardRef}
-      className="rounded-2xl overflow-hidden shadow-lg"
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
-        transition: `opacity 0.6s ease-out ${index * 0.1}s, transform 0.6s ease-out ${index * 0.1}s`,
-      }}
+      ref={ref as React.RefObject<HTMLDivElement>}
+      className={`scroll-animate ${isVisible ? 'is-visible' : ''} rounded-2xl overflow-hidden shadow-luxury`}
+      style={{ transitionDelay: `${index * 0.1}s` }}
     >
-      {/* Card header with gradient */}
+      {/* Gradient header */}
       <div
-        className="p-5 flex items-center gap-4"
-        style={{ background: config.gradient }}
+        className="px-6 py-4"
+        style={{ background: gradient }}
       >
-        <div
-          className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ background: 'rgba(255,255,255,0.2)' }}
+        <span className="text-xs font-bold uppercase tracking-widest text-white opacity-80">
+          {eventType.charAt(0).toUpperCase() + eventType.slice(1)}
+        </span>
+        <h3
+          className="text-xl font-bold text-white mt-0.5"
+          style={{ fontFamily: fontHeading }}
         >
-          <Icon className="w-6 h-6" style={{ color: config.textColor }} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3
-            className="text-xl font-bold leading-tight"
-            style={{ color: config.textColor }}
-          >
-            {event.title}
-          </h3>
-          <span
-            className="text-xs font-semibold uppercase tracking-wider"
-            style={{ color: config.textColor, opacity: 0.8 }}
-          >
-            {config.label}
-          </span>
-        </div>
+          {event.title}
+        </h3>
       </div>
 
       {/* Card body */}
-      <div
-        className="p-5 space-y-3"
-        style={{ background: 'rgba(255, 255, 255, 0.95)' }}
-      >
-        {formattedDate && (
-          <div className="flex items-center gap-2.5">
-            <Calendar className="w-4 h-4 flex-shrink-0" style={{ color: '#6b4c3b' }} />
-            <span className="text-sm font-medium" style={{ color: '#2c1810' }}>
-              {formattedDate}
+      <div className="px-6 py-4 space-y-2 bg-white">
+        {event.date && (
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 shrink-0" style={{ color: primaryColor }} />
+            <span className="text-sm text-gray-700" style={{ fontFamily: fontBody }}>
+              {new Date(event.date).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
             </span>
           </div>
         )}
         {event.time && (
-          <div className="flex items-center gap-2.5">
-            <Clock className="w-4 h-4 flex-shrink-0" style={{ color: '#6b4c3b' }} />
-            <span className="text-sm" style={{ color: '#2c1810' }}>
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 shrink-0" style={{ color: primaryColor }} />
+            <span className="text-sm text-gray-700" style={{ fontFamily: fontBody }}>
               {event.time}
             </span>
           </div>
         )}
         {event.venue && (
-          <div className="flex items-start gap-2.5">
-            <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#6b4c3b' }} />
-            <span className="text-sm" style={{ color: '#2c1810' }}>
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 shrink-0" style={{ color: primaryColor }} />
+            <span className="text-sm text-gray-700" style={{ fontFamily: fontBody }}>
               {event.venue}
             </span>
           </div>
         )}
         {event.description && (
-          <p
-            className="text-sm leading-relaxed pt-1 border-t"
-            style={{ color: '#4a3728', borderColor: 'rgba(180, 140, 80, 0.2)' }}
-          >
+          <p className="text-sm text-gray-600 mt-2 leading-relaxed" style={{ fontFamily: fontBody }}>
             {event.description}
           </p>
         )}
@@ -179,95 +95,64 @@ function EventCard({ event, index, template }: EventCardProps) {
   );
 }
 
-export default function EventTimeline({ events, invitation }: EventTimelineProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
+export default function EventTimeline({ invitation, events, animationMode = 'elegant' }: EventTimelineProps) {
+  const template = getTemplateById(invitation.selectedTemplate);
+  const { ref: sectionRef, isVisible: sectionVisible } = useScrollAnimation({ threshold: 0.05 });
 
-  const template = getTemplateById(invitation.selectedTemplate) || getTemplateById('royal-gold')!;
-
-  const isDark =
-    invitation.backgroundChoice === 'dark-floral' ||
-    invitation.backgroundChoice === 'dark-minimal' ||
-    template.id?.includes('dark') ||
-    template.id?.includes('midnight') ||
-    template.id?.includes('cinematic');
-
-  const sectionBg = isDark
-    ? 'linear-gradient(180deg, #1a1208 0%, #0d0a05 100%)'
-    : `linear-gradient(180deg, #fdf8f0 0%, #f8f2e8 100%)`;
-
-  const headingColor = isDark ? '#f5f0e8' : '#2c1810';
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsVisible(true);
-      },
-      { threshold: 0.1 }
-    );
-    if (sectionRef.current) observer.observe(sectionRef.current);
-    return () => observer.disconnect();
-  }, []);
+  const primaryColor = template?.primaryColor || '#C9A84C';
+  const accentColor = template?.accentColor || '#8B1A1A';
+  const bgColor = template?.bgColor || '#FDF8F0';
+  const fontHeading = template?.fontHeading || 'Cormorant Garamond, serif';
+  const fontBody = template?.fontBody || 'Lato, sans-serif';
+  // Script font: TemplateDefinition has no fontScript field
+  const fontScript = 'Great Vibes, cursive';
 
   if (!events || events.length === 0) return null;
 
-  const sortedEvents = [...events].sort((a, b) => {
-    if (!a.date || !b.date) return 0;
-    return new Date(a.date).getTime() - new Date(b.date).getTime();
-  });
-
   return (
     <section
-      ref={sectionRef}
-      className="py-20 px-4"
-      style={{ background: sectionBg }}
+      ref={sectionRef as React.RefObject<HTMLElement>}
+      className={`py-16 px-6 scroll-animate ${sectionVisible ? 'is-visible' : ''}`}
+      style={{ backgroundColor: bgColor }}
     >
-      <div className="max-w-4xl mx-auto">
-        {/* Section header */}
-        <div
-          className="text-center mb-12"
-          style={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
-          }}
-        >
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div
-              className="h-px w-16"
-              style={{ background: `linear-gradient(90deg, transparent, ${template.primaryColor})` }}
-            />
-            <div className="w-2 h-2 rounded-full" style={{ background: template.primaryColor }} />
-            <div
-              className="h-px w-16"
-              style={{ background: `linear-gradient(90deg, ${template.primaryColor}, transparent)` }}
-            />
-          </div>
-          <h2
-            className="text-3xl sm:text-4xl font-bold"
+      <div className="max-w-3xl mx-auto">
+        {/* Heading */}
+        <div className="text-center mb-12">
+          <p
+            className="text-2xl md:text-3xl mb-2"
             style={{
-              fontFamily: `'${template.headingFont}', serif`,
-              color: headingColor,
+              fontFamily: fontScript,
+              color: accentColor,
             }}
           >
-            Celebration Events
-          </h2>
-          <p
-            className="mt-3 text-sm"
-            style={{ color: isDark ? '#a09070' : '#7a6050' }}
-          >
-            Join us for these special moments
+            Celebrations
           </p>
+          <h2
+            className="text-3xl md:text-4xl font-bold"
+            style={{
+              fontFamily: fontHeading,
+              color: primaryColor,
+            }}
+          >
+            Events &amp; Schedule
+          </h2>
+          <div
+            className="w-24 h-0.5 mx-auto mt-4"
+            style={{ background: `linear-gradient(90deg, transparent, ${primaryColor}, transparent)` }}
+          />
         </div>
 
-        {/* Events grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {sortedEvents.map((event, index) => (
+        {/* Event cards */}
+        <div className="space-y-6">
+          {events.map((event, index) => (
             <EventCard
               key={event.id}
               event={event}
               index={index}
-              template={template}
+              primaryColor={primaryColor}
+              accentColor={accentColor}
+              fontHeading={fontHeading}
+              fontBody={fontBody}
             />
           ))}
         </div>

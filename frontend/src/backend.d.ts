@@ -25,21 +25,35 @@ export interface RSVPEntry {
     guestPhone: string;
 }
 export type Time = bigint;
-export interface Event {
-    id: string;
+export interface UpdateEventInput {
     title: string;
     venue: string;
     date: string;
-    invitationId: string;
     time: string;
     description: string;
-    eventType: EventType;
+    eventType: string;
 }
 export interface ThemeConfig {
     name: string;
     fontChoice: string;
     backgroundChoice: string;
     template: string;
+    colorScheme: string;
+}
+export interface InvitationInput {
+    weddingDate: string;
+    invitationMessage: string;
+    weddingTime: string;
+    venueAddress: string;
+    slug: string;
+    googleMapsLink: string;
+    fontChoice: string;
+    selectedTemplate: string;
+    backgroundChoice: string;
+    brideName: string;
+    groomName: string;
+    venueName: string;
+    familyDetails: string;
     colorScheme: string;
 }
 export interface Invitation {
@@ -75,10 +89,30 @@ export interface RSVP {
     timestamp: Time;
     attending: boolean;
 }
+export interface Event {
+    id: string;
+    title: string;
+    venue: string;
+    date: string;
+    invitationId: string;
+    time: string;
+    description: string;
+    eventType: EventType;
+}
 export interface RSVPStats {
     totalConfirmedGuests: bigint;
     totalResponses: bigint;
     totalDeclined: bigint;
+}
+export interface EventInput {
+    id: string;
+    title: string;
+    venue: string;
+    date: string;
+    invitationId: string;
+    time: string;
+    description: string;
+    eventType: string;
 }
 export interface BackgroundMusic {
     id: string;
@@ -86,6 +120,15 @@ export interface BackgroundMusic {
     autoPlay: boolean;
     invitationId: string;
     uploadedAt: bigint;
+}
+export interface RSVPInput {
+    rsvpId: string;
+    guestCount: bigint;
+    invitationId: string;
+    guestName: string;
+    message: string;
+    attending: boolean;
+    guestPhone: string;
 }
 export interface UserProfile {
     name: string;
@@ -111,11 +154,11 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
-    addEvent(invitationId: string, eventId: string, title: string, date: string, time: string, venue: string, description: string, eventType: EventType): Promise<Event>;
     addPhoto(invitationId: string, photoId: string, imageUrl: string): Promise<Photo>;
     addPhotos(invitationId: string, bridePhoto: ExternalBlob | null, groomPhoto: ExternalBlob | null): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    createInvitation(slug: string, brideName: string, groomName: string, weddingDate: string, weddingTime: string, venueName: string, venueAddress: string, googleMapsLink: string, familyDetails: string, invitationMessage: string, selectedTemplate: string, colorScheme: string, fontChoice: string, backgroundChoice: string): Promise<Invitation>;
+    createEvent(input: EventInput): Promise<Event>;
+    createInvitation(input: InvitationInput): Promise<Invitation>;
     deleteEvent(eventId: string): Promise<void>;
     deleteInvitation(slug: string): Promise<void>;
     deletePhoto(photoId: string): Promise<void>;
@@ -140,7 +183,7 @@ export interface backendInterface {
     saveThemeVariant(invitationId: string, themeConfig: ThemeConfig): Promise<void>;
     setBackgroundMusic(invitationId: string, musicId: string, musicUrl: string, autoPlay: boolean): Promise<BackgroundMusic>;
     submitRSVP(name: string, attending: boolean, inviteCode: string): Promise<void>;
-    submitWeddingInvitationRSVP(invitationId: string, rsvpId: string, guestName: string, guestPhone: string, attending: boolean, guestCount: bigint, message: string): Promise<RSVPEntry>;
-    updateEvent(eventId: string, title: string, date: string, time: string, venue: string, description: string, eventType: EventType): Promise<Event>;
+    submitWeddingInvitationRSVP(input: RSVPInput): Promise<RSVPEntry>;
+    updateEvent(eventId: string, input: UpdateEventInput): Promise<Event>;
     updateInvitation(slug: string, brideName: string, groomName: string, weddingDate: string, weddingTime: string, venueName: string, venueAddress: string, googleMapsLink: string, familyDetails: string, invitationMessage: string, selectedTemplate: string, colorScheme: string, fontChoice: string, backgroundChoice: string): Promise<Invitation>;
 }

@@ -1,5 +1,10 @@
 import { useParams } from '@tanstack/react-router';
-import { useGetInvitationBySlug, useGetEventsByInvitation, useGetPhotosByInvitation, useGetBackgroundMusic } from '../hooks/useQueries';
+import {
+  useGetInvitationBySlug,
+  useGetEventsByInvitation,
+  useGetPhotosByInvitation,
+  useGetBackgroundMusic,
+} from '../hooks/useQueries';
 import HeroSection from '../components/guest/HeroSection';
 import CoupleIntroduction from '../components/guest/CoupleIntroduction';
 import EventTimeline from '../components/guest/EventTimeline';
@@ -11,12 +16,12 @@ import WhatsAppShareButton from '../components/guest/WhatsAppShareButton';
 import MusicController from '../components/media/MusicController';
 import DecorativeDivider from '../components/layout/DecorativeDivider';
 import SkeletonLoader from '../components/SkeletonLoader';
-import { Heart, Lock } from 'lucide-react';
+import { Heart, Lock, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
 export default function GuestInvitation() {
   const { slug } = useParams({ from: '/invitation/$slug' });
 
-  const { data: invitation, isLoading: invLoading, error: invError } = useGetInvitationBySlug(slug);
+  const { data: invitation, isLoading: invLoading, error: invError, refetch, isFetching } = useGetInvitationBySlug(slug);
   const { data: events } = useGetEventsByInvitation(slug);
   const { data: photos } = useGetPhotosByInvitation(slug);
   const { data: musicList } = useGetBackgroundMusic(slug);
@@ -25,7 +30,7 @@ export default function GuestInvitation() {
 
   if (invLoading) {
     return (
-      <div className="min-h-screen bg-ivory-50 pt-20 px-4">
+      <div className="min-h-screen pt-20 px-4" style={{ backgroundColor: 'oklch(0.98 0.005 80)' }}>
         <div className="max-w-4xl mx-auto space-y-6">
           <SkeletonLoader variant="image" />
           <SkeletonLoader variant="text" />
@@ -35,13 +40,55 @@ export default function GuestInvitation() {
     );
   }
 
-  if (invError || !invitation) {
+  if (invError) {
+    const isUnavailable = invError.message.includes('temporarily unavailable');
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ivory-50">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'oklch(0.98 0.005 80)' }}>
+        <div className="text-center px-4 max-w-sm mx-auto">
+          {isUnavailable ? (
+            <AlertTriangle className="w-16 h-16 mx-auto mb-4" style={{ color: 'oklch(0.72 0.12 75)' }} />
+          ) : (
+            <Heart className="w-16 h-16 mx-auto mb-4" style={{ color: 'oklch(0.72 0.12 75)' }} />
+          )}
+          <h2 className="text-2xl font-semibold mb-2" style={{ color: 'oklch(0.18 0.02 60)', fontFamily: '"Playfair Display", serif' }}>
+            {isUnavailable ? 'Service Unavailable' : 'Invitation Not Found'}
+          </h2>
+          <p className="mb-6" style={{ color: 'oklch(0.50 0.04 60)' }}>
+            {isUnavailable
+              ? 'This invitation is temporarily unavailable. Please try again shortly.'
+              : 'This invitation may have been removed or the link is incorrect.'}
+          </p>
+          {isUnavailable && (
+            <button
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all mx-auto disabled:opacity-50"
+              style={{ backgroundColor: 'oklch(0.55 0.18 45)', color: 'oklch(0.99 0.003 80)' }}
+            >
+              {isFetching ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              Try Again
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (!invitation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'oklch(0.98 0.005 80)' }}>
         <div className="text-center px-4">
-          <Heart className="w-16 h-16 text-gold-300 mx-auto mb-4" />
-          <h2 className="text-2xl font-serif text-charcoal-700 mb-2">Invitation Not Found</h2>
-          <p className="text-charcoal-500 font-sans">This invitation may have been removed or the link is incorrect.</p>
+          <Heart className="w-16 h-16 mx-auto mb-4" style={{ color: 'oklch(0.72 0.12 75)' }} />
+          <h2 className="text-2xl font-semibold mb-2" style={{ color: 'oklch(0.18 0.02 60)', fontFamily: '"Playfair Display", serif' }}>
+            Invitation Not Found
+          </h2>
+          <p style={{ color: 'oklch(0.50 0.04 60)' }}>
+            This invitation may have been removed or the link is incorrect.
+          </p>
         </div>
       </div>
     );
@@ -49,11 +96,15 @@ export default function GuestInvitation() {
 
   if (!invitation.isPublished) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-ivory-50">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'oklch(0.98 0.005 80)' }}>
         <div className="text-center px-4">
-          <Lock className="w-16 h-16 text-gold-300 mx-auto mb-4" />
-          <h2 className="text-2xl font-serif text-charcoal-700 mb-2">Coming Soon</h2>
-          <p className="text-charcoal-500 font-sans">This invitation hasn't been published yet. Please check back later.</p>
+          <Lock className="w-16 h-16 mx-auto mb-4" style={{ color: 'oklch(0.72 0.12 75)' }} />
+          <h2 className="text-2xl font-semibold mb-2" style={{ color: 'oklch(0.18 0.02 60)', fontFamily: '"Playfair Display", serif' }}>
+            Coming Soon
+          </h2>
+          <p style={{ color: 'oklch(0.50 0.04 60)' }}>
+            This invitation hasn't been published yet. Please check back later.
+          </p>
         </div>
       </div>
     );
@@ -63,34 +114,24 @@ export default function GuestInvitation() {
 
   return (
     <div className="min-h-screen">
-      {/* Music Controller */}
       {music && (
-        <MusicController
-          musicUrl={music.musicUrl}
-          autoPlay={music.autoPlay}
-        />
+        <MusicController musicUrl={music.musicUrl} autoPlay={music.autoPlay} />
       )}
 
-      {/* WhatsApp Share */}
       <WhatsAppShareButton
         invitationUrl={`${window.location.origin}/invitation/${slug}`}
         coupleName={`${invitation.brideName} & ${invitation.groomName}`}
       />
 
-      {/* Hero */}
       <HeroSection invitation={invitation} />
-
-      {/* Countdown */}
       <CountdownTimer invitation={invitation} />
 
       <DecorativeDivider variant="mandala" />
 
-      {/* Couple Introduction */}
       <CoupleIntroduction invitation={invitation} />
 
       <DecorativeDivider variant="line" />
 
-      {/* Events */}
       {events && events.length > 0 && (
         <>
           <EventTimeline events={events} invitation={invitation} />
@@ -98,7 +139,6 @@ export default function GuestInvitation() {
         </>
       )}
 
-      {/* Photo Gallery */}
       {photoUrls.length > 0 && (
         <>
           <PhotoGalleryLightbox photos={photoUrls} invitation={invitation} />
@@ -106,23 +146,21 @@ export default function GuestInvitation() {
         </>
       )}
 
-      {/* Venue */}
       <VenueSection invitation={invitation} />
 
       <DecorativeDivider variant="mandala" />
 
-      {/* RSVP */}
       <RSVPForm invitation={invitation} />
 
-      {/* Footer */}
-      <footer className="py-8 px-4 bg-charcoal-900 text-center">
-        <p className="text-ivory-400 text-sm font-sans">
-          Built with <Heart className="w-3 h-3 inline text-crimson-400 fill-current" /> using{' '}
+      <footer className="py-8 px-4 text-center" style={{ backgroundColor: 'oklch(0.25 0.02 60)' }}>
+        <p className="text-sm" style={{ color: 'oklch(0.72 0.12 75)' }}>
+          Built with <Heart className="w-3 h-3 inline fill-current" style={{ color: 'oklch(0.55 0.20 25)' }} /> using{' '}
           <a
             href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gold-400 hover:text-gold-300 transition-colors"
+            className="underline hover:opacity-80 transition-opacity"
+            style={{ color: 'oklch(0.82 0.09 78)' }}
           >
             caffeine.ai
           </a>

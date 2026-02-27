@@ -1,14 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Fully restore the Wedding Invitations app to its exact Version 5 state by rolling back all backend and frontend changes introduced after Version 5.
+**Goal:** Fix the black background issue throughout the Indian Wedding Invitations app so all content is fully visible and readable.
 
 **Planned changes:**
-- Restore `backend/main.mo` to Version 5, including all data types (Invitation, Event, RSVP, Photo, Music), CRUD operations, blob storage, and access control logic
-- Restore `App.tsx` routes and providers to Version 5
-- Restore all frontend pages (LandingPage, Dashboard, CreateInvitationWizard, InvitationEditor, GuestInvitation, NotFound) to Version 5
-- Restore all components (AuthGuard, Header, wizard steps, guest components, media, templates, events, layout) to Version 5
-- Restore `useQueries.ts`, `InvitationFormContext.tsx`, utils, and stylesheets to Version 5
-- Revert any login-gating removal, anonymous actor changes, or other modifications made after Version 5
+- Replace all black or near-black background colors with light/themed values (ivory, cream, white) across all pages and components
+- Fix CSS custom properties (`--background`, `--foreground`) and body/root background styles in `index.css` files to use light theme values by default
+- Ensure dark mode CSS variables do not bleed into the default light theme
+- Apply the existing design system color tokens (ivory, crimson, gold, rose, charcoal) consistently across the landing page, dashboard, create wizard, invitation editor, and guest invitation page
 
-**User-visible outcome:** The app looks and behaves exactly as it did in Version 5, with all authentication gating, pages, and functionality fully restored.
+**User-visible outcome:** The app renders with a proper light/themed background on all pages immediately on load, with all text, buttons, cards, forms, and headers fully visible and readable.

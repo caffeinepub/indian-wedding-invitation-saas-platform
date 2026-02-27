@@ -3,11 +3,9 @@ import List "mo:core/List";
 import Runtime "mo:core/Runtime";
 import Text "mo:core/Text";
 import Time "mo:core/Time";
-import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
+import Principal "mo:core/Principal";
 import InviteLinksModule "invite-links/invite-links-module";
 import Random "mo:core/Random";
-import Principal "mo:core/Principal";
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
@@ -16,6 +14,7 @@ import MixinAuthorization "authorization/MixinAuthorization";
 actor {
   include MixinStorage();
 
+  // Authorization system
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
@@ -55,6 +54,42 @@ actor {
     savedThemes : [ThemeConfig];
   };
 
+  type InvitationInput = {
+    slug : Text;
+    brideName : Text;
+    groomName : Text;
+    weddingDate : Text;
+    weddingTime : Text;
+    venueName : Text;
+    venueAddress : Text;
+    googleMapsLink : Text;
+    familyDetails : Text;
+    invitationMessage : Text;
+    selectedTemplate : Text;
+    colorScheme : Text;
+    fontChoice : Text;
+    backgroundChoice : Text;
+  };
+
+  type UpdateEventInput = {
+    title : Text;
+    date : Text;
+    time : Text;
+    venue : Text;
+    description : Text;
+    eventType : Text;
+  };
+
+  type RSVPInput = {
+    invitationId : Text;
+    rsvpId : Text;
+    guestName : Text;
+    guestPhone : Text;
+    attending : Bool;
+    guestCount : Nat;
+    message : Text;
+  };
+
   type EventType = {
     #haldi;
     #mehndi;
@@ -73,6 +108,17 @@ actor {
     venue : Text;
     description : Text;
     eventType : EventType;
+  };
+
+  type EventInput = {
+    id : Text;
+    invitationId : Text;
+    title : Text;
+    date : Text;
+    time : Text;
+    venue : Text;
+    description : Text;
+    eventType : Text;
   };
 
   type RSVPEntry = {
@@ -126,6 +172,7 @@ actor {
     };
   };
 
+  // User profile functions
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can get their profile");
@@ -147,42 +194,29 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  public shared ({ caller }) func createInvitation(
-    slug : Text,
-    brideName : Text,
-    groomName : Text,
-    weddingDate : Text,
-    weddingTime : Text,
-    venueName : Text,
-    venueAddress : Text,
-    googleMapsLink : Text,
-    familyDetails : Text,
-    invitationMessage : Text,
-    selectedTemplate : Text,
-    colorScheme : Text,
-    fontChoice : Text,
-    backgroundChoice : Text,
-  ) : async Invitation {
+  // Invitation management - requires user role (authenticated users manage their invitations)
+  public shared ({ caller }) func createInvitation(input : InvitationInput) : async Invitation {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can create invitations");
     };
-    validateSlug(slug);
+
+    validateSlug(input.slug);
 
     let invitation : Invitation = {
-      id = slug;
-      brideName;
-      groomName;
-      weddingDate;
-      weddingTime;
-      venueName;
-      venueAddress;
-      googleMapsLink;
-      familyDetails;
-      invitationMessage;
-      selectedTemplate;
-      colorScheme;
-      fontChoice;
-      backgroundChoice;
+      id = input.slug;
+      brideName = input.brideName;
+      groomName = input.groomName;
+      weddingDate = input.weddingDate;
+      weddingTime = input.weddingTime;
+      venueName = input.venueName;
+      venueAddress = input.venueAddress;
+      googleMapsLink = input.googleMapsLink;
+      familyDetails = input.familyDetails;
+      invitationMessage = input.invitationMessage;
+      selectedTemplate = input.selectedTemplate;
+      colorScheme = input.colorScheme;
+      fontChoice = input.fontChoice;
+      backgroundChoice = input.backgroundChoice;
       bridePhoto = null;
       groomPhoto = null;
       isPublished = false;
@@ -190,7 +224,8 @@ actor {
       updatedAt = now();
       savedThemes = [];
     };
-    invitationStore.add(slug, invitation);
+
+    invitationStore.add(input.slug, invitation);
     invitation;
   };
 
@@ -244,6 +279,7 @@ actor {
     };
   };
 
+  // Public read - no auth needed (wedding guests need to view invitations)
   public query func getInvitationBySlug(slug : Text) : async Invitation {
     switch (invitationStore.get(slug)) {
       case (null) { Runtime.trap("Invitation not found") };
@@ -271,10 +307,8 @@ actor {
     };
   };
 
-  public query ({ caller }) func getAllInvitations() : async [Invitation] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can list invitations");
-    };
+  // Public read - no auth needed (listing invitations is public)
+  public query func getAllInvitations() : async [Invitation] {
     invitationStore.values().toArray();
   };
 
@@ -302,47 +336,30 @@ actor {
     invitationStore.remove(slug);
   };
 
-  public shared ({ caller }) func addEvent(
-    invitationId : Text,
-    eventId : Text,
-    title : Text,
-    date : Text,
-    time : Text,
-    venue : Text,
-    description : Text,
-    eventType : EventType,
-  ) : async Event {
+  public shared ({ caller }) func createEvent(input : EventInput) : async Event {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can add events");
+      Runtime.trap("Unauthorized: Only users can create events");
     };
-    switch (invitationStore.get(invitationId)) {
+    switch (invitationStore.get(input.invitationId)) {
       case (null) { Runtime.trap("Associated invitation not found") };
       case (?_) {
         let event : Event = {
-          id = eventId;
-          invitationId;
-          title;
-          date;
-          time;
-          venue;
-          description;
-          eventType;
+          id = input.id;
+          invitationId = input.invitationId;
+          title = input.title;
+          date = input.date;
+          time = input.time;
+          venue = input.venue;
+          description = input.description;
+          eventType = #custom;
         };
-        eventStore.add(eventId, event);
+        eventStore.add(input.id, event);
         event;
       };
     };
   };
 
-  public shared ({ caller }) func updateEvent(
-    eventId : Text,
-    title : Text,
-    date : Text,
-    time : Text,
-    venue : Text,
-    description : Text,
-    eventType : EventType,
-  ) : async Event {
+  public shared ({ caller }) func updateEvent(eventId : Text, input : UpdateEventInput) : async Event {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can update events");
     };
@@ -352,12 +369,12 @@ actor {
         let updated : Event = {
           id = eventId;
           invitationId = existing.invitationId;
-          title;
-          date;
-          time;
-          venue;
-          description;
-          eventType;
+          title = input.title;
+          date = input.date;
+          time = input.time;
+          venue = input.venue;
+          description = input.description;
+          eventType = #custom;
         };
         eventStore.add(eventId, updated);
         updated;
@@ -375,6 +392,7 @@ actor {
     eventStore.remove(eventId);
   };
 
+  // Public read - no auth needed (wedding guests view event details)
   public query func getEventsByInvitation(invitationId : Text) : async [Event] {
     let list = List.empty<Event>();
     for (event in eventStore.values()) {
@@ -385,35 +403,28 @@ actor {
     list.toArray();
   };
 
-  // RSVP submission is open to all (including guests)
-  public shared func submitWeddingInvitationRSVP(
-    invitationId : Text,
-    rsvpId : Text,
-    guestName : Text,
-    guestPhone : Text,
-    attending : Bool,
-    guestCount : Nat,
-    message : Text,
-  ) : async RSVPEntry {
-    switch (invitationStore.get(invitationId)) {
+  // RSVP submission - open to all including guests (wedding guests submit RSVPs)
+  public shared ({ caller }) func submitWeddingInvitationRSVP(input : RSVPInput) : async RSVPEntry {
+    switch (invitationStore.get(input.invitationId)) {
       case (null) { Runtime.trap("Associated invitation not found") };
       case (?_) {
         let rsvp : RSVPEntry = {
-          id = rsvpId;
-          invitationId;
-          guestName;
-          guestPhone;
-          attending;
-          guestCount;
-          message;
+          id = input.rsvpId;
+          invitationId = input.invitationId;
+          guestName = input.guestName;
+          guestPhone = input.guestPhone;
+          attending = input.attending;
+          guestCount = input.guestCount;
+          message = input.message;
           submittedAt = now();
         };
-        rsvpStore.add(rsvpId, rsvp);
+        rsvpStore.add(input.rsvpId, rsvp);
         rsvp;
       };
     };
   };
 
+  // RSVP reads - require user role (only invitation owners should see RSVP lists)
   public query ({ caller }) func getRSVPsByInvitation(invitationId : Text) : async [RSVPEntry] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view RSVPs");
@@ -482,6 +493,7 @@ actor {
     photoStore.remove(photoId);
   };
 
+  // Public read - no auth needed (wedding guests view gallery)
   public query func getPhotosByInvitation(invitationId : Text) : async [Photo] {
     let list = List.empty<Photo>();
     for (photo in photoStore.values()) {
@@ -512,6 +524,7 @@ actor {
     };
   };
 
+  // Public read - no auth needed (wedding guests hear background music)
   public query func getBackgroundMusic(invitationId : Text) : async [BackgroundMusic] {
     let list = List.empty<BackgroundMusic>();
     for (music in musicStore.values()) {
@@ -538,6 +551,7 @@ actor {
     };
   };
 
+  // Public read - no auth needed (theme variants are part of the public invitation)
   public query func getThemeVariants(invitationId : Text) : async [ThemeConfig] {
     switch (invitationStore.get(invitationId)) {
       case (null) { Runtime.trap("Invitation not found") };
@@ -581,6 +595,7 @@ actor {
     };
   };
 
+  // Invite codes - requires user role (only invitation owners generate invite codes)
   public shared ({ caller }) func generateInviteCode() : async Text {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can generate invite codes");
@@ -591,11 +606,12 @@ actor {
     code;
   };
 
-  // RSVP submission via invite code is open to all (including guests)
-  public shared func submitRSVP(name : Text, attending : Bool, inviteCode : Text) : async () {
+  // RSVP submission via invite code - open to all including guests
+  public shared ({ caller }) func submitRSVP(name : Text, attending : Bool, inviteCode : Text) : async () {
     InviteLinksModule.submitRSVP(inviteState, name, attending, inviteCode);
   };
 
+  // RSVP and invite code reads - require user role (only invitation owners view these)
   public query ({ caller }) func getAllRSVPs() : async [InviteLinksModule.RSVP] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view all RSVPs");

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Invitation } from '../../backend';
+import { useState, useEffect } from 'react';
 import { getTemplateById } from '../../utils/templateDefinitions';
+import type { Invitation } from '../../backend';
 
 interface CountdownTimerProps {
   invitation: Invitation;
+  animationMode?: 'minimal' | 'elegant' | 'cinematic';
 }
 
 interface TimeLeft {
@@ -13,54 +14,50 @@ interface TimeLeft {
   seconds: number;
 }
 
-function calculateTimeLeft(targetDate: string): TimeLeft {
-  const difference = new Date(targetDate).getTime() - new Date().getTime();
-  if (difference <= 0) {
+function calculateTimeLeft(weddingDate: string, weddingTime: string): TimeLeft {
+  const dateStr = weddingTime ? `${weddingDate}T${weddingTime}` : weddingDate;
+  const target = new Date(dateStr).getTime();
+  const now = Date.now();
+  const diff = target - now;
+
+  if (diff <= 0) {
     return { days: 0, hours: 0, minutes: 0, seconds: 0 };
   }
+
   return {
-    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((difference / 1000 / 60) % 60),
-    seconds: Math.floor((difference / 1000) % 60),
+    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+    hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+    minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+    seconds: Math.floor((diff % (1000 * 60)) / 1000),
   };
 }
 
-export default function CountdownTimer({ invitation }: CountdownTimerProps) {
-  const template = getTemplateById(invitation.selectedTemplate) || getTemplateById('royal-gold')!;
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [mounted, setMounted] = useState(false);
-
-  const isDark =
-    invitation.backgroundChoice === 'dark-floral' ||
-    invitation.backgroundChoice === 'dark-minimal' ||
-    template.id?.includes('dark') ||
-    template.id?.includes('midnight') ||
-    template.id?.includes('cinematic');
-
-  const sectionBg = isDark
-    ? `linear-gradient(135deg, #0d0a05 0%, #1a1208 50%, #0d0a05 100%)`
-    : `linear-gradient(135deg, ${template.primaryColor}12 0%, ${template.primaryColor}06 50%, ${template.primaryColor}12 100%)`;
-
-  const headingColor = isDark ? '#f5f0e8' : '#2c1810';
-  const labelColor = isDark ? '#a09070' : '#7a6050';
-  const digitBg = isDark ? 'rgba(30, 22, 10, 0.9)' : 'rgba(255, 255, 255, 0.9)';
-  const digitColor = isDark ? '#f5f0e8' : '#2c1810';
-  const digitBorder = `${template.primaryColor}30`;
+export default function CountdownTimer({ invitation, animationMode = 'elegant' }: CountdownTimerProps) {
+  const template = getTemplateById(invitation.selectedTemplate);
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() =>
+    calculateTimeLeft(invitation.weddingDate, invitation.weddingTime)
+  );
 
   useEffect(() => {
-    setMounted(true);
-    if (!invitation.weddingDate) return;
-    setTimeLeft(calculateTimeLeft(invitation.weddingDate));
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft(invitation.weddingDate));
+      setTimeLeft(calculateTimeLeft(invitation.weddingDate, invitation.weddingTime));
     }, 1000);
     return () => clearInterval(timer);
-  }, [invitation.weddingDate]);
+  }, [invitation.weddingDate, invitation.weddingTime]);
 
-  if (!invitation.weddingDate) return null;
+  const primaryColor = template?.primaryColor || '#C9A84C';
+  const accentColor = template?.accentColor || '#8B1A1A';
+  const bgColor = template?.bgColor || '#FDF8F0';
+  // Script font: TemplateDefinition has no fontScript field
+  const fontScript = 'Great Vibes, cursive';
+  const fontHeading = template?.fontHeading || 'Cormorant Garamond, serif';
+  const fontBody = template?.fontBody || 'Lato, sans-serif';
 
-  const isPast = new Date(invitation.weddingDate).getTime() <= new Date().getTime();
+  const isWeddingPast =
+    timeLeft.days === 0 &&
+    timeLeft.hours === 0 &&
+    timeLeft.minutes === 0 &&
+    timeLeft.seconds === 0;
 
   const units = [
     { label: 'Days', value: timeLeft.days },
@@ -71,84 +68,84 @@ export default function CountdownTimer({ invitation }: CountdownTimerProps) {
 
   return (
     <section
-      className="py-16 px-4"
-      style={{ background: sectionBg }}
+      className="py-16 px-6 text-center"
+      style={{ backgroundColor: bgColor }}
     >
-      <div className="max-w-2xl mx-auto text-center">
-        {/* Header */}
-        <div className="flex items-center justify-center gap-4 mb-4">
-          <div
-            className="h-px w-12"
-            style={{ background: `linear-gradient(90deg, transparent, ${template.primaryColor})` }}
-          />
-          <div className="w-1.5 h-1.5 rounded-full" style={{ background: template.primaryColor }} />
-          <div
-            className="h-px w-12"
-            style={{ background: `linear-gradient(90deg, ${template.primaryColor}, transparent)` }}
-          />
-        </div>
-
-        <h2
-          className="text-2xl sm:text-3xl font-bold mb-2"
+      <div className="max-w-3xl mx-auto">
+        {/* Section heading */}
+        <p
+          className="text-2xl md:text-3xl mb-2 animate-elegantFade"
           style={{
-            fontFamily: `'${template.headingFont}', serif`,
-            color: headingColor,
+            fontFamily: fontScript,
+            color: accentColor,
           }}
         >
-          {isPast ? 'We Are Married!' : 'Counting Down'}
-        </h2>
-        <p
-          className="text-sm mb-8"
-          style={{ color: labelColor }}
-        >
-          {isPast
-            ? `${invitation.brideName} & ${invitation.groomName} are now married!`
-            : `Until ${invitation.brideName} & ${invitation.groomName} say "I Do"`}
+          Counting down to
         </p>
+        <h2
+          className="text-3xl md:text-4xl font-bold mb-10 animate-fadeInUp"
+          style={{
+            fontFamily: fontHeading,
+            color: primaryColor,
+          }}
+        >
+          The Big Day
+        </h2>
 
-        {/* Timer digits */}
-        {!isPast && (
-          <div
-            className="flex items-center justify-center gap-3 sm:gap-6"
+        {isWeddingPast ? (
+          <p
+            className="text-2xl animate-scaleIn"
             style={{
-              opacity: mounted ? 1 : 0,
-              transition: 'opacity 0.5s ease-out',
+              fontFamily: fontScript,
+              color: primaryColor,
             }}
           >
-            {units.map(({ label, value }, index) => (
-              <React.Fragment key={label}>
-                <div className="flex flex-col items-center">
+            The celebration has begun! 🎉
+          </p>
+        ) : (
+          <div className="flex items-center justify-center gap-4 md:gap-8 flex-wrap">
+            {units.map((unit, index) => (
+              <div
+                key={unit.label}
+                className="flex flex-col items-center animate-scaleIn"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div
+                  className="w-20 h-20 md:w-24 md:h-24 rounded-lg flex items-center justify-center shadow-luxury mb-2 relative overflow-hidden"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor}20, ${primaryColor}40)`,
+                    border: `2px solid ${primaryColor}60`,
+                  }}
+                >
+                  {/* Shimmer overlay */}
                   <div
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex items-center justify-center shadow-lg"
+                    className="absolute inset-0 animate-shimmer"
                     style={{
-                      background: digitBg,
-                      border: `1px solid ${digitBorder}`,
-                      boxShadow: `0 4px 15px ${template.primaryColor}20`,
+                      background: `linear-gradient(90deg, transparent, ${primaryColor}20, transparent)`,
+                      backgroundSize: '200% 100%',
+                    }}
+                  />
+                  <span
+                    className="relative z-10 text-3xl md:text-4xl font-bold tabular-nums"
+                    style={{
+                      fontFamily: fontHeading,
+                      color: primaryColor,
                     }}
                   >
-                    <span
-                      className="text-2xl sm:text-3xl font-bold tabular-nums"
-                      style={{ color: digitColor }}
-                    >
-                      {String(value).padStart(2, '0')}
-                    </span>
-                  </div>
-                  <span
-                    className="text-xs mt-2 uppercase tracking-wider font-medium"
-                    style={{ color: labelColor }}
-                  >
-                    {label}
+                    {String(unit.value).padStart(2, '0')}
                   </span>
                 </div>
-                {index < units.length - 1 && (
-                  <span
-                    className="text-2xl font-bold mb-5"
-                    style={{ color: template.primaryColor }}
-                  >
-                    :
-                  </span>
-                )}
-              </React.Fragment>
+                <span
+                  className="text-xs tracking-widest uppercase"
+                  style={{
+                    fontFamily: fontBody,
+                    color: accentColor,
+                    opacity: 0.7,
+                  }}
+                >
+                  {unit.label}
+                </span>
+              </div>
             ))}
           </div>
         )}

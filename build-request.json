@@ -1,58 +1,61 @@
 {
   "kind": "build_request",
-  "title": "Rollback to Version 5 — Full Restore",
-  "projectName": "Wedding Invitations",
+  "title": "Fix black background hiding content and ensure proper color visibility",
+  "projectName": "Indian Wedding Invitations",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Restore the backend (backend/main.mo) to its exact Version 5 state, including all data types (Invitation, Event, RSVP, Photo, Music), CRUD operations, blob storage, and access control logic that were present in Version 5. Undo all backend changes introduced after Version 5.",
-      "target": "backend",
+      "text": "Fix the black background issue throughout the entire app. Replace all black or near-black background colors with appropriate light or themed backgrounds (ivory, cream, white, or the design system's defined background tokens) so that all content — text, buttons, cards, forms, headers — is fully visible and readable.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-16",
+          "msg-18"
         ],
         "quotes": [
-          "get back my exact same app of version 5 make sure every thing same as version 5"
+          "not looking anything background color is black it hides everything",
+          "fix the black background and ensure all content is properly visible with good color contrast throughout the app"
         ]
       },
       "acceptanceCriteria": [
-        "All data types and CRUD operations match Version 5 exactly.",
-        "Access control and blob storage logic are identical to Version 5.",
-        "No changes introduced after Version 5 remain in the backend."
+        "No page in the app has a solid black (#000 or near-black) background that obscures content",
+        "All text has sufficient contrast against its background (WCAG AA minimum)",
+        "Landing page, dashboard, create wizard, invitation editor, and guest invitation page are all visually legible",
+        "Header, navigation, cards, forms, and buttons are all fully visible without requiring user action",
+        "The app uses the existing design system color tokens (ivory, crimson, gold, rose, charcoal) consistently"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Restore all frontend files to their exact Version 5 state. This includes: App.tsx (routes and providers), all pages (LandingPage, Dashboard, CreateInvitationWizard, InvitationEditor, GuestInvitation, NotFound), all components (AuthGuard, Header, wizard steps, guest components, media, templates, events, layout), all hooks (useQueries.ts), context (InvitationFormContext.tsx), utils, and stylesheets. Revert any login-gating removal, anonymous actor changes, or any other modifications made after Version 5. The app must look and behave exactly as it did in Version 5.",
+      "text": "Audit and fix CSS custom properties and Tailwind color token definitions in frontend/index.css and frontend/src/index.css to ensure that the default (light) theme does not apply dark/black background values. Ensure the --background and --foreground CSS variables, as well as any body or root background styles, are set to appropriate light theme values by default.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-16"
         ],
         "quotes": [
-          "get back my exact same app of version 5 make sure every thing same as version 5"
+          "background color is black it hides everything"
         ]
       },
       "acceptanceCriteria": [
-        "All frontend pages render correctly as they did in Version 5.",
-        "Authentication gating (AuthGuard) is restored if it existed in Version 5.",
-        "useQueries.ts uses the authenticated actor as it did in Version 5.",
-        "Dashboard, CreateInvitationWizard, InvitationEditor, and all other pages function identically to Version 5.",
-        "No login/auth removal changes from versions after Version 5 are present.",
-        "All routes, layouts, and components match Version 5 exactly."
+        "The CSS --background variable resolves to a light color (e.g., ivory or white) in the default theme",
+        "The body element does not have a black or near-black background in the default state",
+        "Dark mode variables do not bleed into the light/default theme",
+        "All pages render with a visible background immediately on load without any flash of black"
       ]
     }
   ],
   "constraints": [
-    "Do not introduce any new features or changes beyond what existed in Version 5.",
-    "Every file must match Version 5 state exactly — no partial rollbacks.",
-    "Do not modify frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui (immutable paths)."
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "Preserve the existing design system color palette (gold, crimson, ivory, charcoal, rose)",
+    "Do not remove or restructure the existing routing or component hierarchy"
   ],
   "nonGoals": [
-    "Any new features or UI improvements beyond Version 5.",
-    "Any changes introduced in Versions 6 through 18.",
-    "Migration of post-Version-5 data models."
+    "Adding or removing authentication features",
+    "Fixing invitation creation logic",
+    "Changing the overall visual theme or branding",
+    "Backend changes"
   ],
   "imageRequirements": {
     "required": [],

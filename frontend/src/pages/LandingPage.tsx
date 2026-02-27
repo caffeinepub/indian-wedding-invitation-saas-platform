@@ -1,272 +1,270 @@
 import { useNavigate } from '@tanstack/react-router';
-import { Heart, Star, Sparkles, Camera, Music, Users, ArrowRight, CheckCircle } from 'lucide-react';
-import DecorativeDivider from '../components/layout/DecorativeDivider';
+import { Heart, Sparkles, Palette, Music, Users, Star, ArrowRight, Camera } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+const FEATURES = [
+  {
+    icon: Palette,
+    title: 'Stunning Templates',
+    description: 'Choose from 5 premium wedding themes crafted with traditional Indian aesthetics.',
+  },
+  {
+    icon: Sparkles,
+    title: 'Fully Customizable',
+    description: 'Personalize colors, fonts, and decorative elements to match your vision.',
+  },
+  {
+    icon: Camera,
+    title: 'Photo Gallery',
+    description: 'Showcase your love story with a beautiful photo gallery for your guests.',
+  },
+  {
+    icon: Music,
+    title: 'Background Music',
+    description: 'Set the mood with custom background music that plays for your guests.',
+  },
+  {
+    icon: Users,
+    title: 'RSVP Management',
+    description: 'Collect and manage RSVPs digitally with real-time guest count tracking.',
+  },
+  {
+    icon: Star,
+    title: 'Event Timeline',
+    description: 'List all your wedding ceremonies — Mehndi, Sangeet, Wedding & Reception.',
+  },
+];
+
+const SAMPLE_INVITATIONS = [
+  {
+    bride: 'Priya',
+    groom: 'Arjun',
+    date: 'March 15, 2026',
+    theme: 'Classic Ivory',
+    gradient: 'linear-gradient(135deg, oklch(0.97 0.01 80), oklch(0.88 0.06 80))',
+    accent: 'oklch(0.55 0.18 45)',
+  },
+  {
+    bride: 'Meera',
+    groom: 'Rohan',
+    date: 'April 22, 2026',
+    theme: 'Royal Crimson',
+    gradient: 'linear-gradient(135deg, oklch(0.97 0.01 15), oklch(0.85 0.07 15))',
+    accent: 'oklch(0.45 0.20 25)',
+  },
+  {
+    bride: 'Ananya',
+    groom: 'Vikram',
+    date: 'May 8, 2026',
+    theme: 'Blush Rose',
+    gradient: 'linear-gradient(135deg, oklch(0.97 0.01 10), oklch(0.88 0.06 15))',
+    accent: 'oklch(0.60 0.14 15)',
+  },
+];
 
 export default function LandingPage() {
   const navigate = useNavigate();
 
-  const features = [
-    {
-      icon: <Sparkles className="w-8 h-8" />,
-      title: 'Stunning Templates',
-      description: 'Choose from 12 beautifully crafted templates inspired by Indian wedding traditions.',
-    },
-    {
-      icon: <Camera className="w-8 h-8" />,
-      title: 'Photo Gallery',
-      description: 'Share your precious moments with a beautiful photo gallery for your guests.',
-    },
-    {
-      icon: <Music className="w-8 h-8" />,
-      title: 'Background Music',
-      description: 'Set the mood with custom background music that plays as guests view your invitation.',
-    },
-    {
-      icon: <Users className="w-8 h-8" />,
-      title: 'RSVP Management',
-      description: 'Collect and manage RSVPs digitally with real-time guest count tracking.',
-    },
-    {
-      icon: <Heart className="w-8 h-8" />,
-      title: 'Multiple Events',
-      description: 'Add all your wedding events — Mehndi, Haldi, Sangeet, Wedding, and Reception.',
-    },
-    {
-      icon: <Star className="w-8 h-8" />,
-      title: 'Custom Themes',
-      description: 'Personalize colors, fonts, and backgrounds to match your wedding aesthetic.',
-    },
-  ];
-
-  const steps = [
-    { number: '01', title: 'Create Your Invitation', description: 'Fill in your wedding details and choose a beautiful template.' },
-    { number: '02', title: 'Customize & Personalize', description: 'Add photos, events, music, and customize the theme to your taste.' },
-    { number: '03', title: 'Share with Guests', description: 'Publish and share your unique invitation link with family and friends.' },
-  ];
-
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ backgroundColor: 'oklch(0.98 0.005 80)' }}>
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b" style={{ backgroundColor: 'oklch(0.25 0.02 60)', borderColor: 'oklch(0.35 0.025 60)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src="/assets/generated/logo-mark.dim_256x256.png" alt="Logo" className="w-8 h-8 object-contain" />
+            <span className="text-xl font-bold" style={{ color: 'oklch(0.72 0.12 75)', fontFamily: '"Playfair Display", serif' }}>
+              Vivah
+            </span>
+          </div>
+          <nav className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate({ to: '/dashboard' })}
+              className="text-sm font-medium"
+              style={{ color: 'oklch(0.88 0.02 80)' }}
+            >
+              Dashboard
+            </Button>
+            <Button
+              onClick={() => navigate({ to: '/create' })}
+              className="text-sm font-medium"
+              style={{ backgroundColor: 'oklch(0.72 0.12 75)', color: 'oklch(0.18 0.02 60)' }}
+            >
+              Create Invitation
+            </Button>
+          </nav>
+        </div>
+      </header>
+
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/assets/generated/hero-bg.dim_1920x1080.png)' }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-charcoal-900/70 via-charcoal-900/50 to-charcoal-900/80" />
+      <section className="relative overflow-hidden py-24 px-4" style={{ background: 'linear-gradient(160deg, oklch(0.99 0.003 80) 0%, oklch(0.96 0.015 80) 50%, oklch(0.93 0.03 15) 100%)' }}>
+        {/* Decorative background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <img
+            src="/assets/generated/mandala-watermark.dim_800x800.png"
+            alt=""
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] object-contain opacity-5"
+          />
+        </div>
 
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          <div className="flex items-center justify-center gap-3 mb-6">
-            <img src="/assets/generated/logo-mark.dim_256x256.png" alt="Logo" className="w-16 h-16 opacity-90" />
+        <div className="relative max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6" style={{ backgroundColor: 'oklch(0.94 0.02 80)', color: 'oklch(0.55 0.18 45)' }}>
+            <Heart className="w-4 h-4" />
+            Beautiful Digital Wedding Invitations
           </div>
 
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="h-px w-16 bg-gold-400" />
-            <span className="text-gold-400 font-sans text-sm tracking-[0.3em] uppercase">Digital Wedding Invitations</span>
-            <div className="h-px w-16 bg-gold-400" />
-          </div>
-
-          <h1 className="text-5xl md:text-7xl font-serif text-ivory-50 mb-6 leading-tight">
-            Create Your
-            <span className="block text-gold-400">Dream Wedding</span>
-            Invitation
+          <h1 className="text-5xl sm:text-6xl font-bold mb-6 leading-tight" style={{ color: 'oklch(0.18 0.02 60)', fontFamily: '"Playfair Display", serif' }}>
+            Create Your Perfect
+            <span className="block" style={{ color: 'oklch(0.55 0.18 45)' }}>Wedding Invitation</span>
           </h1>
 
-          <p className="text-xl text-ivory-200 mb-10 max-w-2xl mx-auto leading-relaxed font-sans">
-            Craft stunning digital wedding invitations that capture the essence of your special day.
-            Beautiful templates, easy customization, and seamless guest management.
+          <p className="text-lg mb-10 max-w-2xl mx-auto leading-relaxed" style={{ color: 'oklch(0.40 0.03 60)' }}>
+            Design stunning digital wedding invitations with traditional Indian aesthetics.
+            Share with guests, collect RSVPs, and manage your special day — all in one place.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => navigate({ to: '/dashboard' })}
-              className="group px-8 py-4 bg-gold-500 hover:bg-gold-400 text-charcoal-900 font-semibold rounded-full transition-all duration-300 shadow-luxury hover:shadow-xl flex items-center justify-center gap-2 text-lg"
+            <Button
+              size="lg"
+              onClick={() => navigate({ to: '/create' })}
+              className="flex items-center gap-2 px-8 py-4 text-base font-semibold"
+              style={{ backgroundColor: 'oklch(0.55 0.18 45)', color: 'oklch(0.99 0.003 80)' }}
             >
-              <Heart className="w-5 h-5 fill-current" />
-              Start Creating
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button
+              <Sparkles className="w-5 h-5" />
+              Create Free Invitation
+              <ArrowRight className="w-5 h-5" />
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
               onClick={() => navigate({ to: '/dashboard' })}
-              className="px-8 py-4 border-2 border-ivory-200 text-ivory-100 hover:bg-ivory-100/10 font-semibold rounded-full transition-all duration-300 text-lg"
+              className="flex items-center gap-2 px-8 py-4 text-base font-semibold"
+              style={{ borderColor: 'oklch(0.72 0.12 75)', color: 'oklch(0.55 0.18 45)' }}
             >
               View Dashboard
-            </button>
-          </div>
-
-          <div className="mt-16 flex items-center justify-center gap-8 text-ivory-300">
-            <div className="text-center">
-              <div className="text-3xl font-serif text-gold-400">12+</div>
-              <div className="text-sm font-sans">Templates</div>
-            </div>
-            <div className="h-8 w-px bg-ivory-500/30" />
-            <div className="text-center">
-              <div className="text-3xl font-serif text-gold-400">∞</div>
-              <div className="text-sm font-sans">Customizations</div>
-            </div>
-            <div className="h-8 w-px bg-ivory-500/30" />
-            <div className="text-center">
-              <div className="text-3xl font-serif text-gold-400">Free</div>
-              <div className="text-sm font-sans">Forever</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-ivory-300/50 rounded-full flex items-start justify-center pt-2">
-            <div className="w-1 h-3 bg-ivory-300/50 rounded-full animate-pulse" />
+            </Button>
           </div>
         </div>
       </section>
 
-      <DecorativeDivider variant="mandala" />
-
-      {/* Features Section */}
-      <section className="py-24 px-4 bg-ivory-50 dark:bg-charcoal-900">
+      {/* Sample Invitations */}
+      <section className="py-20 px-4" style={{ backgroundColor: 'oklch(0.99 0.003 80)' }}>
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="h-px w-12 bg-gold-400" />
-              <span className="text-gold-600 font-sans text-sm tracking-[0.3em] uppercase">Everything You Need</span>
-              <div className="h-px w-12 bg-gold-400" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-serif text-charcoal-800 dark:text-ivory-100 mb-4">
-              Crafted for Your
-              <span className="text-gold-500"> Special Day</span>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4" style={{ color: 'oklch(0.18 0.02 60)', fontFamily: '"Playfair Display", serif' }}>
+              Stunning Invitation Themes
             </h2>
-            <p className="text-charcoal-600 dark:text-ivory-300 max-w-2xl mx-auto text-lg">
-              Every feature designed to make your wedding invitation as beautiful and memorable as your celebration.
+            <p className="text-base" style={{ color: 'oklch(0.50 0.04 60)' }}>
+              Choose from our curated collection of premium wedding themes
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {SAMPLE_INVITATIONS.map((sample, index) => (
               <div
                 key={index}
-                className="group p-8 bg-white dark:bg-charcoal-800 rounded-2xl shadow-soft hover:shadow-luxury transition-all duration-300 border border-gold-100 dark:border-charcoal-700 hover:border-gold-300"
+                className="rounded-2xl overflow-hidden border shadow-card hover:shadow-card-hover transition-all cursor-pointer"
+                style={{ borderColor: 'oklch(0.88 0.02 80)' }}
+                onClick={() => navigate({ to: '/create' })}
               >
-                <div className="w-14 h-14 bg-gold-50 dark:bg-gold-900/20 rounded-xl flex items-center justify-center text-gold-500 mb-6 group-hover:scale-110 transition-transform duration-300">
-                  {feature.icon}
+                <div className="h-48 flex items-center justify-center relative" style={{ background: sample.gradient }}>
+                  <img
+                    src="/assets/generated/mandala-divider.dim_1200x120.png"
+                    alt=""
+                    className="absolute bottom-0 left-0 right-0 w-full h-8 object-cover opacity-20"
+                  />
+                  <div className="text-center z-10">
+                    <p className="text-2xl font-bold mb-1" style={{ color: sample.accent, fontFamily: '"Great Vibes", cursive' }}>
+                      {sample.bride} & {sample.groom}
+                    </p>
+                    <p className="text-xs font-medium" style={{ color: 'oklch(0.50 0.04 60)' }}>{sample.date}</p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-serif text-charcoal-800 dark:text-ivory-100 mb-3">{feature.title}</h3>
-                <p className="text-charcoal-600 dark:text-ivory-300 leading-relaxed">{feature.description}</p>
+                <div className="p-4" style={{ backgroundColor: 'oklch(0.99 0.003 80)' }}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium" style={{ color: 'oklch(0.18 0.02 60)' }}>{sample.theme}</span>
+                    <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: 'oklch(0.94 0.02 80)', color: 'oklch(0.55 0.18 45)' }}>
+                      Premium
+                    </span>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <DecorativeDivider variant="line" />
-
-      {/* How It Works */}
-      <section className="py-24 px-4 bg-white dark:bg-charcoal-800">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="h-px w-12 bg-gold-400" />
-              <span className="text-gold-600 font-sans text-sm tracking-[0.3em] uppercase">Simple Process</span>
-              <div className="h-px w-12 bg-gold-400" />
-            </div>
-            <h2 className="text-4xl md:text-5xl font-serif text-charcoal-800 dark:text-ivory-100 mb-4">
-              How It <span className="text-gold-500">Works</span>
+      {/* Features Grid */}
+      <section className="py-20 px-4" style={{ backgroundColor: 'oklch(0.97 0.01 80)' }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4" style={{ color: 'oklch(0.18 0.02 60)', fontFamily: '"Playfair Display", serif' }}>
+              Everything You Need
             </h2>
+            <p className="text-base" style={{ color: 'oklch(0.50 0.04 60)' }}>
+              Powerful features to make your wedding invitation truly special
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {steps.map((step, index) => (
-              <div key={index} className="text-center relative">
-                {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-px bg-gold-200 dark:bg-gold-800" />
-                )}
-                <div className="w-16 h-16 bg-gold-500 text-white rounded-full flex items-center justify-center text-xl font-serif mx-auto mb-6 shadow-luxury relative z-10">
-                  {step.number}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {FEATURES.map((feature, index) => (
+              <div
+                key={index}
+                className="p-6 rounded-2xl border shadow-card hover:shadow-card-hover transition-all"
+                style={{ backgroundColor: 'oklch(0.99 0.003 80)', borderColor: 'oklch(0.88 0.02 80)' }}
+              >
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: 'oklch(0.94 0.02 80)' }}>
+                  <feature.icon className="w-6 h-6" style={{ color: 'oklch(0.55 0.18 45)' }} />
                 </div>
-                <h3 className="text-xl font-serif text-charcoal-800 dark:text-ivory-100 mb-3">{step.title}</h3>
-                <p className="text-charcoal-600 dark:text-ivory-300 leading-relaxed">{step.description}</p>
+                <h3 className="text-base font-semibold mb-2" style={{ color: 'oklch(0.18 0.02 60)' }}>
+                  {feature.title}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'oklch(0.50 0.04 60)' }}>
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
-
-      <DecorativeDivider variant="flourish" />
 
       {/* CTA Section */}
-      <section className="py-24 px-4 bg-gradient-to-br from-charcoal-900 via-charcoal-800 to-charcoal-900 relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-10 bg-cover bg-center"
-          style={{ backgroundImage: 'url(/assets/generated/watercolor-texture.dim_1200x800.png)' }}
-        />
-        <div className="relative z-10 max-w-3xl mx-auto text-center">
-          <Heart className="w-12 h-12 text-gold-400 fill-current mx-auto mb-6" />
-          <h2 className="text-4xl md:text-5xl font-serif text-ivory-50 mb-6">
-            Ready to Create Your
-            <span className="block text-gold-400">Perfect Invitation?</span>
+      <section className="py-20 px-4" style={{ background: 'linear-gradient(135deg, oklch(0.25 0.02 60), oklch(0.35 0.025 60))' }}>
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4" style={{ color: 'oklch(0.98 0.005 80)', fontFamily: '"Playfair Display", serif' }}>
+            Ready to Create Your Invitation?
           </h2>
-          <p className="text-ivory-300 text-lg mb-10 leading-relaxed">
-            Join thousands of couples who have created beautiful digital wedding invitations.
-            Start your journey today — it's completely free.
+          <p className="text-base mb-8" style={{ color: 'oklch(0.82 0.09 78)' }}>
+            Join thousands of couples who have shared their special day with beautiful digital invitations.
           </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <button
-              onClick={() => navigate({ to: '/dashboard' })}
-              className="group px-10 py-4 bg-gold-500 hover:bg-gold-400 text-charcoal-900 font-semibold rounded-full transition-all duration-300 shadow-luxury hover:shadow-xl flex items-center justify-center gap-2 text-lg"
-            >
-              <Heart className="w-5 h-5 fill-current" />
-              Create Your Invitation
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-6 text-ivory-300">
-            {['Free Forever', 'No Credit Card', 'Instant Setup', 'Beautiful Templates'].map((item) => (
-              <div key={item} className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-gold-400" />
-                <span className="text-sm font-sans">{item}</span>
-              </div>
-            ))}
-          </div>
+          <Button
+            size="lg"
+            onClick={() => navigate({ to: '/create' })}
+            className="flex items-center gap-2 px-10 py-4 text-base font-semibold mx-auto"
+            style={{ backgroundColor: 'oklch(0.72 0.12 75)', color: 'oklch(0.18 0.02 60)' }}
+          >
+            <Heart className="w-5 h-5" />
+            Start Creating Now
+          </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 bg-charcoal-900 border-t border-charcoal-700">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <img src="/assets/generated/logo-mark.dim_256x256.png" alt="Logo" className="w-10 h-10 opacity-80" />
-              <div>
-                <div className="text-ivory-100 font-serif text-lg">Vivah Digital</div>
-                <div className="text-ivory-400 text-xs font-sans">Beautiful Wedding Invitations</div>
-              </div>
-            </div>
-
-            <div className="text-center text-ivory-400 text-sm font-sans">
-              <p>© {new Date().getFullYear()} Vivah Digital. All rights reserved.</p>
-              <p className="mt-1">
-                Built with <Heart className="w-3 h-3 inline text-crimson-400 fill-current" /> using{' '}
-                <a
-                  href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gold-400 hover:text-gold-300 transition-colors"
-                >
-                  caffeine.ai
-                </a>
-              </p>
-            </div>
-
-            <div className="flex gap-6 text-ivory-400 text-sm font-sans">
-              <button onClick={() => navigate({ to: '/dashboard' })} className="hover:text-gold-400 transition-colors">
-                Dashboard
-              </button>
-              <button onClick={() => navigate({ to: '/create' })} className="hover:text-gold-400 transition-colors">
-                Create
-              </button>
-            </div>
-          </div>
-        </div>
+      <footer className="py-8 px-4 border-t text-center" style={{ backgroundColor: 'oklch(0.99 0.003 80)', borderColor: 'oklch(0.88 0.02 80)' }}>
+        <p className="text-sm" style={{ color: 'oklch(0.50 0.04 60)' }}>
+          © {new Date().getFullYear()} Vivah — Built with{' '}
+          <span style={{ color: 'oklch(0.55 0.20 25)' }}>♥</span>{' '}
+          using{' '}
+          <a
+            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:opacity-80 transition-opacity"
+            style={{ color: 'oklch(0.55 0.18 45)' }}
+          >
+            caffeine.ai
+          </a>
+        </p>
       </footer>
     </div>
   );

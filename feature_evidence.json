@@ -2,26 +2,38 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-restore-all-frontend-files-to-their-exact-version-5-state-this-includes-app-tsx-routes-and-providers-all-pages-landingpage-dashboard-createinvitationwizard-invitationeditor-guestinvitation-notfound-all-components-authguard-header-wizard-steps-guest-components-media-templates-events-layout-all-hooks-usequeries-ts-context-invitationformcontext-tsx-utils-and-stylesheets-revert-any-login-gating-removal-anonymous-actor-changes-or-any-other-modifications-made-after-version-5-the-app-must-look-and-behave-exactly-as-it-did-in-version-5",
-      "featureTitle": "Restore all frontend files to their exact Version 5 state. This includes: App.tsx (routes and providers), all pages (LandingPage, Dashboard, CreateInvitationWizard, InvitationEditor, GuestInvitation, NotFound), all components (AuthGuard, Header, wizard steps, guest components, media, templates, events, layout), all hooks (useQueries.ts), context (InvitationFormContext.tsx), utils, and stylesheets. Revert any login-gating removal, anonymous actor changes, or any other modifications made after Version 5. The app must look and behave exactly as it did in Version 5.",
+      "featureId": "feature-fix-the-black-background-issue-throughout-the-entire-app-replace-all-black-or-near-black-background-colors-with-appropriate-light-or-themed-backgrounds-ivory-cream-white-or-the-design-system-s-defined-background-tokens-so-that-all-content-text-buttons-cards-forms-headers-is-fully-visible-and-readable",
+      "featureTitle": "Fix the black background issue throughout the entire app. Replace all black or near-black background colors with appropriate light or themed backgrounds (ivory, cream, white, or the design system's defined background tokens) so that all content — text, buttons, cards, forms, headers — is fully visible and readable.",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/components/auth/AuthGuard.tsx",
-        "frontend/src/components/guest/PhotoGalleryLightbox.tsx",
-        "frontend/src/components/guest/RSVPForm.tsx",
-        "frontend/src/components/guest/WhatsAppShareButton.tsx",
-        "frontend/src/components/layout/DecorativeDivider.tsx",
         "frontend/src/components/layout/Header.tsx",
-        "frontend/src/components/wizard/ProgressBar.tsx",
-        "frontend/src/components/wizard/ReviewStep.tsx",
-        "frontend/src/context/InvitationFormContext.tsx",
-        "frontend/src/hooks/useQueries.ts",
         "frontend/src/pages/CreateInvitationWizard.tsx",
         "frontend/src/pages/Dashboard.tsx",
         "frontend/src/pages/GuestInvitation.tsx",
         "frontend/src/pages/InvitationEditor.tsx",
-        "frontend/src/pages/LandingPage.tsx",
-        "frontend/src/pages/NotFound.tsx"
+        "frontend/src/pages/LandingPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "invite-links@3.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-audit-and-fix-css-custom-properties-and-tailwind-color-token-definitions-in-frontend-index-css-and-frontend-src-index-css-to-ensure-that-the-default-light-theme-does-not-apply-dark-black-background-values-ensure-the-background-and-foreground-css-variables-as-well-as-any-body-or-root-background-styles-are-set-to-appropriate-light-theme-values-by-default",
+      "featureTitle": "Audit and fix CSS custom properties and Tailwind color token definitions in frontend/index.css and frontend/src/index.css to ensure that the default (light) theme does not apply dark/black background values. Ensure the --background and --foreground CSS variables, as well as any body or root background styles, are set to appropriate light theme values by default.",
+      "files": [
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
       ],
       "components": [
         "core-infrastructure@1.0.2",

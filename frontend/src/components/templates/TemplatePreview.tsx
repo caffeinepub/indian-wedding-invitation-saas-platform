@@ -1,222 +1,199 @@
-import React from 'react';
 import { useInvitationForm } from '../../context/InvitationFormContext';
-import { getTemplateById, COLOR_SCHEMES, FONT_CHOICES as TEMPLATE_FONT_CHOICES } from '../../utils/templateDefinitions';
-import { FONT_CHOICES } from './FontSelector';
-
-function getBackgroundStyle(backgroundChoice: string, primaryColor: string) {
-  switch (backgroundChoice) {
-    case 'floral':
-      return {
-        background: `radial-gradient(ellipse at 20% 20%, ${primaryColor}22 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, ${primaryColor}18 0%, transparent 50%), linear-gradient(135deg, #fdf8f0 0%, #faf4e8 100%)`,
-      };
-    case 'paisley':
-      return {
-        background: `repeating-linear-gradient(45deg, ${primaryColor}08 0px, ${primaryColor}08 2px, transparent 2px, transparent 12px), linear-gradient(135deg, #fdf8f0 0%, #f5ede0 100%)`,
-      };
-    case 'watercolor':
-      return {
-        background: `radial-gradient(ellipse at 30% 40%, ${primaryColor}30 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, ${primaryColor}20 0%, transparent 50%), linear-gradient(180deg, #fdf9f4 0%, #f8f0e8 100%)`,
-      };
-    case 'dark-floral':
-      return {
-        background: `radial-gradient(ellipse at 20% 20%, ${primaryColor}40 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, ${primaryColor}30 0%, transparent 50%), linear-gradient(135deg, #1a1208 0%, #0d0a05 100%)`,
-      };
-    case 'dark-minimal':
-      return {
-        background: `linear-gradient(135deg, #1c1c1c 0%, #0a0a0a 100%)`,
-      };
-    case 'minimal':
-    default:
-      return {
-        background: `linear-gradient(135deg, #fdfcfb 0%, #f8f5f0 100%)`,
-      };
-  }
-}
-
-function isDarkBackground(backgroundChoice: string): boolean {
-  return backgroundChoice === 'dark-floral' || backgroundChoice === 'dark-minimal';
-}
+import { getTemplateById } from '../../utils/templateDefinitions';
+import { PETAL_POSITIONS } from '../../utils/animations';
 
 export default function TemplatePreview() {
   const { formData } = useInvitationForm();
-
   const template = getTemplateById(formData.selectedTemplate);
 
-  // Resolve color scheme
-  const colorSchemeObj = COLOR_SCHEMES.find((cs) => cs.id === formData.colorScheme);
-  const primaryColor = colorSchemeObj?.primary || template?.primaryColor || '#c9a84c';
-  const secondaryColor = colorSchemeObj?.secondary || template?.secondaryColor || '#8b6914';
-  const accentColor = colorSchemeObj?.accent || template?.accentColor || '#f0e6d0';
+  // Use formData advanced fields, falling back to template defaults
+  const primaryColor = formData.primaryColor || template?.primaryColor || '#C9A84C';
+  const accentColor = formData.accentColor || template?.accentColor || '#8B1A1A';
+  const bgColor = formData.backgroundColor || template?.bgColor || '#FDF8F0';
+  const fontHeading = formData.headingFont || template?.fontHeading || 'Cormorant Garamond, serif';
+  const fontBody = formData.bodyFont || template?.fontBody || 'Lato, sans-serif';
+  // Script font: use the template's heading font as a fallback since TemplateDefinition has no fontScript
+  const fontScript = 'Great Vibes, cursive';
 
-  // Resolve font
-  const fontChoice = FONT_CHOICES.find((f) => f.id === formData.fontChoice);
-  const headingFont = fontChoice?.heading || template?.headingFont || 'Cormorant Garamond';
-  const headingWeight = fontChoice?.headingWeight || '600';
-  const bodyFont = fontChoice?.body || template?.bodyFont || 'Lato';
-
-  const bgStyle = getBackgroundStyle(formData.backgroundChoice || 'minimal', primaryColor);
-  const isDark = isDarkBackground(formData.backgroundChoice || 'minimal');
-
-  const textColor = isDark ? '#f5f0e8' : '#2c1810';
-  const subtextColor = isDark ? '#d4c4a8' : '#6b4c3b';
-  const dividerColor = primaryColor;
-
-  const brideName = formData.brideName || 'Priya';
-  const groomName = formData.groomName || 'Arjun';
-  const weddingDate = formData.weddingDate || '2025-02-14';
-  const venueName = formData.venueName || 'Grand Palace';
-
-  const formattedDate = weddingDate
-    ? new Date(weddingDate).toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : 'February 14, 2025';
+  const showMandala = formData.mandalaWatermark ?? false;
+  const showFloral = formData.floralBorder ?? false;
+  const showGoldFrame = formData.goldFrame ?? false;
+  const showPetals = formData.animatedPetals ?? false;
+  const showDiya = formData.diyaGlow ?? false;
 
   return (
     <div
-      className="rounded-xl overflow-hidden shadow-2xl border"
+      className={`relative overflow-hidden rounded-xl shadow-luxury invitation-preview ${showGoldFrame ? 'gold-frame' : ''}`}
       style={{
-        ...bgStyle,
-        borderColor: `${primaryColor}40`,
-        minHeight: '420px',
+        backgroundColor: bgColor,
+        minHeight: '600px',
+        fontFamily: fontBody,
       }}
     >
-      {/* Top ornament */}
-      <div className="flex justify-center pt-6 pb-2">
-        <div
-          className="w-16 h-0.5 rounded-full"
-          style={{ background: `linear-gradient(90deg, transparent, ${primaryColor}, transparent)` }}
+      {/* Mandala watermark */}
+      {showMandala && (
+        <img
+          src="/assets/generated/mandala-watermark.dim_800x800.png"
+          alt=""
+          className="mandala-watermark"
         />
-      </div>
+      )}
 
-      {/* Header */}
-      <div className="text-center px-6 py-2">
-        <p
-          className="text-xs uppercase tracking-[0.3em] mb-3"
-          style={{ color: subtextColor, fontFamily: `'${bodyFont}', sans-serif` }}
-        >
-          Together with their families
-        </p>
-        <h1
-          className="text-4xl leading-tight mb-1"
-          style={{
-            fontFamily: `'${headingFont}', serif`,
-            fontWeight: headingWeight,
-            color: primaryColor,
-          }}
-        >
-          {brideName}
-        </h1>
-        <div
-          className="text-lg my-2"
-          style={{ color: subtextColor, fontFamily: `'${bodyFont}', sans-serif` }}
-        >
-          &amp;
-        </div>
-        <h1
-          className="text-4xl leading-tight"
-          style={{
-            fontFamily: `'${headingFont}', serif`,
-            fontWeight: headingWeight,
-            color: primaryColor,
-          }}
-        >
-          {groomName}
-        </h1>
-      </div>
+      {/* Floral border */}
+      {showFloral && (
+        <div className="floral-border" />
+      )}
 
-      {/* Divider */}
-      <div className="flex items-center justify-center gap-3 my-4 px-8">
-        <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, transparent, ${dividerColor}60)` }} />
-        <div className="w-2 h-2 rounded-full" style={{ background: primaryColor }} />
-        <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, ${dividerColor}60, transparent)` }} />
-      </div>
-
-      {/* Date & Venue */}
-      <div className="text-center px-6 pb-4">
-        <p
-          className="text-sm font-medium mb-1"
-          style={{ color: textColor, fontFamily: `'${bodyFont}', sans-serif` }}
-        >
-          {formattedDate}
-        </p>
-        <p
-          className="text-xs"
-          style={{ color: subtextColor, fontFamily: `'${bodyFont}', sans-serif` }}
-        >
-          {venueName}
-        </p>
-      </div>
-
-      {/* Invitation message preview */}
-      {formData.invitationMessage && (
-        <div
-          className="mx-6 mb-4 p-3 rounded-lg text-center"
-          style={{ background: `${primaryColor}12`, borderLeft: `2px solid ${primaryColor}40` }}
-        >
-          <p
-            className="text-xs italic leading-relaxed line-clamp-3"
-            style={{ color: subtextColor, fontFamily: `'${bodyFont}', sans-serif` }}
-          >
-            "{formData.invitationMessage}"
-          </p>
+      {/* Animated petals */}
+      {showPetals && (
+        <div className="petal-container">
+          {PETAL_POSITIONS.map((pos, i) => (
+            <div
+              key={i}
+              className="petal"
+              style={{
+                left: pos.left,
+                width: `${pos.size}px`,
+                height: `${pos.size}px`,
+                animationDuration: pos.animationDuration,
+                animationDelay: pos.animationDelay,
+                animationName: i % 2 === 0 ? 'petalFall' : 'petalFallAlt',
+                animationTimingFunction: 'linear',
+                animationIterationCount: 'infinite',
+                animationFillMode: 'none',
+              }}
+            />
+          ))}
         </div>
       )}
 
-      {/* Template & theme info */}
-      <div className="px-6 pb-6">
-        <div className="flex flex-wrap gap-2 justify-center">
-          {template && (
-            <span
-              className="text-xs px-2 py-1 rounded-full"
-              style={{
-                background: `${primaryColor}20`,
-                color: isDark ? '#e8d5b0' : subtextColor,
-                fontFamily: `'${bodyFont}', sans-serif`,
-              }}
-            >
-              {template.name}
-            </span>
-          )}
-          {colorSchemeObj && (
-            <span
-              className="text-xs px-2 py-1 rounded-full flex items-center gap-1"
-              style={{
-                background: `${primaryColor}20`,
-                color: isDark ? '#e8d5b0' : subtextColor,
-                fontFamily: `'${bodyFont}', sans-serif`,
-              }}
-            >
-              <span
-                className="w-2 h-2 rounded-full inline-block"
-                style={{ background: primaryColor }}
-              />
-              {colorSchemeObj.name}
-            </span>
-          )}
-          {fontChoice && (
-            <span
-              className="text-xs px-2 py-1 rounded-full"
-              style={{
-                background: `${primaryColor}20`,
-                color: isDark ? '#e8d5b0' : subtextColor,
-                fontFamily: `'${headingFont}', serif`,
-              }}
-            >
-              {fontChoice.name}
-            </span>
-          )}
-        </div>
-      </div>
+      {/* Main content */}
+      <div className="relative z-10 p-8 text-center">
+        {/* Script greeting */}
+        <p
+          className="text-xl mb-2"
+          style={{ fontFamily: fontScript, color: accentColor }}
+        >
+          Together with their families
+        </p>
 
-      {/* Bottom ornament */}
-      <div className="flex justify-center pb-6">
+        {/* Couple names */}
+        <h1
+          className="text-4xl md:text-5xl font-bold leading-tight mb-4"
+          style={{ fontFamily: fontHeading, color: primaryColor }}
+        >
+          {formData.brideName || 'Bride Name'}
+          <span
+            className="block text-2xl my-1"
+            style={{ fontFamily: fontScript, color: accentColor }}
+          >
+            &amp;
+          </span>
+          {formData.groomName || 'Groom Name'}
+        </h1>
+
+        {/* Diya glow decoration */}
+        {showDiya && (
+          <div className="flex justify-center gap-6 my-4">
+            <img
+              src="/assets/generated/diya-glow.dim_256x256.png"
+              alt=""
+              className="w-12 h-12 diya-glow-effect"
+            />
+            <img
+              src="/assets/generated/diya-glow.dim_256x256.png"
+              alt=""
+              className="w-12 h-12 diya-glow-effect animation-delay-500"
+            />
+          </div>
+        )}
+
+        {/* Divider */}
         <div
-          className="w-16 h-0.5 rounded-full"
+          className="w-32 h-px mx-auto my-4"
           style={{ background: `linear-gradient(90deg, transparent, ${primaryColor}, transparent)` }}
+        />
+
+        {/* Date */}
+        {formData.weddingDate && (
+          <p
+            className="text-base tracking-widest uppercase mb-1"
+            style={{ fontFamily: fontBody, color: accentColor, opacity: 0.8 }}
+          >
+            {new Date(formData.weddingDate).toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </p>
+        )}
+
+        {/* Time */}
+        {formData.weddingTime && (
+          <p
+            className="text-sm tracking-widest mb-4"
+            style={{ fontFamily: fontBody, color: primaryColor }}
+          >
+            {formData.weddingTime}
+          </p>
+        )}
+
+        {/* Venue */}
+        {formData.venueName && (
+          <div className="mt-4">
+            <p
+              className="text-xl font-semibold"
+              style={{ fontFamily: fontHeading, color: primaryColor }}
+            >
+              {formData.venueName}
+            </p>
+            {formData.venueAddress && (
+              <p
+                className="text-sm mt-1 opacity-70"
+                style={{ fontFamily: fontBody, color: accentColor }}
+              >
+                {formData.venueAddress}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Invitation message */}
+        {formData.invitationMessage && (
+          <div className="mt-6 px-4">
+            <p
+              className="text-sm leading-relaxed italic opacity-80"
+              style={{ fontFamily: fontBody, color: accentColor }}
+            >
+              "{formData.invitationMessage}"
+            </p>
+          </div>
+        )}
+
+        {/* Corner flourishes */}
+        <img
+          src="/assets/generated/corner-flourish.dim_256x256.png"
+          alt=""
+          className="absolute top-2 left-2 w-16 h-16 opacity-30"
+        />
+        <img
+          src="/assets/generated/corner-flourish.dim_256x256.png"
+          alt=""
+          className="absolute top-2 right-2 w-16 h-16 opacity-30"
+          style={{ transform: 'scaleX(-1)' }}
+        />
+        <img
+          src="/assets/generated/corner-flourish.dim_256x256.png"
+          alt=""
+          className="absolute bottom-2 left-2 w-16 h-16 opacity-30"
+          style={{ transform: 'scaleY(-1)' }}
+        />
+        <img
+          src="/assets/generated/corner-flourish.dim_256x256.png"
+          alt=""
+          className="absolute bottom-2 right-2 w-16 h-16 opacity-30"
+          style={{ transform: 'scale(-1)' }}
         />
       </div>
     </div>
